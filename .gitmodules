@@ -1,0 +1,3 @@
+[submodule "firmware/lib/DigitalIO"]
+	path = firmware/lib/DigitalIO
+	url = https://github.com/greiman/DigitalIO
