@@ -57,6 +57,15 @@ void setup() {
     // (do this as the last tin in `setup()`)
     digitalWrite(5, HIGH);
 
+    // populate cur_in[]
+    latchPinOut = LOW;
+    latchPinIn = HIGH;
+    cur_in[0] = spi.transfer(out.bytes[0]);
+    cur_in[1] = spi.transfer(out.bytes[1]);
+    cur_in[2] = spi.transfer(out.bytes[2]);
+    latchPinOut = HIGH;
+    latchPinIn = LOW;
+
     uint32_t bootCount = 0;
     fram.readLong(0x0000, &bootCount);
     Serial.print("boot = ");
