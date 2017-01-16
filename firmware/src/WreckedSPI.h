@@ -46,16 +46,16 @@
  * @class SoftSPI
  * @brief Fast software SPI with 2 Sck pins.
  */
-template<uint8_t MisoPin, uint8_t MosiPin, uint8_t SckPin1, uint8_t SckPin2, uint8_t Mode = 0>
+template<uint8_t MisoPin, uint8_t MosiPin, uint8_t SckPinMiso, uint8_t SckPinMosi, uint8_t ModeMiso = 2, uint8_t ModeMosi = 0>
 class WreckedSPI {
  public:
   //----------------------------------------------------------------------------
   /** Initialize SoftSPI pins. */
   void begin() {
     fastPinConfig(MisoPin, MISO_MODE, MISO_LEVEL);
-    fastPinConfig(MosiPin, MOSI_MODE, !MODE_CPHA(Mode));
-    fastPinConfig(SckPin1, SCK_MODE, MODE_CPOL(Mode));
-    fastPinConfig(SckPin2, SCK_MODE, MODE_CPOL(Mode));
+    fastPinConfig(MosiPin, MOSI_MODE, !MODE_CPHA(ModeMosi));
+    fastPinConfig(SckPinMiso, SCK_MODE, MODE_CPOL(ModeMiso));
+    fastPinConfig(SckPinMosi, SCK_MODE, MODE_CPOL(ModeMosi));
   }
   //----------------------------------------------------------------------------
   /** Soft SPI receive byte.
@@ -116,51 +116,45 @@ class WreckedSPI {
   bool MODE_CPOL(uint8_t mode) {return (mode & 2) != 0;}
   inline __attribute__((always_inline))
   void receiveBit(uint8_t bit, uint8_t* data) {
-    if (MODE_CPHA(Mode)) {
-      fastDigitalWrite(SckPin1, !MODE_CPOL(Mode));
-      fastDigitalWrite(SckPin2, !MODE_CPOL(Mode));
+    if (MODE_CPHA(ModeMiso)) {
+      fastDigitalWrite(SckPinMiso, !MODE_CPOL(ModeMiso));
     }
-    // nop;
-    // nop;
-    fastDigitalWrite(SckPin1, MODE_CPHA(Mode) ? MODE_CPOL(Mode) : !MODE_CPOL(Mode));
-    fastDigitalWrite(SckPin2, MODE_CPHA(Mode) ? MODE_CPOL(Mode) : !MODE_CPOL(Mode));
+    fastDigitalWrite(SckPinMiso, MODE_CPHA(ModeMiso) ? MODE_CPOL(ModeMiso) : !MODE_CPOL(ModeMiso));
     if (fastDigitalRead(MisoPin)) *data |= 1 << bit;
-    if (!MODE_CPHA(Mode)) {
-      fastDigitalWrite(SckPin1, MODE_CPOL(Mode));
-      fastDigitalWrite(SckPin2, MODE_CPOL(Mode));
+    if (!MODE_CPHA(ModeMiso)) {
+      fastDigitalWrite(SckPinMiso, MODE_CPOL(ModeMiso));
     }
   }
   //----------------------------------------------------------------------------
   inline __attribute__((always_inline))
   void sendBit(uint8_t bit, uint8_t data) {
-    if (MODE_CPHA(Mode)) {
-      fastDigitalWrite(SckPin1, !MODE_CPOL(Mode));
-      fastDigitalWrite(SckPin2, !MODE_CPOL(Mode));
+    if (MODE_CPHA(ModeMosi)) {
+      fastDigitalWrite(SckPinMosi, !MODE_CPOL(ModeMosi));
     }
     fastDigitalWrite(MosiPin, data & (1 << bit));
-    fastDigitalWrite(SckPin1, MODE_CPHA(Mode) ? MODE_CPOL(Mode) : !MODE_CPOL(Mode));
-    fastDigitalWrite(SckPin2, MODE_CPHA(Mode) ? MODE_CPOL(Mode) : !MODE_CPOL(Mode));
-    // nop;
-    // nop;
-    if (!MODE_CPHA(Mode)) {
-      fastDigitalWrite(SckPin1, MODE_CPOL(Mode));
-      fastDigitalWrite(SckPin2, MODE_CPOL(Mode));
+    fastDigitalWrite(SckPinMosi, MODE_CPHA(ModeMosi) ? MODE_CPOL(ModeMosi) : !MODE_CPOL(ModeMosi));
+    if (!MODE_CPHA(ModeMosi)) {
+      fastDigitalWrite(SckPinMosi, MODE_CPOL(ModeMosi));
     }
   }
   //----------------------------------------------------------------------------
   inline __attribute__((always_inline))
   void transferBit(uint8_t bit, uint8_t* rxData, uint8_t txData) {
-    if (MODE_CPHA(Mode)) {
-      fastDigitalWrite(SckPin1, !MODE_CPOL(Mode));
-      fastDigitalWrite(SckPin2, !MODE_CPOL(Mode));
+    if (MODE_CPHA(ModeMiso)) {
+      fastDigitalWrite(SckPinMiso, !MODE_CPOL(ModeMiso));
+    }
+    if (MODE_CPHA(ModeMosi)) {
+      fastDigitalWrite(SckPinMosi, !MODE_CPOL(ModeMosi));
     }
     fastDigitalWrite(MosiPin, txData & (1 << bit));
-    fastDigitalWrite(SckPin1, MODE_CPHA(Mode) ? MODE_CPOL(Mode) : !MODE_CPOL(Mode));
-    fastDigitalWrite(SckPin2, MODE_CPHA(Mode) ? MODE_CPOL(Mode) : !MODE_CPOL(Mode));
+    fastDigitalWrite(SckPinMiso, MODE_CPHA(ModeMiso) ? MODE_CPOL(ModeMiso) : !MODE_CPOL(ModeMiso));
+    fastDigitalWrite(SckPinMosi, MODE_CPHA(ModeMosi) ? MODE_CPOL(ModeMosi) : !MODE_CPOL(ModeMosi));
     if (fastDigitalRead(MisoPin)) *rxData |= 1 << bit;
-    if (!MODE_CPHA(Mode)) {
-      fastDigitalWrite(SckPin1, MODE_CPOL(Mode));
-      fastDigitalWrite(SckPin2, MODE_CPOL(Mode));
+    if (!MODE_CPHA(ModeMiso)) {
+      fastDigitalWrite(SckPinMiso, MODE_CPOL(ModeMiso));
+    }
+    if (!MODE_CPHA(ModeMosi)) {
+      fastDigitalWrite(SckPinMosi, MODE_CPOL(ModeMosi));
     }
   }
   //----------------------------------------------------------------------------
