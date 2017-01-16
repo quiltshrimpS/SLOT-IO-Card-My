@@ -8,13 +8,19 @@
  * D8 - 74HC165 - CLK
  * D9 - 74HC165 - SH/nLD
  *
+ * A4 - FRAM - SDA
+ * A5 - FRAM - SCL
+ * A7 - FRAM - WP
  */
 
 #include <Arduino.h>
 #include <DigitalIO.h>
+#include <Wire.h>
+#include <FRAM_MB85RC_I2C.h>
 
 #include "WreckedSPI.h"
 
+FRAM_MB85RC_I2C fram(MB85RC_ADDRESS_A000, true, A7, 16 /* kb */);
 WreckedSPI<7, 2, 8, 3> spi;
 
 DigitalPin<4> latchPinOut; // for 74HC595
@@ -35,17 +41,28 @@ void setup() {
 
     pinMode(5, OUTPUT); // 595_nCLR
     pinMode(6, OUTPUT); // 595_nG
-
     digitalWrite(5, LOW); // clear 74HC595 memories (toggle it on lator)
     digitalWrite(6, LOW); // enable 74HC595
+
     latchPinOut.config(OUTPUT, HIGH); // latchPinOUT in output with initial HIGH
     latchPinIn.config(OUTPUT, LOW); // latchPinIn in input with initial LOW
-    spi.begin();
-    digitalWrite(5, HIGH); // cleared 74HC595, put it back on.
+    spi.begin(); // for 74HC595 and 74HC165
+    Wire.begin(); // for FRAM
+    fram.begin();
 
     out.integer = 1;
-
     last_diag_millis = millis();
+
+    // cleared 74HC595, put it back on.
+    // (do this as the last tin in `setup()`)
+    digitalWrite(5, HIGH);
+
+    uint32_t bootCount = 0;
+    fram.readLong(0x0000, &bootCount);
+    Serial.print("boot = ");
+    Serial.println(bootCount);
+    ++bootCount;
+    fram.writeLong(0x0000, bootCount);
 }
 
 uint32_t ejected = 0;
