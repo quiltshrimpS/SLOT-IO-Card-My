@@ -31,8 +31,6 @@ uint8_t cur_in[3] = { 0 };
 uint32_t last_diag_millis;
 
 void setup() {
-    // for the code to run, hit C-d in the serial console ti de-activate DTR.
-    // this is probably due to layout error.
     Serial.begin(115200);
 
     pinMode(5, OUTPUT); // 595_nCLR
@@ -50,6 +48,8 @@ void setup() {
     last_diag_millis = millis();
 }
 
+uint32_t ejected = 0;
+
 void loop() {
     uint32_t t1 = micros();
     latchPinOut = LOW;
@@ -62,14 +62,15 @@ void loop() {
 
     bool do_print = false;
     if (in[0] != cur_in[0] || in[1] != cur_in[1] || in[2] != cur_in[2]) {
+        if (~in[1] & 0x08)
+            ++ejected;
+
         cur_in[0] = in[0];
         cur_in[1] = in[1];
         cur_in[2] = in[2];
         do_print = true;
     }
     uint32_t t2 = micros();
-
-    delayMicroseconds(50);
 
     if (do_print) {
         Serial.print(millis());
@@ -79,6 +80,8 @@ void loop() {
         Serial.print((int) (in[1]), HEX);
         Serial.print(" ");
         Serial.print((int) (in[2]), HEX);
+        Serial.print(", ejected = ");
+        Serial.print(ejected);
         Serial.print(", took = ");
         Serial.print(t2 - t1);
         Serial.println("us");
