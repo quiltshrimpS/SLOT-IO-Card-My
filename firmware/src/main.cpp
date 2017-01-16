@@ -19,6 +19,7 @@
 #include <FRAM_MB85RC_I2C.h>
 
 #include "WreckedSPI.h"
+#include "Ports.h"
 
 FRAM_MB85RC_I2C fram(MB85RC_ADDRESS_A000, true, A7, 16 /* kb */);
 WreckedSPI<7, 2, 8, 3> spi;
