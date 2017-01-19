@@ -21,52 +21,57 @@
 #include "WreckedSPI.h"
 #include "Ports.h"
 
-FRAM_MB85RC_I2C fram(MB85RC_ADDRESS_A000, true, A7, 16 /* kb */);
-WreckedSPI<7, 2, 8, 3> spi;
+FRAM_MB85RC_I2C fram(MB85RC_ADDRESS_A000, true, /* WP */ A7, 16 /* kb */);
+WreckedSPI< /* MISO */ 7, /* MOSI */ 2, /* SCLK_MISO */ 8, /* SCLK_MOSI */ 3, /* MODE_MISO */ 2, /* MODE_MOSI */ 0 > spi;
 
-DigitalPin<4> latchPinOut; // for 74HC595
-DigitalPin<9> latchPinIn;  // for 74HC165
+#define COIN_EJECT_LEVEL                (HIGH)
+#define COIN_EJECT_DEBOUNCE_TIMEOUT_US  (90000)
+#define COIN_INSERT_DEBOUNCE_TIMEOUT_US (90000)
+
+static uint8_t const PIN_LATCH_OUT = 4; // for 74HC595
+static uint8_t const PIN_LATCH_IN = 9;  // for 74HC165
 
 union {
-    uint8_t bytes[4];
-    uint32_t integer;
+    uint8_t bytes[3];
+    struct OutPort port;
 } out;
 
-uint8_t in[3] = { 0 };
-uint8_t cur_in[3] = { 0 };
+union {
+    uint8_t bytes[3];
+    struct InPort port;
+} in, cur_in;
 
-uint32_t last_diag_millis;
+static uint32_t last_coin_eject_micros;
+static uint32_t last_coin_insert_micros;
 
 void setup() {
+    fastPinConfig(5, OUTPUT, LOW); // 595 nCLR (active LOW), clear register
+    fastPinConfig(6, OUTPUT, LOW); // 595 nG (active LOW), enable
+    fastPinConfig(PIN_LATCH_OUT, OUTPUT, HIGH); // 595 latch
+    fastPinConfig(PIN_LATCH_IN, OUTPUT, LOW);   // 165 latch
+
     Serial.begin(115200);
 
-    pinMode(5, OUTPUT); // 595_nCLR
-    pinMode(6, OUTPUT); // 595_nG
-    digitalWrite(5, LOW); // clear 74HC595 memories (toggle it on lator)
-    digitalWrite(6, LOW); // enable 74HC595
-
-    latchPinOut.config(OUTPUT, HIGH); // latchPinOUT in output with initial HIGH
-    latchPinIn.config(OUTPUT, LOW); // latchPinIn in input with initial LOW
     spi.begin(); // for 74HC595 and 74HC165
+
     Wire.begin(); // for FRAM
     fram.begin();
 
-    out.integer = 1;
-    last_diag_millis = millis();
+    last_coin_eject_micros = last_coin_insert_micros = micros();
 
     // cleared 74HC595, put it back on.
-    // (do this as the last tin in `setup()`)
-    digitalWrite(5, HIGH);
+    fastDigitalWrite(5, HIGH);
 
-    // populate cur_in[]
-    latchPinOut = LOW;
-    latchPinIn = HIGH;
-    cur_in[0] = spi.transfer(out.bytes[0]);
-    cur_in[1] = spi.transfer(out.bytes[1]);
-    cur_in[2] = spi.transfer(out.bytes[2]);
-    latchPinOut = HIGH;
-    latchPinIn = LOW;
+    // read the initial states, and write the initial states.
+    fastDigitalWrite(PIN_LATCH_OUT, LOW);
+    fastDigitalWrite(PIN_LATCH_IN, HIGH);
+    cur_in.bytes[0] = spi.transfer(out.bytes[0]);
+    cur_in.bytes[1] = spi.transfer(out.bytes[1]);
+    cur_in.bytes[2] = spi.transfer(out.bytes[2]);
+    fastDigitalWrite(PIN_LATCH_OUT, HIGH);
+    fastDigitalWrite(PIN_LATCH_IN, LOW);
 
+    // FRAM test, boot count.
     uint32_t bootCount = 0;
     fram.readLong(0x0000, &bootCount);
     Serial.print("boot = ");
@@ -75,58 +80,95 @@ void setup() {
     fram.writeLong(0x0000, bootCount);
 }
 
-uint32_t ejected = 0;
+int32_t inserted = 0;
+int32_t ejected = 0;
 
 void loop() {
-    uint32_t t1 = micros();
-    latchPinOut = LOW;
-    latchPinIn = HIGH;
-    in[0] = spi.transfer(out.bytes[0]);
-    in[1] = spi.transfer(out.bytes[1]);
-    in[2] = spi.transfer(out.bytes[2]);
-    latchPinOut = HIGH;
-    latchPinIn = LOW;
+    uint32_t t1, t2, t3 = 0, t4 = 0;
 
-    bool do_print = false;
-    if (in[0] != cur_in[0] || in[1] != cur_in[1] || in[2] != cur_in[2]) {
-        if (~in[1] & 0x08)
-            ++ejected;
+    t1 = micros();
+    fastDigitalWrite(PIN_LATCH_IN, HIGH);
+    in.bytes[0] = spi.receive();
+    in.bytes[1] = spi.receive();
+    in.bytes[2] = spi.receive();
+    fastDigitalWrite(PIN_LATCH_IN, LOW);
+    t2 = micros();
 
-        cur_in[0] = in[0];
-        cur_in[1] = in[1];
-        cur_in[2] = in[2];
+    bool do_print = false, do_send = false;
+    if (in.bytes[0] != cur_in.bytes[0] || in.bytes[1] != cur_in.bytes[1] || in.bytes[2] != cur_in.bytes[2]) {
+        // coin eject
+        if (in.port.sw11 != cur_in.port.sw11) {
+            if (in.port.sw11 == COIN_EJECT_LEVEL) {
+                if (micros() - last_coin_eject_micros > COIN_EJECT_DEBOUNCE_TIMEOUT_US) {
+                    last_coin_eject_micros = micros();
+                    ++ejected;
+                }
+            }
+        }
+
+        if (in.port.sw12 != cur_in.port.sw12) {
+            if (in.port.sw12 == LOW)
+                if (micros() - last_coin_insert_micros > COIN_INSERT_DEBOUNCE_TIMEOUT_US) {
+                    last_coin_insert_micros = micros();
+                    ++inserted;
+                }
+        }
+
+        if (in.port.sw01 != cur_in.port.sw01) {
+            out.port.ssr5 = !in.port.sw01;
+            do_send = true;
+        }
+
+        if (in.port.sw02 != cur_in.port.sw02) {
+            if (in.port.sw02 == LOW) {
+                ejected = 0;
+                inserted = 0;
+            }
+        }
+
+        cur_in.bytes[0] = in.bytes[0];
+        cur_in.bytes[1] = in.bytes[1];
+        cur_in.bytes[2] = in.bytes[2];
         do_print = true;
     }
-    uint32_t t2 = micros();
+
+    if (do_send) {
+        t3 = micros();
+        fastDigitalWrite(PIN_LATCH_OUT, LOW);
+        spi.send(out.bytes[0]);
+        spi.send(out.bytes[1]);
+        spi.send(out.bytes[2]);
+        fastDigitalWrite(PIN_LATCH_OUT, HIGH);
+        t4 = micros();
+
+        Serial.print(millis());
+        Serial.print(": out = ");
+        Serial.print((int) (out.bytes[0]), BIN);
+        Serial.print(" ");
+        Serial.print((int) (out.bytes[1]), BIN);
+        Serial.print(" ");
+        Serial.print((int) (out.bytes[2]), BIN);
+        Serial.print(", inserted = ");
+        Serial.print(inserted);
+        Serial.print(", ejected = ");
+        Serial.print(ejected);
+        Serial.print(", took = ");
+        Serial.print(t4 - t3);
+        Serial.println("us");
+    }
 
     if (do_print) {
         Serial.print(millis());
         Serial.print(": in = ");
-        Serial.print((int) (in[0]), HEX);
+        Serial.print((int) (in.bytes[0]), BIN);
         Serial.print(" ");
-        Serial.print((int) (in[1]), HEX);
+        Serial.print((int) (in.bytes[1]), BIN);
         Serial.print(" ");
-        Serial.print((int) (in[2]), HEX);
+        Serial.print((int) (in.bytes[2]), BIN);
+        Serial.print(", inserted = ");
+        Serial.print(inserted);
         Serial.print(", ejected = ");
         Serial.print(ejected);
-        Serial.print(", took = ");
-        Serial.print(t2 - t1);
-        Serial.println("us");
-    }
-
-    if (millis() - last_diag_millis > 500) {
-        last_diag_millis = millis();
-        out.integer <<= 1;
-        if (out.integer == 1l << 24)
-            out.integer = 1;
-
-        Serial.print(millis());
-        Serial.print(": out = ");
-        Serial.print((int) (out.bytes[0]), HEX);
-        Serial.print(" ");
-        Serial.print((int) (out.bytes[1]), HEX);
-        Serial.print(" ");
-        Serial.print((int) (out.bytes[2]), HEX);
         Serial.print(", took = ");
         Serial.print(t2 - t1);
         Serial.println("us");
