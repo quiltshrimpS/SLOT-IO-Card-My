@@ -21,7 +21,11 @@ public partial class MainWindow
 
 	private global::Gtk.Label label_cmd;
 
+	private global::Gtk.Label label_cmd_desc;
+
 	private global::Gtk.Label label_payload;
+
+	private global::Gtk.Label label_payload_help;
 
 	private global::Gtk.Label label_port;
 
@@ -33,7 +37,7 @@ public partial class MainWindow
 		this.Title = global::Mono.Unix.Catalog.GetString("MainWindow");
 		this.WindowPosition = ((global::Gtk.WindowPosition)(4));
 		// Container child MainWindow.Gtk.Container+ContainerChild
-		this.table1 = new global::Gtk.Table(((uint)(3)), ((uint)(5)), false);
+		this.table1 = new global::Gtk.Table(((uint)(5)), ((uint)(5)), false);
 		this.table1.Name = "table1";
 		this.table1.RowSpacing = ((uint)(6));
 		this.table1.ColumnSpacing = ((uint)(6));
@@ -66,16 +70,9 @@ public partial class MainWindow
 		w2.YOptions = ((global::Gtk.AttachOptions)(4));
 		// Container child table1.Gtk.Table+TableChild
 		this.combobox_cmd = global::Gtk.ComboBox.NewText();
-		this.combobox_cmd.AppendText(global::Mono.Unix.Catalog.GetString("0xF0 (GET_INFO)"));
-		this.combobox_cmd.AppendText(global::Mono.Unix.Catalog.GetString("0xE1 (EJECT_COIN)"));
-		this.combobox_cmd.AppendText(global::Mono.Unix.Catalog.GetString("0xD2 (RESET_COIN_COUNTER)"));
-		this.combobox_cmd.AppendText(global::Mono.Unix.Catalog.GetString("0xB4 (SET_OUTPUT)"));
-		this.combobox_cmd.AppendText(global::Mono.Unix.Catalog.GetString("0x96 (WRITE_STORAGE)"));
-		this.combobox_cmd.AppendText(global::Mono.Unix.Catalog.GetString("0x87 (READ_STORAGE)"));
 		this.combobox_cmd.CanDefault = true;
 		this.combobox_cmd.Events = ((global::Gdk.EventMask)(65536));
 		this.combobox_cmd.Name = "combobox_cmd";
-		this.combobox_cmd.Active = 0;
 		this.table1.Add(this.combobox_cmd);
 		global::Gtk.Table.TableChild w3 = ((global::Gtk.Table.TableChild)(this.table1[this.combobox_cmd]));
 		w3.TopAttach = ((uint)(1));
@@ -113,8 +110,8 @@ public partial class MainWindow
 		this.GtkScrolledWindow.Add(this.textview_received);
 		this.table1.Add(this.GtkScrolledWindow);
 		global::Gtk.Table.TableChild w7 = ((global::Gtk.Table.TableChild)(this.table1[this.GtkScrolledWindow]));
-		w7.TopAttach = ((uint)(2));
-		w7.BottomAttach = ((uint)(3));
+		w7.TopAttach = ((uint)(4));
+		w7.BottomAttach = ((uint)(5));
 		w7.RightAttach = ((uint)(5));
 		w7.XOptions = ((global::Gtk.AttachOptions)(4));
 		// Container child table1.Gtk.Table+TableChild
@@ -129,39 +126,64 @@ public partial class MainWindow
 		w8.XOptions = ((global::Gtk.AttachOptions)(4));
 		w8.YOptions = ((global::Gtk.AttachOptions)(4));
 		// Container child table1.Gtk.Table+TableChild
+		this.label_cmd_desc = new global::Gtk.Label();
+		this.label_cmd_desc.Name = "label_cmd_desc";
+		this.label_cmd_desc.Xalign = 0F;
+		this.table1.Add(this.label_cmd_desc);
+		global::Gtk.Table.TableChild w9 = ((global::Gtk.Table.TableChild)(this.table1[this.label_cmd_desc]));
+		w9.TopAttach = ((uint)(3));
+		w9.BottomAttach = ((uint)(4));
+		w9.RightAttach = ((uint)(5));
+		w9.XOptions = ((global::Gtk.AttachOptions)(4));
+		w9.YOptions = ((global::Gtk.AttachOptions)(4));
+		// Container child table1.Gtk.Table+TableChild
 		this.label_payload = new global::Gtk.Label();
 		this.label_payload.Name = "label_payload";
 		this.label_payload.Xalign = 0F;
 		this.label_payload.LabelProp = global::Mono.Unix.Catalog.GetString("Payload:");
 		this.table1.Add(this.label_payload);
-		global::Gtk.Table.TableChild w9 = ((global::Gtk.Table.TableChild)(this.table1[this.label_payload]));
-		w9.TopAttach = ((uint)(1));
-		w9.BottomAttach = ((uint)(2));
-		w9.LeftAttach = ((uint)(2));
-		w9.RightAttach = ((uint)(3));
-		w9.XOptions = ((global::Gtk.AttachOptions)(4));
-		w9.YOptions = ((global::Gtk.AttachOptions)(4));
+		global::Gtk.Table.TableChild w10 = ((global::Gtk.Table.TableChild)(this.table1[this.label_payload]));
+		w10.TopAttach = ((uint)(1));
+		w10.BottomAttach = ((uint)(2));
+		w10.LeftAttach = ((uint)(2));
+		w10.RightAttach = ((uint)(3));
+		w10.XOptions = ((global::Gtk.AttachOptions)(4));
+		w10.YOptions = ((global::Gtk.AttachOptions)(4));
+		// Container child table1.Gtk.Table+TableChild
+		this.label_payload_help = new global::Gtk.Label();
+		this.label_payload_help.Name = "label_payload_help";
+		this.label_payload_help.Xalign = 1F;
+		this.label_payload_help.LabelProp = global::Mono.Unix.Catalog.GetString("Payload: 0xXX (0x0 ~ 0xFF), XX (0 ~ 255), 0XX (00 ~ 0377), 0bXX (0b0 ~ 0b11111111)\nuse \" \" to seperate the bytes. ex. \"0x12 34 056 0b11111111\"");
+		this.label_payload_help.Justify = ((global::Gtk.Justification)(1));
+		this.table1.Add(this.label_payload_help);
+		global::Gtk.Table.TableChild w11 = ((global::Gtk.Table.TableChild)(this.table1[this.label_payload_help]));
+		w11.TopAttach = ((uint)(2));
+		w11.BottomAttach = ((uint)(3));
+		w11.RightAttach = ((uint)(5));
+		w11.XOptions = ((global::Gtk.AttachOptions)(4));
+		w11.YOptions = ((global::Gtk.AttachOptions)(4));
 		// Container child table1.Gtk.Table+TableChild
 		this.label_port = new global::Gtk.Label();
 		this.label_port.Name = "label_port";
 		this.label_port.Xalign = 0F;
 		this.label_port.LabelProp = global::Mono.Unix.Catalog.GetString("Port:");
 		this.table1.Add(this.label_port);
-		global::Gtk.Table.TableChild w10 = ((global::Gtk.Table.TableChild)(this.table1[this.label_port]));
-		w10.XOptions = ((global::Gtk.AttachOptions)(4));
-		w10.YOptions = ((global::Gtk.AttachOptions)(4));
+		global::Gtk.Table.TableChild w12 = ((global::Gtk.Table.TableChild)(this.table1[this.label_port]));
+		w12.XOptions = ((global::Gtk.AttachOptions)(4));
+		w12.YOptions = ((global::Gtk.AttachOptions)(4));
 		this.Add(this.table1);
 		if ((this.Child != null))
 		{
 			this.Child.ShowAll();
 		}
-		this.DefaultWidth = 559;
+		this.DefaultWidth = 670;
 		this.DefaultHeight = 397;
 		this.combobox_cmd.HasDefault = true;
 		this.Show();
 		this.DeleteEvent += new global::Gtk.DeleteEventHandler(this.OnDeleteEvent);
 		this.comboboxentry_port.Changed += new global::System.EventHandler(this.OnComboBoxEntryPort_Changed);
 		this.comboboxentry_payload.Changed += new global::System.EventHandler(this.OnComboBoxEntryPayload_Changed);
+		this.combobox_cmd.Changed += new global::System.EventHandler(this.OnComboBoxCmd_Changed);
 		this.button_send.Clicked += new global::System.EventHandler(this.OnButtonSend_Clicked);
 		this.button_connect.Clicked += new global::System.EventHandler(this.OnButtonConnect_Clicked);
 	}

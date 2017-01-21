@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandMessenger", "..\..\f
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandMessenger.Transport.Serial", "..\..\firmware\lib\Arduino-CmdMessenger\extras\CSharp\CommandMessenger.Transport.Serial\CommandMessenger.Transport.Serial.csproj", "{00D85F0B-00A5-41FA-8A99-428C0199C663}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IOCardLibrary", "..\..\csharp_driver\IOCardLibrary\IOCardLibrary.csproj", "{054F8632-17EE-4BAC-8C20-8A322FD6EC2A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -25,6 +27,10 @@ Global
 		{00D85F0B-00A5-41FA-8A99-428C0199C663}.Debug|x86.Build.0 = Debug|x86
 		{00D85F0B-00A5-41FA-8A99-428C0199C663}.Release|x86.ActiveCfg = Release|x86
 		{00D85F0B-00A5-41FA-8A99-428C0199C663}.Release|x86.Build.0 = Release|x86
+		{054F8632-17EE-4BAC-8C20-8A322FD6EC2A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{054F8632-17EE-4BAC-8C20-8A322FD6EC2A}.Debug|x86.Build.0 = Debug|Any CPU
+		{054F8632-17EE-4BAC-8C20-8A322FD6EC2A}.Release|x86.ActiveCfg = Release|Any CPU
+		{054F8632-17EE-4BAC-8C20-8A322FD6EC2A}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		Policies = $0

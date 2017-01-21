@@ -61,13 +61,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\firmware\lib\Arduino-CmdMessenger\extras\CSharp\CommandMessenger\CommandMessenger.csproj">
-      <Project>{3CF8F8FC-6F5C-46F8-94DC-C2E4C505ECA4}</Project>
-      <Name>CommandMessenger</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\firmware\lib\Arduino-CmdMessenger\extras\CSharp\CommandMessenger.Transport.Serial\CommandMessenger.Transport.Serial.csproj">
-      <Project>{00D85F0B-00A5-41FA-8A99-428C0199C663}</Project>
-      <Name>CommandMessenger.Transport.Serial</Name>
+    <ProjectReference Include="..\..\..\csharp_driver\IOCardLibrary\IOCardLibrary.csproj">
+      <Project>{054F8632-17EE-4BAC-8C20-8A322FD6EC2A}</Project>
+      <Name>IOCardLibrary</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
