@@ -23,6 +23,7 @@
 #include "WreckedSPI.h"
 #include "Ports.h"
 #include "Debounce.h"
+#include "Pulse.h"
 
 FRAM_MB85RC_I2C fram(MB85RC_ADDRESS_A000, true, /* WP */ A7, 16 /* kb */);
 WreckedSPI< /* MISO */ 7, /* MOSI */ 2, /* SCLK_MISO */ 8, /* SCLK_MOSI */ 3, /* MODE_MISO */ 2, /* MODE_MOSI */ 0 > spi;
@@ -37,7 +38,6 @@ union {
     struct InPort port;
 } in;
 
-#define COIN_EJECT_LEVEL                (HIGH)
 
 bool do_print = false;
 bool do_send = false;
@@ -46,10 +46,18 @@ int32_t ejected = 0;
 
 uint8_t to_eject = 0;
 
-Debounce<COIN_EJECT_LEVEL, 5000> debounce_eject(
+// counter is 150 CPS, each cycle is 6.66ms, 50% duty = 3.33ms HIGH then 3.33ms LOW.
+// we round it to 3.5ms to give it a bit buffer
+Pulse<3500, 3500> pulse_counter_score;
+Pulse<3500, 3500> pulse_counter_wash;
+Pulse<3500, 3500> pulse_counter_insert;
+Pulse<3500, 3500> pulse_counter_eject;
+
+Debounce<HIGH, 5000> debounce_eject(
 	nullptr,
 	[] () {
 		++ejected;
+		pulse_counter_eject.pulse(1);
 		// FIXME: had to issue stop early, or inertia ejects an extra coin
 		if (to_eject-- < 2) {
 			out.port.ssr5 = false;
@@ -59,10 +67,29 @@ Debounce<COIN_EJECT_LEVEL, 5000> debounce_eject(
 	}
 );
 
-Debounce<LOW, 5000> debounce_insert(
+Debounce<LOW, 5000> debounce_insert_1(
 	nullptr,
 	[] () {
 		++inserted;
+		pulse_counter_insert.pulse(1);
+		do_print = true;
+	}
+);
+
+Debounce<LOW, 5000> debounce_insert_2(
+	nullptr,
+	[] () {
+		++inserted;
+		pulse_counter_insert.pulse(1);
+		do_print = true;
+	}
+);
+
+Debounce<LOW, 5000> debounce_insert_3(
+	nullptr,
+	[] () {
+		++inserted;
+		pulse_counter_insert.pulse(1);
 		do_print = true;
 	}
 );
@@ -116,19 +143,13 @@ void setup() {
 	debounce_sw01.begin(in.port.sw01, now);
 	debounce_sw02.begin(in.port.sw02, now);
 	debounce_eject.begin(in.port.sw11, now);
-	debounce_insert.begin(in.port.sw12, now);
-
-    // FRAM test, boot count.
-    uint32_t bootCount = 0;
-    fram.readLong(0x0000, &bootCount);
-    Serial.print("boot = ");
-    Serial.println(bootCount);
-    ++bootCount;
-    fram.writeLong(0x0000, bootCount);
+	debounce_insert_1.begin(in.port.sw12, now);
+	debounce_insert_2.begin(in.port.sw13, now);
+	debounce_insert_3.begin(in.port.sw14, now);
 }
 
 void loop() {
-    uint32_t t1, t2, t3, t4;
+    uint32_t t1, t2, t3;
 
     t1 = micros();
     fastDigitalWrite(PIN_LATCH_IN, HIGH);
@@ -137,14 +158,34 @@ void loop() {
     in.bytes[2] = spi.receive();
     fastDigitalWrite(PIN_LATCH_IN, LOW);
     t2 = micros();
-
-	t3 = micros();
 	uint32_t now = micros();
 	debounce_sw01.feed(in.port.sw01, now);
 	debounce_sw02.feed(in.port.sw02, now);
 	debounce_eject.feed(in.port.sw11, now);
-	debounce_insert.feed(in.port.sw12, now);
-	t4 = micros();
+	debounce_insert_1.feed(in.port.sw12, now);
+	debounce_insert_2.feed(in.port.sw13, now);
+	debounce_insert_3.feed(in.port.sw14, now);
+	if (pulse_counter_score.update(now))
+	{
+		out.port.counter1 = pulse_counter_score.get();
+		do_send = true;
+	}
+	if (pulse_counter_wash.update(now))
+	{
+		out.port.counter2 = pulse_counter_wash.get();
+		do_send = true;
+	}
+	if (pulse_counter_insert.update(now))
+	{
+		out.port.counter3 = pulse_counter_insert.get();
+		do_send = true;
+	}
+	if (pulse_counter_eject.update(now))
+	{
+		out.port.counter4 = pulse_counter_eject.get();
+		do_send = true;
+	}
+	t3 = micros();
 
     if (do_send) {
 		do_send = false;
@@ -169,7 +210,7 @@ void loop() {
         Serial.print(", ejected = ");
         Serial.print(ejected);
 		Serial.print(", debounce took ");
-		Serial.print(t4 - t3);
+		Serial.print(t3 - t2);
 		Serial.print("us, receive took ");
 		Serial.print(t2 - t1);
         Serial.print("us, send took ");
@@ -191,7 +232,7 @@ void loop() {
         Serial.print(", ejected = ");
         Serial.print(ejected);
 		Serial.print(", debounce took ");
-		Serial.print(t4 - t3);
+		Serial.print(t3 - t2);
 		Serial.print("us, receive took ");
 		Serial.print(t2 - t1);
         Serial.println("us");
