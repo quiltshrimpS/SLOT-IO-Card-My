@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using CommandMessenger;
+using CommandMessenger.Transport;
+using CommandMessenger.Transport.Serial;
+
 namespace Spark.Slot.IO
 {
 	public class IOCard
 	{
-		public static IOCard Card { get; }
+		private static readonly IOCard sCard = new IOCard();
+		public static IOCard Card { get { return sCard; } }
 
 		public enum CoinTrack
 		{
@@ -36,17 +41,71 @@ namespace Spark.Slot.IO
 			return 0;
 		}
 
-		public ButtonState GetCachedButtonState(int buttonId)
+		public ButtonState GetCachedButtonState(byte buttonId)
 		{
 			if (mButtonStates.ContainsKey(buttonId))
 				return mButtonStates[buttonId];
 			return ButtonState.StateUnavailable;
 		}
 
-		#region "implementations"
-		// disallow instantiation
-		private IOCard() {
+		public bool Connect(string port)
+		{
+			if (mMessenger != null)
+				return false;
 
+			try
+			{
+				var transport = new SerialTransport()
+				{
+					CurrentSerialSettings = { PortName = port, BaudRate = 115200, DtrEnable = false, },
+				};
+
+				var messenger = new CmdMessenger(transport);
+				messenger.Attach((int)Events.EVT_GET_INFO_RESULT, OnReceive_GetInfo);
+				var status = messenger.Connect();
+				if (status)
+				{
+					mMessenger = messenger;
+					if (OnConnected != null)
+						OnConnected(this, EventArgs.Empty);
+				}
+				return status;
+			}
+			catch (InvalidOperationException ex)
+			{
+				Console.WriteLine("IOCard.Connect(): connection failed, " + ex.Message);
+			}
+			return false;
+		}
+
+		public bool Disconnect()
+		{
+			if (IsConnected)
+			{
+				var status = mMessenger.Disconnect();
+				if (status)
+				{
+					mMessenger = null;
+					if (OnDisconnected != null)
+						OnDisconnected(this, EventArgs.Empty);
+				}
+				return status;
+			}
+			return false;
+		}
+
+		public bool IsConnected { get { return mMessenger != null; } }
+
+		public event EventHandler OnConnected;
+		public event EventHandler OnDisconnected;
+
+		#region "implementations"
+
+		private CmdMessenger mMessenger = null;
+
+		// disallow instantiation
+		private IOCard()
+		{
 		}
 
 		private Dictionary<CoinTrack, UInt32> mCoinCounts = new Dictionary<CoinTrack, UInt32>();
