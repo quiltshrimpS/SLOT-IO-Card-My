@@ -30,15 +30,15 @@ public partial class MainWindow : Window
 			"Get the device information (model / version)"),
 		new CommandDescription(IOCard.Commands.CMD_EJECT_COIN, true,
 			"Eject N coins. Payload: [coins (1 byte)]"),
-		new CommandDescription(IOCard.Commands.CMD_GET_COIN_COUNTER, false,
+		new CommandDescription(IOCard.Commands.CMD_GET_COIN_COUNTER, true,
 			"Get coin counter. Payload: [trackId (1 byte)]"),
-		new CommandDescription(IOCard.Commands.CMD_RESET_COIN_COINTER, false,
+		new CommandDescription(IOCard.Commands.CMD_RESET_COIN_COINTER, true,
 			"Reset coin counter. Payload: [trackId (1 byte)]"),
-		new CommandDescription(IOCard.Commands.CMD_SET_OUTPUT, false,
+		new CommandDescription(IOCard.Commands.CMD_SET_OUTPUT, true,
 			"Set 74HC595 output. Payload: [State (N bytes)], length automatically calculated."),
-		new CommandDescription(IOCard.Commands.CMD_WRITE_STORAGE, false,
+		new CommandDescription(IOCard.Commands.CMD_WRITE_STORAGE, true,
 			"Write data to the onboard storage. Payload: [address (2 bytes)][data (N bytes)], length automatically calculated."),
-		new CommandDescription(IOCard.Commands.CMD_READ_STORAGE, false,
+		new CommandDescription(IOCard.Commands.CMD_READ_STORAGE, true,
 			"Read data from onboard storage. Payload: [address (2 bytes)][length (1 byte)]"),
 	};
 
@@ -59,6 +59,7 @@ public partial class MainWindow : Window
 		label_cmd_desc.Text = sCommands[mLastCmdIndex].Description;
 
 		_populateComboBoxEntry(comboboxentry_payload, sCommands[mLastCmdIndex].Payloads);
+		comboboxentry_payload.Sensitive = sCommands[mLastCmdIndex].HasPayload;
 		_populateComboBoxEntry(comboboxentry_port, mPorts);
 	}
 
@@ -76,6 +77,7 @@ public partial class MainWindow : Window
 		mLastCmdIndex = cb.Active;
 
 		_populateComboBoxEntry(comboboxentry_payload, sCommands[mLastCmdIndex].Payloads);
+		comboboxentry_payload.Sensitive = sCommands[mLastCmdIndex].HasPayload;
 		label_cmd_desc.Text = sCommands[mLastCmdIndex].Description;
 	}
 
