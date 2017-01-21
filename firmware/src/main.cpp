@@ -18,18 +18,14 @@
 #include <Wire.h>
 #include <FRAM_MB85RC_I2C.h>
 
+#include <CmdMessenger.h>
+
 #include "WreckedSPI.h"
 #include "Ports.h"
+#include "Debounce.h"
 
 FRAM_MB85RC_I2C fram(MB85RC_ADDRESS_A000, true, /* WP */ A7, 16 /* kb */);
 WreckedSPI< /* MISO */ 7, /* MOSI */ 2, /* SCLK_MISO */ 8, /* SCLK_MOSI */ 3, /* MODE_MISO */ 2, /* MODE_MOSI */ 0 > spi;
-
-#define COIN_EJECT_LEVEL                (HIGH)
-#define COIN_EJECT_DEBOUNCE_TIMEOUT_US  (90000)
-#define COIN_INSERT_DEBOUNCE_TIMEOUT_US (90000)
-
-static uint8_t const PIN_LATCH_OUT = 4; // for 74HC595
-static uint8_t const PIN_LATCH_IN = 9;  // for 74HC165
 
 union {
     uint8_t bytes[3];
@@ -39,10 +35,51 @@ union {
 union {
     uint8_t bytes[3];
     struct InPort port;
-} in, cur_in;
+} in;
 
-static uint32_t last_coin_eject_micros;
-static uint32_t last_coin_insert_micros;
+#define COIN_EJECT_LEVEL                (HIGH)
+
+bool do_print = false;
+bool do_send = false;
+int32_t inserted = 0;
+int32_t ejected = 0;
+
+uint8_t to_eject = 0;
+
+Debounce<COIN_EJECT_LEVEL, 5000> debounce_eject(
+	nullptr,
+	[] () {
+		++ejected;
+		do_print = true;
+	}
+);
+
+Debounce<LOW, 5000> debounce_insert(
+	nullptr,
+	[] () {
+		++inserted;
+		do_print = true;
+	}
+);
+
+Debounce<LOW, 5000> debounce_sw01(
+	[] () {
+		to_eject = 10;
+		do_print = true;
+	},
+	nullptr
+);
+
+Debounce<LOW, 5000> debounce_sw02(
+	nullptr,
+	[] () {
+		ejected = inserted = 0;
+		do_print = true;
+	}
+);
+
+static uint8_t const PIN_LATCH_OUT = 4; // for 74HC595
+static uint8_t const PIN_LATCH_IN = 9;  // for 74HC165
 
 void setup() {
     fastPinConfig(5, OUTPUT, LOW); // 595 nCLR (active LOW), clear register
@@ -57,19 +94,23 @@ void setup() {
     Wire.begin(); // for FRAM
     fram.begin();
 
-    last_coin_eject_micros = last_coin_insert_micros = micros();
-
     // cleared 74HC595, put it back on.
     fastDigitalWrite(5, HIGH);
 
     // read the initial states, and write the initial states.
     fastDigitalWrite(PIN_LATCH_OUT, LOW);
     fastDigitalWrite(PIN_LATCH_IN, HIGH);
-    cur_in.bytes[0] = spi.transfer(out.bytes[0]);
-    cur_in.bytes[1] = spi.transfer(out.bytes[1]);
-    cur_in.bytes[2] = spi.transfer(out.bytes[2]);
+    in.bytes[0] = spi.transfer(out.bytes[0]);
+    in.bytes[1] = spi.transfer(out.bytes[1]);
+    in.bytes[2] = spi.transfer(out.bytes[2]);
     fastDigitalWrite(PIN_LATCH_OUT, HIGH);
     fastDigitalWrite(PIN_LATCH_IN, LOW);
+
+	uint32_t now = micros();
+	debounce_sw01.begin(in.port.sw01, now);
+	debounce_sw02.begin(in.port.sw02, now);
+	debounce_eject.begin(in.port.sw11, now);
+	debounce_insert.begin(in.port.sw12, now);
 
     // FRAM test, boot count.
     uint32_t bootCount = 0;
@@ -80,13 +121,8 @@ void setup() {
     fram.writeLong(0x0000, bootCount);
 }
 
-int32_t inserted = 0;
-int32_t ejected = 0;
-
-uint32_t p_0 = 0, p_1 = 0;
-
 void loop() {
-    uint32_t t1, t2, t3 = 0, t4 = 0;
+    uint32_t t1, t2, t3, t4;
 
     t1 = micros();
     fastDigitalWrite(PIN_LATCH_IN, HIGH);
@@ -96,57 +132,24 @@ void loop() {
     fastDigitalWrite(PIN_LATCH_IN, LOW);
     t2 = micros();
 
-    bool do_print = false, do_send = false;
-    if (in.bytes[0] != cur_in.bytes[0] || in.bytes[1] != cur_in.bytes[1] || in.bytes[2] != cur_in.bytes[2]) {
-        // coin eject
-        if (in.port.sw11 != cur_in.port.sw11) {
-            if (in.port.sw11 == COIN_EJECT_LEVEL) {
-                p_1 = micros();
-            } else {
-                if (p_0 - p_1 > 10000) {
-                    if (micros() - last_coin_eject_micros > COIN_EJECT_DEBOUNCE_TIMEOUT_US) {
-                        last_coin_eject_micros = micros();
-                        ++ejected;
-                    }
-                }
-                p_0 = micros();
-            }
-        }
-
-        if (in.port.sw12 != cur_in.port.sw12) {
-            if (in.port.sw12 == LOW)
-                if (micros() - last_coin_insert_micros > COIN_INSERT_DEBOUNCE_TIMEOUT_US) {
-                    last_coin_insert_micros = micros();
-                    ++inserted;
-                }
-        }
-
-        if (in.port.sw01 != cur_in.port.sw01) {
-            out.port.ssr5 = !in.port.sw01;
-            do_send = true;
-        }
-
-        if (in.port.sw02 != cur_in.port.sw02) {
-            if (in.port.sw02 == LOW) {
-                ejected = 0;
-                inserted = 0;
-            }
-        }
-
-        cur_in.bytes[0] = in.bytes[0];
-        cur_in.bytes[1] = in.bytes[1];
-        cur_in.bytes[2] = in.bytes[2];
-        do_print = true;
-    }
+	t3 = micros();
+	uint32_t now = micros();
+	debounce_sw01.feed(in.port.sw01, now);
+	debounce_sw02.feed(in.port.sw02, now);
+	debounce_eject.feed(in.port.sw11, now);
+	debounce_insert.feed(in.port.sw12, now);
+	t4 = micros();
 
     if (do_send) {
-        t3 = micros();
+		do_send = false;
+		uint32_t t5, t6;
+        t5 = micros();
         fastDigitalWrite(PIN_LATCH_OUT, LOW);
         spi.send(out.bytes[0]);
         spi.send(out.bytes[1]);
         spi.send(out.bytes[2]);
         fastDigitalWrite(PIN_LATCH_OUT, HIGH);
-        t4 = micros();
+        t6 = micros();
 
         Serial.print(millis());
         Serial.print(": out = ");
@@ -159,12 +162,17 @@ void loop() {
         Serial.print(inserted);
         Serial.print(", ejected = ");
         Serial.print(ejected);
-        Serial.print(", took = ");
-        Serial.print(t4 - t3);
+		Serial.print(", debounce took ");
+		Serial.print(t4 - t3);
+		Serial.print("us, receive took ");
+		Serial.print(t2 - t1);
+        Serial.print("us, send took ");
+		Serial.print(t6 - t5);
         Serial.println("us");
     }
 
     if (do_print) {
+		do_print = false;
         Serial.print(millis());
         Serial.print(": in = ");
         Serial.print((int) (in.bytes[0]), BIN);
@@ -176,14 +184,10 @@ void loop() {
         Serial.print(inserted);
         Serial.print(", ejected = ");
         Serial.print(ejected);
-        if (in.port.sw11 != COIN_EJECT_LEVEL) {
-            Serial.print(", period = ");
-            Serial.print(p_0 - p_1);
-            if (p_0 - p_1 < 10000)
-                Serial.print(" (X)");
-        }
-        Serial.print(", took = ");
-        Serial.print(t2 - t1);
+		Serial.print(", debounce took ");
+		Serial.print(t4 - t3);
+		Serial.print("us, receive took ");
+		Serial.print(t2 - t1);
         Serial.println("us");
     }
 }
