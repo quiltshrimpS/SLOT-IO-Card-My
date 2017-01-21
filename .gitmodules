@@ -4,3 +4,6 @@
 [submodule "firmware/lib/FRAM_MB85RC_I2C"]
 	path = firmware/lib/FRAM_MB85RC_I2C
 	url = https://github.com/sosandroid/FRAM_MB85RC_I2C
+[submodule "firmware/lib/Arduino-CmdMessenger"]
+	path = firmware/lib/Arduino-CmdMessenger
+	url = https://github.com/Palatis/Arduino-CmdMessenger.git
