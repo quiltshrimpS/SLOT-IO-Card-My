@@ -50,6 +50,11 @@ Debounce<COIN_EJECT_LEVEL, 5000> debounce_eject(
 	nullptr,
 	[] () {
 		++ejected;
+		// FIXME: had to issue stop early, or inertia ejects an extra coin
+		if (to_eject-- < 2) {
+			out.port.ssr5 = false;
+			do_send = true;
+		}
 		do_print = true;
 	}
 );
@@ -65,7 +70,8 @@ Debounce<LOW, 5000> debounce_insert(
 Debounce<LOW, 5000> debounce_sw01(
 	[] () {
 		to_eject = 10;
-		do_print = true;
+		out.port.ssr5 = true;
+		do_send = true;
 	},
 	nullptr
 );
