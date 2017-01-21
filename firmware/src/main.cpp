@@ -60,7 +60,7 @@ Debounce<HIGH, 5000> debounce_eject(
 		pulse_counter_eject.pulse(1);
 		// FIXME: had to issue stop early, or inertia ejects an extra coin
 		if (to_eject-- < 2) {
-			out.port.ssr5 = false;
+			out.port.ssr1 = false; // pull LOW to stop the motor
 			do_send = true;
 		}
 		do_print = true;
@@ -97,7 +97,7 @@ Debounce<LOW, 5000> debounce_insert_3(
 Debounce<LOW, 5000> debounce_sw01(
 	[] () {
 		to_eject = 10;
-		out.port.ssr5 = true;
+		out.port.ssr1 = true;
 		do_send = true;
 	},
 	nullptr

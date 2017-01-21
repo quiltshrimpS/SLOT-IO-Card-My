@@ -4,14 +4,14 @@
 #include <Arduino.h>
 
 struct OutPort {
-    uint8_t lamp1:1;    // 0b00000001: stop 1
-    uint8_t lamp2:1;    // 0b00000010: stop 2
-    uint8_t lamp3:1;    // 0b00000100: stop 3
-    uint8_t lamp4:1;    // 0b00001000: stop 4
-    uint8_t lamp5:1;    // 0b00010000: stop 5
-    uint8_t lamp6:1;    // 0b00100000: start
-    uint8_t lamp7:1;    // 0b01000000: auto
-    uint8_t ssr5:1;     // 0b10000000: reserved SSR5
+	uint8_t counter1:1; // 0b00000001: score
+	uint8_t counter2:1; // 0b00000010: wash score (what is this?)
+	uint8_t counter3:1; // 0b00000100: coin insert
+	uint8_t counter4:1; // 0b00001000: coin extract
+	uint8_t ssr4:1;     // 0b00010000: reserved SSR4
+	uint8_t ssr3:1;     // 0b00100000: reserved SSR3
+	uint8_t ssr2:1;     // 0b01000000: reserved SSR2
+	uint8_t ssr1:1;     // 0b10000000: coin extract motor SSR1
 
     uint8_t lamp8:1;    // 0b00000001: max bet
     uint8_t lamp9:1;    // 0b00000010: help
@@ -22,14 +22,14 @@ struct OutPort {
     uint8_t lamp14:1;   // 0b01000000: error
     uint8_t ssr6:1;     // 0b10000000: reserved SSR6
 
-    uint8_t counter1:1; // 0b00000001: score
-    uint8_t counter2:1; // 0b00000010: wash score (what is this?)
-    uint8_t counter3:1; // 0b00000100: coin insert
-    uint8_t counter4:1; // 0b00001000: coin extract
-    uint8_t ssr4:1;     // 0b00010000: reserved SSR4
-    uint8_t ssr3:1;     // 0b00100000: reserved SSR3
-    uint8_t ssr2:1;     // 0b01000000: reserved SSR2
-    uint8_t ssr1:1;     // 0b10000000: coin extract motor SSR1
+	uint8_t lamp1:1;    // 0b00000001: stop 1
+    uint8_t lamp2:1;    // 0b00000010: stop 2
+    uint8_t lamp3:1;    // 0b00000100: stop 3
+    uint8_t lamp4:1;    // 0b00001000: stop 4
+    uint8_t lamp5:1;    // 0b00010000: stop 5
+    uint8_t lamp6:1;    // 0b00100000: start
+    uint8_t lamp7:1;    // 0b01000000: auto
+    uint8_t ssr5:1;     // 0b10000000: reserved SSR5
 };
 
 struct InPort {
