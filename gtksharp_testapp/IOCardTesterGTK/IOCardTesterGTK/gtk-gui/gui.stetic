@@ -15,11 +15,14 @@
     <child>
       <widget class="Gtk.Table" id="table1">
         <property name="MemberName" />
-        <property name="NRows">5</property>
+        <property name="NRows">4</property>
         <property name="NColumns">5</property>
         <property name="RowSpacing">6</property>
         <property name="ColumnSpacing">6</property>
         <property name="BorderWidth">6</property>
+        <child>
+          <placeholder />
+        </child>
         <child>
           <widget class="Gtk.Button" id="button_connect">
             <property name="MemberName" />
@@ -46,6 +49,7 @@
         <child>
           <widget class="Gtk.Button" id="button_send">
             <property name="MemberName" />
+            <property name="Sensitive">False</property>
             <property name="CanFocus">True</property>
             <property name="Type">TextOnly</property>
             <property name="Label" translatable="yes">_Send</property>
@@ -84,10 +88,10 @@
             <property name="LeftAttach">1</property>
             <property name="RightAttach">2</property>
             <property name="AutoSize">False</property>
-            <property name="XOptions">Fill</property>
+            <property name="XOptions">0</property>
             <property name="YOptions">Fill</property>
             <property name="XExpand">False</property>
-            <property name="XFill">True</property>
+            <property name="XFill">False</property>
             <property name="XShrink">False</property>
             <property name="YExpand">False</property>
             <property name="YFill">True</property>
@@ -95,11 +99,11 @@
           </packing>
         </child>
         <child>
-          <widget class="Gtk.ComboBoxEntry" id="comboboxentry_payload">
+          <widget class="Gtk.ComboBoxEntry" id="comboboxentry_params">
             <property name="MemberName" />
             <property name="IsTextCombo">True</property>
             <property name="Items" translatable="yes" />
-            <signal name="Changed" handler="OnComboBoxEntryPayload_Changed" />
+            <signal name="Changed" handler="OnComboBoxEntryParams_Changed" />
           </widget>
           <packing>
             <property name="TopAttach">1</property>
@@ -150,8 +154,8 @@
             </child>
           </widget>
           <packing>
-            <property name="TopAttach">4</property>
-            <property name="BottomAttach">5</property>
+            <property name="TopAttach">3</property>
+            <property name="BottomAttach">4</property>
             <property name="RightAttach">5</property>
             <property name="AutoSize">True</property>
             <property name="XOptions">Fill</property>
@@ -172,11 +176,11 @@
           <packing>
             <property name="TopAttach">1</property>
             <property name="BottomAttach">2</property>
-            <property name="AutoSize">True</property>
-            <property name="XOptions">Fill</property>
+            <property name="AutoSize">False</property>
+            <property name="XOptions">0</property>
             <property name="YOptions">Fill</property>
             <property name="XExpand">False</property>
-            <property name="XFill">True</property>
+            <property name="XFill">False</property>
             <property name="XShrink">False</property>
             <property name="YExpand">False</property>
             <property name="YFill">True</property>
@@ -189,54 +193,52 @@
             <property name="Xalign">0</property>
           </widget>
           <packing>
-            <property name="TopAttach">3</property>
-            <property name="BottomAttach">4</property>
-            <property name="RightAttach">5</property>
-            <property name="AutoSize">True</property>
-            <property name="XOptions">Fill</property>
+            <property name="TopAttach">2</property>
+            <property name="BottomAttach">3</property>
+            <property name="RightAttach">2</property>
+            <property name="AutoSize">False</property>
+            <property name="XOptions">Shrink, Fill</property>
             <property name="YOptions">Fill</property>
             <property name="XExpand">False</property>
             <property name="XFill">True</property>
-            <property name="XShrink">False</property>
+            <property name="XShrink">True</property>
             <property name="YExpand">False</property>
             <property name="YFill">True</property>
             <property name="YShrink">False</property>
           </packing>
         </child>
         <child>
-          <widget class="Gtk.Label" id="label_payload">
+          <widget class="Gtk.Label" id="label_params">
             <property name="MemberName" />
             <property name="Xalign">0</property>
-            <property name="LabelProp" translatable="yes">Payload:</property>
+            <property name="LabelProp" translatable="yes">Params:</property>
           </widget>
           <packing>
             <property name="TopAttach">1</property>
             <property name="BottomAttach">2</property>
             <property name="LeftAttach">2</property>
             <property name="RightAttach">3</property>
-            <property name="AutoSize">True</property>
-            <property name="XOptions">Fill</property>
+            <property name="AutoSize">False</property>
+            <property name="XOptions">Shrink</property>
             <property name="YOptions">Fill</property>
             <property name="XExpand">False</property>
-            <property name="XFill">True</property>
-            <property name="XShrink">False</property>
+            <property name="XFill">False</property>
+            <property name="XShrink">True</property>
             <property name="YExpand">False</property>
             <property name="YFill">True</property>
             <property name="YShrink">False</property>
           </packing>
         </child>
         <child>
-          <widget class="Gtk.Label" id="label_payload_help">
+          <widget class="Gtk.Label" id="label_params_desc">
             <property name="MemberName" />
-            <property name="Xalign">1</property>
-            <property name="LabelProp" translatable="yes">Payload: 0xXX (0x0 ~ 0xFF), XX (0 ~ 255), 0XX (00 ~ 0377), 0bXX (0b0 ~ 0b11111111)
-use " " to seperate the bytes. ex. "0x12 34 056 0b11111111"</property>
-            <property name="Justify">Right</property>
+            <property name="Xalign">0</property>
           </widget>
           <packing>
             <property name="TopAttach">2</property>
             <property name="BottomAttach">3</property>
-            <property name="RightAttach">5</property>
+            <property name="LeftAttach">2</property>
+            <property name="RightAttach">4</property>
             <property name="AutoSize">True</property>
             <property name="XOptions">Fill</property>
             <property name="YOptions">Fill</property>
@@ -255,11 +257,11 @@ use " " to seperate the bytes. ex. "0x12 34 056 0b11111111"</property>
             <property name="LabelProp" translatable="yes">Port:</property>
           </widget>
           <packing>
-            <property name="AutoSize">True</property>
-            <property name="XOptions">Fill</property>
+            <property name="AutoSize">False</property>
+            <property name="XOptions">0</property>
             <property name="YOptions">Fill</property>
             <property name="XExpand">False</property>
-            <property name="XFill">True</property>
+            <property name="XFill">False</property>
             <property name="XShrink">False</property>
             <property name="YExpand">False</property>
             <property name="YFill">True</property>

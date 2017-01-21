@@ -12,37 +12,81 @@ public partial class MainWindow : Window
 		"COM20",
 	});
 
-	private class CommandDescription
+	private class CommandProperties
 	{
 		public readonly IOCard.Commands Command;
-		public readonly bool HasPayload;
-		public readonly string Description;
-		public readonly List<string> Payloads = new List<string>();
+		public readonly int Params;
+		public readonly string CommandDescription;
+		public readonly string ParamsDescription;
+		public readonly List<string> HistoryParams;
 
-		public CommandDescription(IOCard.Commands cmd, bool hasPayload, string desc)
+		public CommandProperties(IOCard.Commands cmd, int parameter_count, string cmdDesc, string paramsDesc, string[] history)
 		{
 			Command = cmd;
-			HasPayload = hasPayload;
-			Description = desc;
+			Params = parameter_count;
+			CommandDescription = cmdDesc;
+			ParamsDescription = paramsDesc;
+			HistoryParams = new List<string>(history);
 		}
 	}
 
-	private static CommandDescription[] sCommands = new CommandDescription[]
-	{
-		new CommandDescription(IOCard.Commands.CMD_GET_INFO, false,
-			"Get the device information (model / version)"),
-		new CommandDescription(IOCard.Commands.CMD_EJECT_COIN, true,
-			"Eject N coins. Payload: [coins (1 byte)]"),
-		new CommandDescription(IOCard.Commands.CMD_GET_COIN_COUNTER, true,
-			"Get coin counter. Payload: [trackId (1 byte)]"),
-		new CommandDescription(IOCard.Commands.CMD_RESET_COIN_COINTER, true,
-			"Reset coin counter. Payload: [trackId (1 byte)]"),
-		new CommandDescription(IOCard.Commands.CMD_SET_OUTPUT, true,
-			"Set 74HC595 output. Payload: [State (N bytes)], length automatically calculated."),
-		new CommandDescription(IOCard.Commands.CMD_WRITE_STORAGE, true,
-			"Write data to the onboard storage. Payload: [address (2 bytes)][data (N bytes)], length automatically calculated."),
-		new CommandDescription(IOCard.Commands.CMD_READ_STORAGE, true,
-			"Read data from onboard storage. Payload: [address (2 bytes)][length (1 byte)]"),
+	private static CommandProperties[] sCommands = {
+		new CommandProperties(
+			IOCard.Commands.CMD_GET_INFO, 0,
+			"Get device information",
+			"Params: N/A",
+			new string[0]
+		),
+		new CommandProperties(
+			IOCard.Commands.CMD_EJECT_COIN, 2,
+			"Eject N coins.",
+			"Params: <track (byte)>, <coins (byte)>",
+			new string[] {
+				"0x80, 0x0A // eject 10 coins from track 0x80",
+				"0x80, 010 // eject 8 coins from track 0x80",
+				"0x80, 0 // interrupt track 0x80",
+			}
+		),
+		new CommandProperties(
+			IOCard.Commands.CMD_GET_COIN_COUNTER, 1,
+			"Get coin counter.",
+			"Params: <track (byte)>",
+			new string[] { "0x80 // track 0x80" }
+		),
+		new CommandProperties(
+			IOCard.Commands.CMD_RESET_COIN_COINTER, 1,
+			"Reset coin counter.", 
+			"Params: <track (byte)>",
+			new string[] { "0x80 // track 0x80" }
+		),
+		new CommandProperties(
+			IOCard.Commands.CMD_SET_OUTPUT, 1,
+			"Set 74HC595 output.",
+			"Params: <states (byte[])>",
+			new string[] { 
+				"0x12 0x34 0x56 // 3 bytes",
+				"0x34 0x56 0x78 // 3 bytes",
+			}
+		),
+		new CommandProperties(
+			IOCard.Commands.CMD_WRITE_STORAGE, 2,
+			"Write data to the onboard storage.",
+			"Params: <address (UInt16)>, <data (byte[])>",
+			new string[] {
+				"0x100, 0x12 0x34 0x56 0x78 0x90 0xAB 0xCD 0xEF",
+				"0x200, 0xFE 0xDC 0xBA 0x09 0x87 0x65 0x43 0x21",
+			}
+		),
+		new CommandProperties(
+			IOCard.Commands.CMD_READ_STORAGE, 2,
+			"Read data from onboard storage.",
+			"Params: <address (UInt16)>, <length (byte)>",
+			new string[] {
+				"0x100, 8 // read 8 bytes from 0x100",
+				"0x200, 4 // read 4 bytes from 0x200",
+				"0x204, 4 // read 4 bytes from 0x204",
+			}
+		),
 	};
 
 	public MainWindow() : base(WindowType.Toplevel)
@@ -59,10 +103,11 @@ public partial class MainWindow : Window
 				desc.Command.ToString().Replace("CMD_", "")
 			));
 		_populateComboBox(combobox_cmd, cmds);
-		label_cmd_desc.Text = sCommands[mLastCmdIndex].Description;
+		label_cmd_desc.Text = sCommands[mLastCmdIndex].CommandDescription;
+		label_params_desc.Text = sCommands[mLastCmdIndex].ParamsDescription;
 
-		_populateComboBoxEntry(comboboxentry_payload, sCommands[mLastCmdIndex].Payloads);
-		comboboxentry_payload.Sensitive = sCommands[mLastCmdIndex].HasPayload;
+		_populateComboBoxEntry(comboboxentry_params, sCommands[mLastCmdIndex].HistoryParams);
+		comboboxentry_params.Sensitive = sCommands[mLastCmdIndex].Params != 0;
 		_populateComboBoxEntry(comboboxentry_port, mPorts);
 
 		IOCard.Card.OnConnected += (sender, e) =>
@@ -90,9 +135,10 @@ public partial class MainWindow : Window
 			return;
 		mLastCmdIndex = cb.Active;
 
-		_populateComboBoxEntry(comboboxentry_payload, sCommands[mLastCmdIndex].Payloads);
-		comboboxentry_payload.Sensitive = sCommands[mLastCmdIndex].HasPayload;
-		label_cmd_desc.Text = sCommands[mLastCmdIndex].Description;
+		_populateComboBoxEntry(comboboxentry_params, sCommands[mLastCmdIndex].HistoryParams);
+		comboboxentry_params.Sensitive = sCommands[mLastCmdIndex].Params != 0;
+		label_cmd_desc.Text = sCommands[mLastCmdIndex].CommandDescription;
+		label_params_desc.Text = sCommands[mLastCmdIndex].ParamsDescription;
 	}
 
 	protected void OnComboBoxEntryPort_Changed(object sender, EventArgs e)
@@ -107,15 +153,15 @@ public partial class MainWindow : Window
 		}
 	}
 
-	protected void OnComboBoxEntryPayload_Changed(object sender, EventArgs e)
+	protected void OnComboBoxEntryParams_Changed(object sender, EventArgs e)
 	{
 		var cbe = (ComboBoxEntry)sender;
 		if (cbe.Active > 0)
 		{
-			var payload = cbe.ActiveText;
-			sCommands[mLastCmdIndex].Payloads.Remove(payload);
-			sCommands[mLastCmdIndex].Payloads.Insert(0, payload);
-			_populateComboBoxEntry(comboboxentry_payload, sCommands[mLastCmdIndex].Payloads);
+			var parameters = cbe.ActiveText;
+			sCommands[mLastCmdIndex].HistoryParams.Remove(parameters);
+			sCommands[mLastCmdIndex].HistoryParams.Insert(0, parameters);
+			_populateComboBoxEntry(comboboxentry_params, sCommands[mLastCmdIndex].HistoryParams);
 		}
 	}
 
@@ -140,13 +186,21 @@ public partial class MainWindow : Window
 
 	protected void OnButtonSend_Clicked(object sender, EventArgs e)
 	{
-		if (comboboxentry_payload.Active != 0)
+		var parameters_raw = comboboxentry_params.ActiveText;
+		if (comboboxentry_params.Active != 0)
 		{
-			var payload = comboboxentry_payload.ActiveText;
-			sCommands[mLastCmdIndex].Payloads.Remove(payload);
-			sCommands[mLastCmdIndex].Payloads.Insert(0, payload);
-			_populateComboBoxEntry(comboboxentry_payload, sCommands[mLastCmdIndex].Payloads);
+			sCommands[mLastCmdIndex].HistoryParams.Remove(parameters_raw);
+			sCommands[mLastCmdIndex].HistoryParams.Insert(0, parameters_raw);
+			_populateComboBoxEntry(comboboxentry_params, sCommands[mLastCmdIndex].HistoryParams);
 		}
+
+		parameters_raw = parameters_raw.Trim();
+		var comment_idx = parameters_raw.IndexOf("//", StringComparison.Ordinal);
+		parameters_raw = parameters_raw.Substring(0, comment_idx == -1 ? parameters_raw.Length : comment_idx);
+
+		textview_received.Buffer.Text =
+			string.Format("{0}: {1}\r\n", DateTime.Now, parameters_raw) +
+			textview_received.Buffer.Text;
 	}
 
 	private void _populateComboBox(ComboBox cb, List<string> contents)
