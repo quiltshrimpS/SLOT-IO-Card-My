@@ -29,7 +29,7 @@ public partial class MainWindow : Window
 		new CommandDescription(IOCard.Commands.CMD_GET_INFO, false,
 			"Get the device information (model / version)"),
 		new CommandDescription(IOCard.Commands.CMD_EJECT_COIN, true,
-			"Eject N coins. Payload: [coin (1 byte)]"),
+			"Eject N coins. Payload: [coins (1 byte)]"),
 		new CommandDescription(IOCard.Commands.CMD_GET_COIN_COUNTER, false,
 			"Get coin counter. Payload: [trackId (1 byte)]"),
 		new CommandDescription(IOCard.Commands.CMD_RESET_COIN_COINTER, false,

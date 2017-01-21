@@ -8,8 +8,7 @@ namespace IOCardTesterGTK
 		public static void Main(string[] args)
 		{
 			Application.Init();
-			MainWindow win = new MainWindow();
-			win.Show();
+			new MainWindow().Show();
 			Application.Run();
 		}
 	}
