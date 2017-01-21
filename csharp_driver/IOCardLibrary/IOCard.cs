@@ -48,6 +48,25 @@ namespace Spark.Slot.IO
 			return ButtonState.StateUnavailable;
 		}
 
+		/// <summary>
+		/// queue a GET_INFO command
+		/// </summary>
+		/// <returns><c>true</c>, if get info was queued, <c>false</c> otherwise.</returns>
+		/// <param name="queuePosition">
+		/// position of the command to be placed, either <c>SendQueue.InFrontQueue</c> to place the command in front of
+		/// the queue, or <c>SendQueue.AtEndQueue</c> to place the command at the end of the queue. Defaults to
+		/// <c>SendQueue.AtEndQueue</c>.
+		/// </param>
+		public bool QueryGetInfo(SendQueue queuePosition = SendQueue.AtEndQueue)
+		{
+			if (IsConnected)
+			{
+				mMessenger.SendCommand(new SendCommand((int)Commands.CMD_GET_INFO), queuePosition);
+				return true;
+			}
+			return false;
+		}
+
 		public bool Connect(string port)
 		{
 			if (mMessenger != null)
@@ -98,6 +117,7 @@ namespace Spark.Slot.IO
 
 		public event EventHandler OnConnected;
 		public event EventHandler OnDisconnected;
+		public event EventHandler<GetInfoResultEventArgs> OnGetInfoResult;
 
 		#region "implementations"
 
@@ -129,6 +149,37 @@ namespace Spark.Slot.IO
 			EVT_KEY = 0x4B,
 			EVT_WRITE_STORAGE_RESULT = 0x69,
 			EVT_READ_STORAGE_RESULT = 0x78,
+		}
+
+		public String Model { get; private set; }
+		public String Version { get; private set; }
+		public UInt16 ProtocolVersion { get; private set; }
+
+		void OnReceive_GetInfo(ReceivedCommand receivedCommand)
+		{
+			if (receivedCommand.Available())
+				Model = receivedCommand.ReadBinStringArg();
+			if (receivedCommand.Available())
+				Version = receivedCommand.ReadBinStringArg();
+			if (receivedCommand.Available())
+				ProtocolVersion = receivedCommand.ReadBinUInt16Arg();
+
+			if (OnGetInfoResult != null)
+				OnGetInfoResult(this, new GetInfoResultEventArgs(Model, Version, ProtocolVersion));
+		}
+
+		public class GetInfoResultEventArgs : EventArgs
+		{
+			public String Model { get; private set; }
+			public String Version { get; private set; }
+			public UInt16 ProtocolVersion { get; private set; }
+
+			public GetInfoResultEventArgs(String model, String version, UInt16 protoVersion)
+			{
+				Model = model;
+				Version = version;
+				ProtocolVersion = protoVersion;
+			}
 		}
 
 		#endregion
