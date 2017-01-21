@@ -9,11 +9,12 @@ public partial class MainWindow : Window
 
 	private List<string> mPorts = new List<string>();
 
-	private struct CommandDescription
+	private class CommandDescription
 	{
-		public IOCard.Commands Command;
-		public bool HasPayload;
-		public string Description;
+		public readonly IOCard.Commands Command;
+		public readonly bool HasPayload;
+		public readonly string Description;
+		public readonly List<string> Payloads = new List<string>();
 
 		public CommandDescription(IOCard.Commands cmd, bool hasPayload, string desc)
 		{
@@ -28,44 +29,23 @@ public partial class MainWindow : Window
 		new CommandDescription(IOCard.Commands.CMD_GET_INFO, false,
 			"Get the device information (model / version)"),
 		new CommandDescription(IOCard.Commands.CMD_EJECT_COIN, true,
-		    "Eject N coins. Payload: [coin (1 byte)]"),
+			"Eject N coins. Payload: [coin (1 byte)]"),
 		new CommandDescription(IOCard.Commands.CMD_GET_COIN_COUNTER, false,
-		    "Get coin counter. Payload: [trackId (1 byte)]"),
+			"Get coin counter. Payload: [trackId (1 byte)]"),
 		new CommandDescription(IOCard.Commands.CMD_RESET_COIN_COINTER, false,
-		    "Reset coin counter. Payload: [trackId (1 byte)]"),
+			"Reset coin counter. Payload: [trackId (1 byte)]"),
 		new CommandDescription(IOCard.Commands.CMD_SET_OUTPUT, false,
-		    "Set 74HC595 output. Payload: [State (N bytes)], length automatically calculated."),
+			"Set 74HC595 output. Payload: [State (N bytes)], length automatically calculated."),
 		new CommandDescription(IOCard.Commands.CMD_WRITE_STORAGE, false,
-		    "Write data to the onboard storage. Payload: [address (2 bytes)][data (N bytes)], length automatically calculated."),
+			"Write data to the onboard storage. Payload: [address (2 bytes)][data (N bytes)], length automatically calculated."),
 		new CommandDescription(IOCard.Commands.CMD_READ_STORAGE, false,
-		    "Read data from onboard storage. Payload: [address (2 bytes)][length (1 byte)]"),
+			"Read data from onboard storage. Payload: [address (2 bytes)][length (1 byte)]"),
 	};
-
-	private Dictionary<int, List<string>> mPayloads = new Dictionary<int, List<string>>();
 
 	public MainWindow() : base(WindowType.Toplevel)
 	{
 		Build();
 		mLastCmdIndex = combobox_cmd.Active;
-
-		mPayloads.Add(0, new List<string>());
-		mPayloads[0].Add("blah1");
-		mPayloads[0].Add("blah2");
-		mPayloads[0].Add("blah3");
-		mPayloads[0].Add("blah4");
-		mPayloads[0].Add("blah5");
-
-		mPayloads.Add(2, new List<string>());
-		mPayloads[2].Add("blah6");
-		mPayloads[2].Add("blah7");
-		mPayloads[2].Add("blah8");
-		mPayloads[2].Add("blah9");
-		mPayloads[2].Add("blah10");
-
-		if (!mPayloads.ContainsKey(mLastCmdIndex))
-			mPayloads.Add(mLastCmdIndex, new List<string>());
-		_populateComboBoxEntry(comboboxentry_payload, mPayloads[mLastCmdIndex]);
-		_populateComboBoxEntry(comboboxentry_port, mPorts);
 
 		var cmds = new List<string>(sCommands.Length);
 		foreach (var desc in sCommands)
@@ -77,6 +57,9 @@ public partial class MainWindow : Window
 			));
 		_populateComboBox(combobox_cmd, cmds);
 		label_cmd_desc.Text = sCommands[mLastCmdIndex].Description;
+
+		_populateComboBoxEntry(comboboxentry_payload, sCommands[mLastCmdIndex].Payloads);
+		_populateComboBoxEntry(comboboxentry_port, mPorts);
 	}
 
 	protected void OnDeleteEvent(object sender, DeleteEventArgs a)
@@ -92,10 +75,7 @@ public partial class MainWindow : Window
 			return;
 		mLastCmdIndex = cb.Active;
 
-		if (!mPayloads.ContainsKey(mLastCmdIndex))
-			mPayloads.Add(mLastCmdIndex, new List<string>());
-		_populateComboBoxEntry(comboboxentry_payload, mPayloads[mLastCmdIndex]);
-
+		_populateComboBoxEntry(comboboxentry_payload, sCommands[mLastCmdIndex].Payloads);
 		label_cmd_desc.Text = sCommands[mLastCmdIndex].Description;
 	}
 
@@ -117,13 +97,9 @@ public partial class MainWindow : Window
 		if (cbe.Active > 0)
 		{
 			var payload = cbe.ActiveText;
-			var payloads = mPayloads[mLastCmdIndex];
-			payloads.Remove(payload);
-			payloads.Insert(0, payload);
-
-			if (!mPayloads.ContainsKey(mLastCmdIndex))
-				mPayloads.Add(mLastCmdIndex, new List<string>());
-			_populateComboBoxEntry(comboboxentry_payload, mPayloads[mLastCmdIndex]);
+			sCommands[mLastCmdIndex].Payloads.Remove(payload);
+			sCommands[mLastCmdIndex].Payloads.Insert(0, payload);
+			_populateComboBoxEntry(comboboxentry_payload, sCommands[mLastCmdIndex].Payloads);
 		}
 	}
 
@@ -143,13 +119,9 @@ public partial class MainWindow : Window
 		if (comboboxentry_payload.Active != 0)
 		{
 			var payload = comboboxentry_payload.ActiveText;
-			var payloads = mPayloads[mLastCmdIndex];
-			payloads.Remove(payload);
-			payloads.Insert(0, payload);
-
-			if (!mPayloads.ContainsKey(mLastCmdIndex))
-				mPayloads.Add(mLastCmdIndex, new List<string>());
-			_populateComboBoxEntry(comboboxentry_payload, mPayloads[mLastCmdIndex]);
+			sCommands[mLastCmdIndex].Payloads.Remove(payload);
+			sCommands[mLastCmdIndex].Payloads.Insert(0, payload);
+			_populateComboBoxEntry(comboboxentry_payload, sCommands[mLastCmdIndex].Payloads);
 		}
 	}
 
