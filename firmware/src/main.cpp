@@ -83,6 +83,8 @@ void setup() {
 int32_t inserted = 0;
 int32_t ejected = 0;
 
+uint32_t p_0 = 0, p_1 = 0;
+
 void loop() {
     uint32_t t1, t2, t3 = 0, t4 = 0;
 
@@ -99,10 +101,15 @@ void loop() {
         // coin eject
         if (in.port.sw11 != cur_in.port.sw11) {
             if (in.port.sw11 == COIN_EJECT_LEVEL) {
-                if (micros() - last_coin_eject_micros > COIN_EJECT_DEBOUNCE_TIMEOUT_US) {
-                    last_coin_eject_micros = micros();
-                    ++ejected;
+                p_1 = micros();
+            } else {
+                if (p_0 - p_1 > 10000) {
+                    if (micros() - last_coin_eject_micros > COIN_EJECT_DEBOUNCE_TIMEOUT_US) {
+                        last_coin_eject_micros = micros();
+                        ++ejected;
+                    }
                 }
+                p_0 = micros();
             }
         }
 
@@ -169,6 +176,12 @@ void loop() {
         Serial.print(inserted);
         Serial.print(", ejected = ");
         Serial.print(ejected);
+        if (in.port.sw11 != COIN_EJECT_LEVEL) {
+            Serial.print(", period = ");
+            Serial.print(p_0 - p_1);
+            if (p_0 - p_1 < 10000)
+                Serial.print(" (X)");
+        }
         Serial.print(", took = ");
         Serial.print(t2 - t1);
         Serial.println("us");
