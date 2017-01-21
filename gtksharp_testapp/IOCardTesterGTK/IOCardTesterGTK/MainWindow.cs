@@ -7,7 +7,10 @@ public partial class MainWindow : Window
 {
 	private int mLastCmdIndex = 0;
 
-	private List<string> mPorts = new List<string>();
+	private List<string> mPorts = new List<string>(new string[] {
+		"COM1",
+		"COM20",
+	});
 
 	private class CommandDescription
 	{
@@ -61,6 +64,17 @@ public partial class MainWindow : Window
 		_populateComboBoxEntry(comboboxentry_payload, sCommands[mLastCmdIndex].Payloads);
 		comboboxentry_payload.Sensitive = sCommands[mLastCmdIndex].HasPayload;
 		_populateComboBoxEntry(comboboxentry_port, mPorts);
+
+		IOCard.Card.OnConnected += (sender, e) =>
+		{
+			button_send.Sensitive = true;
+			button_connect.Label = "_Disconnect";
+		};
+		IOCard.Card.OnDisconnected += (sender, e) =>
+		{
+			button_send.Sensitive = false;
+			button_connect.Label = "_Connect";
+		};
 	}
 
 	protected void OnDeleteEvent(object sender, DeleteEventArgs a)
@@ -107,12 +121,20 @@ public partial class MainWindow : Window
 
 	protected void OnButtonConnect_Clicked(object sender, EventArgs e)
 	{
-		if (comboboxentry_port.Active != 0)
+		if (IOCard.Card.IsConnected)
 		{
-			string port = comboboxentry_port.ActiveText;
-			mPorts.Remove(port);
-			mPorts.Insert(0, port);
-			_populateComboBoxEntry(comboboxentry_port, mPorts);
+			IOCard.Card.Disconnect();
+		}
+		else
+		{
+			var port = comboboxentry_port.ActiveText;
+			if (comboboxentry_port.Active != 0)
+			{
+				mPorts.Remove(port);
+				mPorts.Insert(0, port);
+				_populateComboBoxEntry(comboboxentry_port, mPorts);
+			}
+			var status = IOCard.Card.Connect(port);
 		}
 	}
 
