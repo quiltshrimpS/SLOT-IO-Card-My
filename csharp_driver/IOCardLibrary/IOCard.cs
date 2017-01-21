@@ -19,11 +19,13 @@ namespace Spark.Slot.IO
 		{
 			StatePressed,
 			StateReleased,
-			/**
-			 * button state not yet available, either
-			 * 1. not received any update, yet
-			 * 2. it's "masked", not an available input.
-			 */
+			/// <summary>
+			///  button state not (yet) available.
+			/// </summary>
+			/// <value>
+			/// 1. not received any update, yet
+			/// 2. it's "masked", not an available input.
+			/// </value>
 			StateUnavailable,
 		}
 
@@ -59,13 +61,11 @@ namespace Spark.Slot.IO
 			CMD_GET_COIN_COUNTER = 0xD2,
 			CMD_EJECT_COIN = 0xE1,
 			CMD_GET_INFO = 0xF0,
-
-			CMD_ACK = 0x0F, // special command used for ACK
 		}
 
 		public enum Events
 		{
-			EVT_ACK = 0x0F,
+			EVT_GET_INFO_RESULT = 0x0F,
 			EVT_COIN_COUNTER_RESULT = 0x2D,
 			EVT_KEY = 0x4B,
 			EVT_WRITE_STORAGE_RESULT = 0x69,
