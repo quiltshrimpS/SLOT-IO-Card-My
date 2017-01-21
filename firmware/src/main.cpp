@@ -115,22 +115,15 @@ static uint8_t const PIN_LATCH_OUT = 4; // for 74HC595
 static uint8_t const PIN_LATCH_IN = 9;  // for 74HC165
 
 void setup() {
+	// FIXME: write the SPI as early as possible, because 74HC595 defaults to
+	// FIXME: HIGH on power-on. pull it low as early as possible.
     fastPinConfig(5, OUTPUT, LOW); // 595 nCLR (active LOW), clear register
     fastPinConfig(6, OUTPUT, LOW); // 595 nG (active LOW), enable
     fastPinConfig(PIN_LATCH_OUT, OUTPUT, HIGH); // 595 latch
     fastPinConfig(PIN_LATCH_IN, OUTPUT, LOW);   // 165 latch
-
-    Serial.begin(115200);
-
     spi.begin(); // for 74HC595 and 74HC165
-
-    Wire.begin(); // for FRAM
-    fram.begin();
-
-    // cleared 74HC595, put it back on.
-    fastDigitalWrite(5, HIGH);
-
-    // read the initial states, and write the initial states.
+    fastDigitalWrite(5, HIGH); // cleared 74HC595, put it back on.
+	// read the initial states, and write the initial states.
     fastDigitalWrite(PIN_LATCH_OUT, LOW);
     fastDigitalWrite(PIN_LATCH_IN, HIGH);
     in.bytes[0] = spi.transfer(out.bytes[0]);
@@ -139,7 +132,15 @@ void setup() {
     fastDigitalWrite(PIN_LATCH_OUT, HIGH);
     fastDigitalWrite(PIN_LATCH_IN, LOW);
 
-	uint32_t now = micros();
+	uint32_t now = micros(); // record the time early, for better accuracy
+
+	// do the rest of the thing after we switch off the motor
+    Serial.begin(115200);
+
+    Wire.begin(); // for FRAM
+    fram.begin();
+
+	// populate the debouncers
 	debounce_sw01.begin(in.port.sw01, now);
 	debounce_sw02.begin(in.port.sw02, now);
 	debounce_eject.begin(in.port.sw11, now);
