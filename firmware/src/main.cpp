@@ -142,7 +142,7 @@ void setup() {
 	uint32_t now = micros(); // record the time early, for better accuracy
 
 	// do the rest of the thing after we switch off the motor
-    Serial.begin(115200);
+    Serial.begin(230400);
 
     Wire.begin(); // for FRAM
     fram.begin();
