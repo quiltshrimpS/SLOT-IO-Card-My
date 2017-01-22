@@ -36,7 +36,7 @@ union {
 union {
     uint8_t bytes[3];
     struct InPort port;
-} in;
+} in, previous_in;
 
 
 bool do_print = false;
@@ -136,6 +136,10 @@ void setup() {
 	debounce_insert_1.begin(in.port.sw12, now);
 	debounce_insert_2.begin(in.port.sw13, now);
 	debounce_insert_3.begin(in.port.sw14, now);
+
+	previous_in.bytes[0] = in.bytes[0] | IN_MASK_0;
+	previous_in.bytes[1] = in.bytes[1] | IN_MASK_1;
+	previous_in.bytes[2] = in.bytes[2] | IN_MASK_2;
 }
 
 void loop() {
@@ -173,6 +177,23 @@ void loop() {
 	{
 		out.port.counter4 = pulse_counter_eject.get();
 		do_send = true;
+	}
+
+	// rest of the keys are not debounced, we just send them to the PC if
+	// anything changed.
+	uint8_t masked[] = {
+		in.bytes[0] & IN_MASK_0,
+		in.bytes[1] & IN_MASK_1,
+		in.bytes[2] & IN_MASK_2,
+	};
+	if (masked[0] != previous_in.bytes[0] ||
+		masked[1] != previous_in.bytes[1] ||
+		masked[2] != previous_in.bytes[2])
+	{
+		do_print = true;
+		previous_in.bytes[0] = masked[0];
+		previous_in.bytes[1] = masked[1];
+		previous_in.bytes[2] = masked[2];
 	}
 	t3 = micros();
 

@@ -3,6 +3,10 @@
 
 #include <Arduino.h>
 
+#define OUT_MASK_0 (0b00000000)
+#define OUT_MASK_1 (0b01111111)
+#define OUT_MASK_2 (0b01111111)
+
 struct OutPort {
 	uint8_t counter1:1; // 0b00000001: score
 	uint8_t counter2:1; // 0b00000010: wash score (what is this?)
@@ -31,6 +35,10 @@ struct OutPort {
     uint8_t lamp7:1;    // 0b01000000: auto
     uint8_t ssr5:1;     // 0b10000000: reserved SSR5
 };
+
+#define IN_MASK_0 (0b11111111)
+#define IN_MASK_1 (0b00000111)
+#define IN_MASK_2 (0b11111111)
 
 struct InPort {
     uint8_t sw01:1;     // 0b00000001: stop 1
