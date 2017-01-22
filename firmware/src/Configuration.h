@@ -2,6 +2,8 @@
 #define __CONFIGURATION_H__
 
 #include <Arduino.h>
+#include <Wire.h>
+#include <utility/twi.h>
 #include <FRAM_MB85RC_I2C.h>
 
 #define CONF_OFFSET_SEQ					(0x0000)
@@ -250,7 +252,7 @@ public:
 private:
 	void _readBytes(uint16_t addr, uint8_t length, uint8_t * buffer) {
 		while (length != 0) {
-			uint8_t bytes_to_read = min(length, 32);
+			uint8_t bytes_to_read = min(length, TWI_BUFFER_LENGTH);
 			_fram.readArray(addr, bytes_to_read, buffer);
 			addr += bytes_to_read;
 			buffer += bytes_to_read;
@@ -260,7 +262,7 @@ private:
 
 	void _writeBytes(uint16_t addr, uint8_t length, uint8_t *buffer) {
 		while (length != 0) {
-			uint8_t bytes_to_write = min(length, 32);
+			uint8_t bytes_to_write = min(length, TWI_BUFFER_LENGTH);
 			_fram.writeArray(addr, bytes_to_write, buffer);
 			addr += bytes_to_write;
 			buffer += bytes_to_write;
