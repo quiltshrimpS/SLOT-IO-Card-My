@@ -101,23 +101,6 @@ Debounce<LOW, 5000> debounce_insert_3(
 	}
 );
 
-Debounce<LOW, 5000> debounce_sw01(
-	[] () {
-		to_eject = 10;
-		out.port.ssr1 = true;
-		do_send = true;
-	},
-	nullptr
-);
-
-Debounce<LOW, 5000> debounce_sw02(
-	nullptr,
-	[] () {
-		ejected = inserted = 0;
-		do_print = true;
-	}
-);
-
 static uint8_t const PIN_LATCH_OUT = 4; // for 74HC595
 static uint8_t const PIN_LATCH_IN = 9;  // for 74HC165
 
@@ -148,8 +131,6 @@ void setup() {
     fram.begin();
 
 	// populate the debouncers
-	debounce_sw01.begin(in.port.sw01, now);
-	debounce_sw02.begin(in.port.sw02, now);
 	debounce_banknote.begin(in.port.sw20, now);
 	debounce_eject.begin(in.port.sw11, now);
 	debounce_insert_1.begin(in.port.sw12, now);
@@ -168,8 +149,6 @@ void loop() {
     fastDigitalWrite(PIN_LATCH_IN, LOW);
     t2 = micros();
 	uint32_t now = micros();
-	debounce_sw01.feed(in.port.sw01, now);
-	debounce_sw02.feed(in.port.sw02, now);
 	debounce_banknote.feed(in.port.sw20, now);
 	debounce_eject.feed(in.port.sw11, now);
 	debounce_insert_1.feed(in.port.sw12, now);
