@@ -32,7 +32,6 @@
 class Configuration {
 public:
 	Configuration(FRAM_MB85RC_I2C &fram):
-		_bank(false),
 		_fram(fram)
 	{
 	}
@@ -51,33 +50,43 @@ public:
 
 		// read the data from bank 0
 		_readBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
-		bool bank0_checksum_good = _getChecksum() == _data.configs.checksum;
+		uint8_t checksum_0 = _getChecksum();
+		bool bank0_checksum_good = checksum_0 == _data.configs.checksum;
 		uint8_t bank0_seq = _data.configs.seq + 1;
 
 		#if defined(DEBUG_SERIAL)
-		DEBUG_SERIAL.print("Configuration: (bank 0)");
+		DEBUG_SERIAL.print("Configuration: (bank 0, ");
+		DEBUG_SERIAL.print(bank0_checksum_good ? "good)" : "bad!)");
 		for (int i = 0;i < CONF_SIZE_ALL;++i) {
 			DEBUG_SERIAL.print(' ');
 			if (_data.bytes[i] < 0x10)
 				DEBUG_SERIAL.print('0');
 			DEBUG_SERIAL.print((int)(_data.bytes[i]), HEX);
 		}
-		DEBUG_SERIAL.println();
+		DEBUG_SERIAL.print(", ");
+		if (checksum_0 < 0x10)
+			DEBUG_SERIAL.print('0');
+		DEBUG_SERIAL.println((int)(checksum_0), HEX);
 		#endif
 
 		// read the data from bank 1
 		_readBytes(CONF_ADDR_BANK_1, CONF_SIZE_ALL, _data.bytes);
-		bool bank1_checksum_good = _getChecksum() == _data.configs.checksum;
+		uint8_t checksum_1 = _getChecksum();
+		bool bank1_checksum_good = checksum_1 == _data.configs.checksum;
 
 		#if defined(DEBUG_SERIAL)
-		DEBUG_SERIAL.print("Configuration: (bank 1)");
+		DEBUG_SERIAL.print("Configuration: (bank 1, ");
+		DEBUG_SERIAL.print(bank0_checksum_good ? "good)" : "bad!)");
 		for (int i = 0;i < CONF_SIZE_ALL;++i) {
 			DEBUG_SERIAL.print(' ');
 			if (_data.bytes[i] < 0x10)
 				DEBUG_SERIAL.print('0');
 			DEBUG_SERIAL.print((int)(_data.bytes[i]), HEX);
 		}
-		DEBUG_SERIAL.println();
+		DEBUG_SERIAL.print(", ");
+		if (checksum_1 < 0x10)
+			DEBUG_SERIAL.print('0');
+		DEBUG_SERIAL.println((int)(checksum_1), HEX);
 		#endif
 
 		// decide which bank to use
@@ -89,7 +98,6 @@ public:
 				#endif
 				// bank0.seq + 1 == bank1.seq, bank1 is newer
 				// nothing to be done, _data is already bank1.
-				_bank = true;
 			} else {
 				#if defined(DEBUG_SERIAL)
 				DEBUG_SERIAL.println("Configuration: both good, using bank 0");
@@ -118,13 +126,11 @@ public:
 				DEBUG_SERIAL.println("Configuration: bank 0 bad, use bank 1.");
 				#endif
 				// bank0 is bad, use bank1.
-				_bank = true;
 			}
 		}
 
 		#if defined(DEBUG_SERIAL)
-		DEBUG_SERIAL.print("Configuration: (bank ");
-		DEBUG_SERIAL.print(_bank ? "1)" : "0)");
+		DEBUG_SERIAL.print("Configuration:");
 		for (int i = 0;i < CONF_SIZE_ALL;++i) {
 			DEBUG_SERIAL.print(' ');
 			if (_data.bytes[i] < 0x10)
@@ -161,10 +167,25 @@ public:
 		else if (track == TRACK_BANKNOTE) // banknote track
 			_data.configs.track_level_3 = level;
 
-		_bank = !_bank;
+		++_data.configs.seq;
 		_data.configs.checksum = _getChecksum();
-		_fram.writeByte((_bank ? CONF_ADDR_BANK_0 : CONF_ADDR_BANK_1) + CONF_OFFSET_COIN_TRACK_LEVEL, _data.bytes[CONF_OFFSET_COIN_TRACK_LEVEL]);
-		_fram.writeByte((_bank ? CONF_ADDR_BANK_0 : CONF_ADDR_BANK_1) + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
+		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_COIN_TRACK_LEVEL, _data.bytes[CONF_OFFSET_COIN_TRACK_LEVEL]);
+		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_SEQ, _data.configs.seq);
+		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
+		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_COIN_TRACK_LEVEL, _data.bytes[CONF_OFFSET_COIN_TRACK_LEVEL]);
+		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_SEQ, _data.configs.seq);
+		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
+
+		#if defined(DEBUG_SERIAL)
+		DEBUG_SERIAL.print("Configuration:");
+		for (int i = 0;i < CONF_SIZE_ALL;++i) {
+			DEBUG_SERIAL.print(' ');
+			if (_data.bytes[i] < 0x10)
+				DEBUG_SERIAL.print('0');
+			DEBUG_SERIAL.print((int)(_data.bytes[i]), HEX);
+		}
+		DEBUG_SERIAL.println();
+		#endif
 	}
 
 	uint8_t getCoinsToEject(uint8_t track) {
@@ -182,10 +203,25 @@ public:
 
 		if (track_idx != 0xFF) {
 			_data.configs.coins_to_eject[track_idx] = coins;
-			_bank = !_bank;
+			++_data.configs.seq;
 			_data.configs.checksum = _getChecksum();
-			_fram.writeByte((_bank ? CONF_ADDR_BANK_0 : CONF_ADDR_BANK_1) + CONF_OFFSET_COINS_TO_EJECT + track_idx, coins);
-			_fram.writeByte((_bank ? CONF_ADDR_BANK_0 : CONF_ADDR_BANK_1) + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
+			_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_COINS_TO_EJECT + track_idx, coins);
+			_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_SEQ, _data.configs.seq);
+			_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
+			_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_COINS_TO_EJECT + track_idx, coins);
+			_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_SEQ, _data.configs.seq);
+			_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
+
+			#if defined(DEBUG_SERIAL)
+			DEBUG_SERIAL.print("Configuration:");
+			for (int i = 0;i < CONF_SIZE_ALL;++i) {
+				DEBUG_SERIAL.print(' ');
+				if (_data.bytes[i] < 0x10)
+					DEBUG_SERIAL.print('0');
+				DEBUG_SERIAL.print((int)(_data.bytes[i]), HEX);
+			}
+			DEBUG_SERIAL.println();
+			#endif
 		}
 	}
 
@@ -220,10 +256,25 @@ public:
 
 		if (track_idx != 0xFF) {
 			_data.configs.coin_count[track_idx] = count;
-			_bank = !_bank;
+			++_data.configs.seq;
 			_data.configs.checksum = _getChecksum();
-			_fram.writeLong((_bank ? CONF_ADDR_BANK_0 : CONF_ADDR_BANK_1) + CONF_OFFSET_COIN_COUNT + track_idx, count);
-			_fram.writeByte((_bank ? CONF_ADDR_BANK_0 : CONF_ADDR_BANK_1) + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
+			_fram.writeLong(CONF_ADDR_BANK_0 + CONF_OFFSET_COIN_COUNT + track_idx * sizeof(uint32_t), count);
+			_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_SEQ, _data.configs.seq);
+			_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
+			_fram.writeLong(CONF_ADDR_BANK_1 + CONF_OFFSET_COIN_COUNT + track_idx * sizeof(uint32_t), count);
+			_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_SEQ, _data.configs.seq);
+			_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
+
+			#if defined(DEBUG_SERIAL)
+			DEBUG_SERIAL.print("Configuration:");
+			for (int i = 0;i < CONF_SIZE_ALL;++i) {
+				DEBUG_SERIAL.print(' ');
+				if (_data.bytes[i] < 0x10)
+					DEBUG_SERIAL.print('0');
+				DEBUG_SERIAL.print((int)(_data.bytes[i]), HEX);
+			}
+			DEBUG_SERIAL.println();
+			#endif
 		}
 	}
 
@@ -231,12 +282,6 @@ private:
 	void _readBytes(uint16_t addr, uint8_t length, uint8_t * buffer) {
 		while (length != 0) {
 			uint8_t bytes_to_read = min(length, 32);
-			#if defined(DEBUG_SERIAL)
-			DEBUG_SERIAL.print("Configuration: reading ");
-			DEBUG_SERIAL.print(length);
-			DEBUG_SERIAL.print(" bytes from 0x");
-			DEBUG_SERIAL.println(addr, HEX);
-			#endif
 			_fram.readArray(addr, bytes_to_read, buffer);
 			addr += bytes_to_read;
 			buffer += bytes_to_read;
@@ -247,12 +292,6 @@ private:
 	void _writeBytes(uint16_t addr, uint8_t length, uint8_t *buffer) {
 		while (length != 0) {
 			uint8_t bytes_to_write = min(length, 32);
-			#if defined(DEBUG_SERIAL)
-			DEBUG_SERIAL.print("Configuration: wrinting ");
-			DEBUG_SERIAL.print(length);
-			DEBUG_SERIAL.print(" bytes to 0x");
-			DEBUG_SERIAL.println(addr, HEX);
-			#endif
 			_fram.writeArray(addr, bytes_to_write, buffer);
 			addr += bytes_to_write;
 			buffer += bytes_to_write;
@@ -287,7 +326,6 @@ private:
 			uint8_t checksum;
 		} configs;
 	} _data;
-	bool _bank;
 	FRAM_MB85RC_I2C & _fram;
 };
 
