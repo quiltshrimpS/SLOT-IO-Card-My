@@ -34,7 +34,7 @@ public:
 			if (now - _start_us > HIGH_US + LOW_US) {
 				_state = STATE_PAUSED;
 				--_pulses;
-				return true;
+				return false;
 			}
 		} else /* if (_state == STATE_PAUSED) */ {
 			// if in PAUSED and need to pulse, transit to HIGH
