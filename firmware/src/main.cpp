@@ -24,9 +24,11 @@
 #include "Ports.h"
 #include "Debounce.h"
 #include "Pulse.h"
+#include "Configuration.h"
 
 FRAM_MB85RC_I2C fram(MB85RC_ADDRESS_A000, true, /* WP */ A7, 16 /* kb */);
 WreckedSPI< /* MISO */ 7, /* MOSI */ 2, /* SCLK_MISO */ 8, /* SCLK_MOSI */ 3, /* MODE_MISO */ 2, /* MODE_MOSI */ 0 > spi;
+Configuration conf(fram);
 
 union {
     uint8_t bytes[3];
@@ -129,6 +131,7 @@ void setup() {
 
     Wire.begin(); // for FRAM
     fram.begin();
+	conf.begin();
 
 	// populate the debouncers
 	debounce_banknote.begin(in.port.sw20, now);
