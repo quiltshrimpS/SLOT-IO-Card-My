@@ -124,7 +124,7 @@ public:
 
 		#if defined(DEBUG_SERIAL)
 		DEBUG_SERIAL.print("Configuration: (bank ");
-		DEBUG_SERIAL.print(_bank ? "0)" : "1)");
+		DEBUG_SERIAL.print(_bank ? "1)" : "0)");
 		for (int i = 0;i < CONF_SIZE_ALL;++i) {
 			DEBUG_SERIAL.print(' ');
 			if (_data.bytes[i] < 0x10)
