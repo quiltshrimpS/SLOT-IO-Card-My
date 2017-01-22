@@ -50,19 +50,19 @@ uint8_t to_eject = 0;
 
 // counter is 150 CPS, each cycle is 6.66ms, 50% duty = 3.33ms HIGH then 3.33ms LOW.
 // we round it to 3.5ms to give it a bit buffer
-Pulse<3500, 3500> pulse_counter_score;
-Pulse<3500, 3500> pulse_counter_wash;
-Pulse<3500, 3500> pulse_counter_insert;
-Pulse<3500, 3500> pulse_counter_eject;
+Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_score;
+Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_wash;
+Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_insert;
+Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_eject;
 
-Debounce<LOW, 5000> debounce_banknote(
+Debounce<LOW, DEBOUNCE_TIMEOUT> debounce_banknote(
 	nullptr,
 	[] () {
 
 	}
 );
 
-Debounce<HIGH, 5000> debounce_eject(
+Debounce<HIGH, DEBOUNCE_TIMEOUT> debounce_eject(
 	nullptr,
 	[] () {
 		++ejected;
@@ -76,7 +76,7 @@ Debounce<HIGH, 5000> debounce_eject(
 	}
 );
 
-Debounce<LOW, 5000> debounce_insert_1(
+Debounce<LOW, DEBOUNCE_TIMEOUT> debounce_insert_1(
 	nullptr,
 	[] () {
 		++inserted;
@@ -85,7 +85,7 @@ Debounce<LOW, 5000> debounce_insert_1(
 	}
 );
 
-Debounce<LOW, 5000> debounce_insert_2(
+Debounce<LOW, DEBOUNCE_TIMEOUT> debounce_insert_2(
 	nullptr,
 	[] () {
 		++inserted;
@@ -94,7 +94,7 @@ Debounce<LOW, 5000> debounce_insert_2(
 	}
 );
 
-Debounce<LOW, 5000> debounce_insert_3(
+Debounce<LOW, DEBOUNCE_TIMEOUT> debounce_insert_3(
 	nullptr,
 	[] () {
 		++inserted;
