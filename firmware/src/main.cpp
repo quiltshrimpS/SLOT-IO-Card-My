@@ -53,6 +53,13 @@ Pulse<3500, 3500> pulse_counter_wash;
 Pulse<3500, 3500> pulse_counter_insert;
 Pulse<3500, 3500> pulse_counter_eject;
 
+Debounce<LOW, 5000> debounce_banknote(
+	nullptr,
+	[] () {
+
+	}
+);
+
 Debounce<HIGH, 5000> debounce_eject(
 	nullptr,
 	[] () {
@@ -143,6 +150,7 @@ void setup() {
 	// populate the debouncers
 	debounce_sw01.begin(in.port.sw01, now);
 	debounce_sw02.begin(in.port.sw02, now);
+	debounce_banknote.begin(in.port.sw20, now);
 	debounce_eject.begin(in.port.sw11, now);
 	debounce_insert_1.begin(in.port.sw12, now);
 	debounce_insert_2.begin(in.port.sw13, now);
@@ -162,6 +170,7 @@ void loop() {
 	uint32_t now = micros();
 	debounce_sw01.feed(in.port.sw01, now);
 	debounce_sw02.feed(in.port.sw02, now);
+	debounce_banknote.feed(in.port.sw20, now);
 	debounce_eject.feed(in.port.sw11, now);
 	debounce_insert_1.feed(in.port.sw12, now);
 	debounce_insert_2.feed(in.port.sw13, now);
