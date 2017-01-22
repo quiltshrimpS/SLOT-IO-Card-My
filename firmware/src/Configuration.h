@@ -54,19 +54,12 @@ public:
 		bool bank0_checksum_good = checksum_0 == _data.configs.checksum;
 		uint8_t bank0_seq = _data.configs.seq + 1;
 
+		dumpBuffer("bank0", _data.bytes, CONF_SIZE_ALL);
 		#if defined(DEBUG_SERIAL)
-		DEBUG_SERIAL.print("Configuration: (bank 0, ");
-		DEBUG_SERIAL.print(bank0_checksum_good ? "good)" : "bad!)");
-		for (int i = 0;i < CONF_SIZE_ALL;++i) {
-			DEBUG_SERIAL.print(' ');
-			if (_data.bytes[i] < 0x10)
-				DEBUG_SERIAL.print('0');
-			DEBUG_SERIAL.print((int)(_data.bytes[i]), HEX);
-		}
-		DEBUG_SERIAL.print(", ");
-		if (checksum_0 < 0x10)
+		DEBUG_SERIAL.print("Configuration bank1: checksum = ");
+		if (checksum_1 < 0x10)
 			DEBUG_SERIAL.print('0');
-		DEBUG_SERIAL.println((int)(checksum_0), HEX);
+		DEBUG_SERIAL.println((int)checksum_1, HEX);
 		#endif
 
 		// read the data from bank 1
@@ -74,19 +67,12 @@ public:
 		uint8_t checksum_1 = _getChecksum();
 		bool bank1_checksum_good = checksum_1 == _data.configs.checksum;
 
+		dumpBuffer("bank1", _data.bytes, CONF_SIZE_ALL);
 		#if defined(DEBUG_SERIAL)
-		DEBUG_SERIAL.print("Configuration: (bank 1, ");
-		DEBUG_SERIAL.print(bank0_checksum_good ? "good)" : "bad!)");
-		for (int i = 0;i < CONF_SIZE_ALL;++i) {
-			DEBUG_SERIAL.print(' ');
-			if (_data.bytes[i] < 0x10)
-				DEBUG_SERIAL.print('0');
-			DEBUG_SERIAL.print((int)(_data.bytes[i]), HEX);
-		}
-		DEBUG_SERIAL.print(", ");
+		DEBUG_SERIAL.print("Configuration bank1: checksum = ");
 		if (checksum_1 < 0x10)
 			DEBUG_SERIAL.print('0');
-		DEBUG_SERIAL.println((int)(checksum_1), HEX);
+		DEBUG_SERIAL.println((int)checksum_1, HEX);
 		#endif
 
 		// decide which bank to use
@@ -129,16 +115,7 @@ public:
 			}
 		}
 
-		#if defined(DEBUG_SERIAL)
-		DEBUG_SERIAL.print("Configuration:");
-		for (int i = 0;i < CONF_SIZE_ALL;++i) {
-			DEBUG_SERIAL.print(' ');
-			if (_data.bytes[i] < 0x10)
-				DEBUG_SERIAL.print('0');
-			DEBUG_SERIAL.print((int)(_data.bytes[i]), HEX);
-		}
-		DEBUG_SERIAL.println();
-		#endif
+		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
 	}
 
 	uint8_t getTrackLevel(uint8_t track) {
@@ -176,16 +153,7 @@ public:
 		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_SEQ, _data.configs.seq);
 		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
 
-		#if defined(DEBUG_SERIAL)
-		DEBUG_SERIAL.print("Configuration:");
-		for (int i = 0;i < CONF_SIZE_ALL;++i) {
-			DEBUG_SERIAL.print(' ');
-			if (_data.bytes[i] < 0x10)
-				DEBUG_SERIAL.print('0');
-			DEBUG_SERIAL.print((int)(_data.bytes[i]), HEX);
-		}
-		DEBUG_SERIAL.println();
-		#endif
+		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
 	}
 
 	uint8_t getCoinsToEject(uint8_t track) {
@@ -212,16 +180,7 @@ public:
 			_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_SEQ, _data.configs.seq);
 			_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
 
-			#if defined(DEBUG_SERIAL)
-			DEBUG_SERIAL.print("Configuration:");
-			for (int i = 0;i < CONF_SIZE_ALL;++i) {
-				DEBUG_SERIAL.print(' ');
-				if (_data.bytes[i] < 0x10)
-					DEBUG_SERIAL.print('0');
-				DEBUG_SERIAL.print((int)(_data.bytes[i]), HEX);
-			}
-			DEBUG_SERIAL.println();
-			#endif
+			dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
 		}
 	}
 
@@ -265,17 +224,27 @@ public:
 			_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_SEQ, _data.configs.seq);
 			_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
 
-			#if defined(DEBUG_SERIAL)
-			DEBUG_SERIAL.print("Configuration:");
-			for (int i = 0;i < CONF_SIZE_ALL;++i) {
-				DEBUG_SERIAL.print(' ');
-				if (_data.bytes[i] < 0x10)
-					DEBUG_SERIAL.print('0');
-				DEBUG_SERIAL.print((int)(_data.bytes[i]), HEX);
-			}
-			DEBUG_SERIAL.println();
-			#endif
+			dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
 		}
+	}
+
+	__attribute__((always_inline)) inline
+	void dumpBuffer(char const * const tag, uint8_t const * const buffer, size_t const size) {
+		#if defined(DEBUG_SERIAL)
+		DEBUG_SERIAL.print("Configuration");
+		if (tag != nullptr) {
+			DEBUG_SERIAL.print(' ');
+			DEBUG_SERIAL.print(tag);
+		}
+		DEBUG_SERIAL.print(":");
+		for (size_t i = 0;i < size;++i) {
+			DEBUG_SERIAL.print(' ');
+			if (buffer[i] < 0x10)
+				DEBUG_SERIAL.print('0');
+			DEBUG_SERIAL.print((int)(buffer[i]), HEX);
+		}
+		DEBUG_SERIAL.println();
+		#endif
 	}
 
 private:
@@ -301,7 +270,7 @@ private:
 
 	uint8_t _getChecksum() {
 		uint8_t checksum = 0x87; // randomly picked seed...
-		for (int i = 0;i < CONF_SIZE_ALL - 1;++i)
+		for (uint8_t i = 0;i < CONF_SIZE_ALL - 1;++i)
 			checksum ^= _data.bytes[i];
 		return checksum;
 	}
