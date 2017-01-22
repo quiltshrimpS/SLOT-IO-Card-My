@@ -44,8 +44,6 @@ union {
 bool do_print = false;
 bool do_send = false;
 
-// counter is 150 CPS, each cycle is 6.66ms, 50% duty = 3.33ms HIGH then 3.33ms LOW.
-// we round it to 3.5ms to give it a bit buffer
 Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_score;
 Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_wash;
 Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_insert;
@@ -126,10 +124,10 @@ void setup() {
 	uint32_t now = micros(); // record the time early, for better accuracy
 
 	// do the rest of the thing after we switch off the motor
-    Serial.begin(230400);
+    Serial.begin(UART_BAUDRATE);
 
     Wire.begin(); // for FRAM
-	Wire.setClock(FRAM_BAUDRATE);
+	Wire.setClock(TWI_BAUDRATE);
     fram.begin();
 	conf.begin();
 
