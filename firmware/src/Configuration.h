@@ -38,6 +38,7 @@ public:
 	{
 	}
 
+	__attribute__((always_inline)) inline
 	void begin() {
 		// there are 2 banks of memories inside the fram:
 		//   - CONF_ADDR_BANK_0 (256 bytes): [ CONF_SIZE_ALL ] [ RESERVED ]
@@ -120,6 +121,7 @@ public:
 		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
 	}
 
+	__attribute__((always_inline)) inline
 	uint8_t getTrackLevel(uint8_t track) {
 		if (track == TRACK_EJECT) // eject track
 			return _data.configs.track_level_4;
@@ -134,6 +136,7 @@ public:
 		return ERR_NOT_A_TRACK;
 	}
 
+	__attribute__((always_inline)) inline
 	void setTrackLevel(uint8_t track, bool level) {
 		if (track == TRACK_EJECT) // eject track
 			_data.configs.track_level_4 = level;
@@ -158,6 +161,7 @@ public:
 		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
 	}
 
+	__attribute__((always_inline)) inline
 	uint8_t getCoinsToEject(uint8_t track) {
 		uint8_t track_idx = 0xFF;
 		if (track == TRACK_EJECT)
@@ -166,6 +170,7 @@ public:
 		return track_idx == 0xFF ? 0 : _data.configs.coins_to_eject[track_idx];
 	}
 
+	__attribute__((always_inline)) inline
 	void setCoinsToEject(uint8_t track, uint8_t coins) {
 		uint8_t track_idx = 0xFF;
 		if (track == TRACK_EJECT)
@@ -186,6 +191,7 @@ public:
 		}
 	}
 
+	__attribute__((always_inline)) inline
 	uint32_t getCoinCount(uint8_t track) {
 		uint8_t track_idx = 0xFF;
 		if (track == TRACK_EJECT)
@@ -202,6 +208,7 @@ public:
 		return track_idx == 0xFF ? 0 : _data.configs.coin_count[track_idx];
 	}
 
+	__attribute__((always_inline)) inline
 	void setCoinCount(uint8_t track, uint32_t count) {
 		uint8_t track_idx = 0xFF;
 		if (track == TRACK_EJECT)
@@ -250,6 +257,7 @@ public:
 	}
 
 private:
+	__attribute__((always_inline)) inline
 	void _readBytes(uint16_t addr, uint8_t length, uint8_t * buffer) {
 		while (length != 0) {
 			uint8_t bytes_to_read = min(length, TWI_BUFFER_LENGTH);
@@ -260,6 +268,7 @@ private:
 		}
 	}
 
+	__attribute__((always_inline)) inline
 	void _writeBytes(uint16_t addr, uint8_t length, uint8_t *buffer) {
 		while (length != 0) {
 			uint8_t bytes_to_write = min(length, TWI_BUFFER_LENGTH);
@@ -270,6 +279,7 @@ private:
 		}
 	}
 
+	__attribute__((always_inline)) inline
 	uint8_t _getChecksum() {
 		uint8_t checksum = 0x87; // randomly picked seed...
 		for (uint8_t i = 0;i < CONF_SIZE_ALL - 1;++i)

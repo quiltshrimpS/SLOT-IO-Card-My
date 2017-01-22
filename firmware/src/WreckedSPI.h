@@ -51,6 +51,7 @@ class WreckedSPI {
  public:
   //----------------------------------------------------------------------------
   /** Initialize SoftSPI pins. */
+  __attribute__((always_inline)) inline
   void begin() {
     fastPinConfig(MisoPin, MISO_MODE, MISO_LEVEL);
     fastPinConfig(MosiPin, MOSI_MODE, !MODE_CPHA(ModeMosi));

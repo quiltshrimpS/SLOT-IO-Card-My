@@ -14,10 +14,12 @@ public:
 	{
 	}
 
+	__attribute__((always_inline)) inline
 	void pulse(uint16_t pulses) {
 		_pulses += pulses;
 	}
 
+	__attribute__((always_inline)) inline
 	bool update(uint32_t now = micros())
 	{
 		// super easy state machine :-D
@@ -45,6 +47,7 @@ public:
 		return false;
 	}
 
+	__attribute__((always_inline)) inline
 	bool get() {
 		return _state == STATE_HIGH;
 	}

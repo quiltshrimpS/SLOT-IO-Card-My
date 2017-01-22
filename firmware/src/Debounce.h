@@ -17,13 +17,15 @@ public:
 	{
 	}
 
-	inline void begin(bool const initial_state, uint32_t const now = micros())
+	__attribute__((always_inline)) inline
+	void begin(bool const initial_state, uint32_t const now = micros())
 	{
 		_old_output = initial_state;
 		_feed_micros = now;
 	}
 
-	inline void feed(bool const state, uint32_t const now = micros()) {
+	__attribute__((always_inline)) inline
+	void feed(bool const state, uint32_t const now = micros()) {
 		if (state == ACTIVE_LEVEL) {
 			_energy += _feed_micros - now;
 		} else {
