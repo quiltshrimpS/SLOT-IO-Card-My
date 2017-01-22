@@ -50,7 +50,7 @@ public:
 		// this class will try to use the one with good `checksum` and newer `seq`
 
 		// read the data from bank 0
-		_fram.readArray(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
+		_readBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
 		bool bank0_checksum_good = _getChecksum() == _data.configs.checksum;
 		uint8_t bank0_seq = _data.configs.seq + 1;
 
@@ -66,7 +66,7 @@ public:
 		#endif
 
 		// read the data from bank 1
-		_fram.readArray(CONF_ADDR_BANK_1, CONF_SIZE_ALL, _data.bytes);
+		_readBytes(CONF_ADDR_BANK_1, CONF_SIZE_ALL, _data.bytes);
 		bool bank1_checksum_good = _getChecksum() == _data.configs.checksum;
 
 		#if defined(DEBUG_SERIAL)
@@ -95,7 +95,7 @@ public:
 				DEBUG_SERIAL.println("Configuration: both good, using bank 0");
 				#endif
 				// bank0 is newer, read them back from fram
-				_fram.readArray(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
+				_readBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
 			}
 		} else if (!bank0_checksum_good && !bank1_checksum_good) {
 			#if defined(DEBUG_SERIAL)
@@ -104,15 +104,15 @@ public:
 			// both bad, initialize bank0 and use it, write back to both bank
 			memset(_data.bytes, 0, CONF_SIZE_ALL);
 			_data.configs.checksum = _getChecksum();
-			_fram.writeArray(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
-			_fram.writeArray(CONF_ADDR_BANK_1, CONF_SIZE_ALL, _data.bytes);
+			_writeBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
+			_writeBytes(CONF_ADDR_BANK_1, CONF_SIZE_ALL, _data.bytes);
 		} else {
 			if (bank0_checksum_good) {
 				#if defined(DEBUG_SERIAL)
 				DEBUG_SERIAL.println("Configuration: bank 1 bad, use bank 0.");
 				#endif
 				// bank1 is bad, read back bank0
-				_fram.readArray(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
+				_readBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
 			} else /* if (bank1_checksum_good) */ {
 				#if defined(DEBUG_SERIAL)
 				DEBUG_SERIAL.println("Configuration: bank 0 bad, use bank 1.");
@@ -228,6 +228,38 @@ public:
 	}
 
 private:
+	void _readBytes(uint16_t addr, uint8_t length, uint8_t * buffer) {
+		while (length != 0) {
+			uint8_t bytes_to_read = min(length, 32);
+			#if defined(DEBUG_SERIAL)
+			DEBUG_SERIAL.print("Configuration: reading ");
+			DEBUG_SERIAL.print(length);
+			DEBUG_SERIAL.print(" bytes from 0x");
+			DEBUG_SERIAL.println(addr, HEX);
+			#endif
+			_fram.readArray(addr, bytes_to_read, buffer);
+			addr += bytes_to_read;
+			buffer += bytes_to_read;
+			length -= bytes_to_read;
+		}
+	}
+
+	void _writeBytes(uint16_t addr, uint8_t length, uint8_t *buffer) {
+		while (length != 0) {
+			uint8_t bytes_to_write = min(length, 32);
+			#if defined(DEBUG_SERIAL)
+			DEBUG_SERIAL.print("Configuration: wrinting ");
+			DEBUG_SERIAL.print(length);
+			DEBUG_SERIAL.print(" bytes to 0x");
+			DEBUG_SERIAL.println(addr, HEX);
+			#endif
+			_fram.writeArray(addr, bytes_to_write, buffer);
+			addr += bytes_to_write;
+			buffer += bytes_to_write;
+			length -= bytes_to_write;
+		}
+	}
+
 	uint8_t _getChecksum() {
 		uint8_t checksum = 0x87; // randomly picked seed...
 		for (int i = 0;i < CONF_SIZE_ALL - 1;++i)
