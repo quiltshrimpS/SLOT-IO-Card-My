@@ -129,6 +129,7 @@ void setup() {
     Serial.begin(230400);
 
     Wire.begin(); // for FRAM
+	Wire.setClock(FRAM_BAUDRATE);
     fram.begin();
 	conf.begin();
 
