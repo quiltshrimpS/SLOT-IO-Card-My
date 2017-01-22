@@ -59,9 +59,9 @@ public:
 		dumpBuffer("bank0", _data.bytes, CONF_SIZE_ALL);
 		#if defined(DEBUG_SERIAL)
 		DEBUG_SERIAL.print("Configuration bank1: checksum = ");
-		if (checksum_1 < 0x10)
+		if (checksum_0 < 0x10)
 			DEBUG_SERIAL.print('0');
-		DEBUG_SERIAL.println((int)checksum_1, HEX);
+		DEBUG_SERIAL.println((int)checksum_0, HEX);
 		#endif
 
 		// read the data from bank 1
