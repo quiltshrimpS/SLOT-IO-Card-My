@@ -43,10 +43,6 @@ union {
 
 bool do_print = false;
 bool do_send = false;
-int32_t inserted = 0;
-int32_t ejected = 0;
-
-uint8_t to_eject = 0;
 
 // counter is 150 CPS, each cycle is 6.66ms, 50% duty = 3.33ms HIGH then 3.33ms LOW.
 // we round it to 3.5ms to give it a bit buffer
@@ -58,17 +54,20 @@ Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_eject;
 Debounce<LOW, DEBOUNCE_TIMEOUT> debounce_banknote(
 	nullptr,
 	[] () {
-
+		conf.setCoinCount(TRACK_INSERT_3, conf.getCoinCount(TRACK_INSERT_3) + 1);
+		do_print = true;
 	}
 );
 
 Debounce<HIGH, DEBOUNCE_TIMEOUT> debounce_eject(
 	nullptr,
 	[] () {
-		++ejected;
+		conf.setCoinCount(TRACK_EJECT, conf.getCoinCount(TRACK_EJECT) + 1);
 		pulse_counter_eject.pulse(1);
 		// FIXME: had to issue stop early, or inertia ejects an extra coin
-		if (to_eject-- < 2) {
+		uint8_t to_eject = conf.getCoinsToEject(TRACK_EJECT);
+		conf.setCoinsToEject(TRACK_EJECT, to_eject - 1);
+		if (to_eject < 2) {
 			out.port.ssr1 = false; // pull LOW to stop the motor
 			do_send = true;
 		}
@@ -79,7 +78,7 @@ Debounce<HIGH, DEBOUNCE_TIMEOUT> debounce_eject(
 Debounce<LOW, DEBOUNCE_TIMEOUT> debounce_insert_1(
 	nullptr,
 	[] () {
-		++inserted;
+		conf.setCoinCount(TRACK_INSERT_1, conf.getCoinCount(TRACK_INSERT_1) + 1);
 		pulse_counter_insert.pulse(1);
 		do_print = true;
 	}
@@ -88,7 +87,7 @@ Debounce<LOW, DEBOUNCE_TIMEOUT> debounce_insert_1(
 Debounce<LOW, DEBOUNCE_TIMEOUT> debounce_insert_2(
 	nullptr,
 	[] () {
-		++inserted;
+		conf.setCoinCount(TRACK_INSERT_2, conf.getCoinCount(TRACK_INSERT_2) + 1);
 		pulse_counter_insert.pulse(1);
 		do_print = true;
 	}
@@ -97,7 +96,7 @@ Debounce<LOW, DEBOUNCE_TIMEOUT> debounce_insert_2(
 Debounce<LOW, DEBOUNCE_TIMEOUT> debounce_insert_3(
 	nullptr,
 	[] () {
-		++inserted;
+		conf.setCoinCount(TRACK_INSERT_3, conf.getCoinCount(TRACK_INSERT_3) + 1);
 		pulse_counter_insert.pulse(1);
 		do_print = true;
 	}
@@ -219,9 +218,9 @@ void loop() {
         Serial.print(" ");
         Serial.print((int) (out.bytes[2]), BIN);
         Serial.print(", inserted = ");
-        Serial.print(inserted);
+        Serial.print(conf.getCoinCount(TRACK_INSERT_1));
         Serial.print(", ejected = ");
-        Serial.print(ejected);
+        Serial.print(conf.getCoinCount(TRACK_EJECT));
 		Serial.print(", debounce took ");
 		Serial.print(t3 - t2);
 		Serial.print("us, receive took ");
@@ -241,9 +240,9 @@ void loop() {
         Serial.print(" ");
         Serial.print((int) (in.bytes[2]), BIN);
         Serial.print(", inserted = ");
-        Serial.print(inserted);
+		Serial.print(conf.getCoinCount(TRACK_INSERT_1));
         Serial.print(", ejected = ");
-        Serial.print(ejected);
+        Serial.print(conf.getCoinCount(TRACK_EJECT));
 		Serial.print(", debounce took ");
 		Serial.print(t3 - t2);
 		Serial.print("us, receive took ");
