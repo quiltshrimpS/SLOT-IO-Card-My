@@ -91,6 +91,12 @@ namespace Spark.Slot.IO
 						OnGetInfoResult(this, new GetInfoResultEventArgs(Manufacturer, Product, Version, ProtocolVersion));
 				});
 
+				messenger.Attach((receivedCommand) =>
+				{
+					if (OnUnknown != null)
+						OnUnknown(this, new UnknownEventArgs(receivedCommand));
+				});
+                
 				if (messenger.Connect())
 				{
 					mMessenger = messenger;
@@ -127,6 +133,7 @@ namespace Spark.Slot.IO
 		public event EventHandler OnConnected;
 		public event EventHandler OnDisconnected;
 		public event EventHandler<GetInfoResultEventArgs> OnGetInfoResult;
+		public event EventHandler<UnknownEventArgs> OnUnknown;
 
 		#region "implementations"
 
@@ -178,6 +185,16 @@ namespace Spark.Slot.IO
 				Product = product;
 				Version = version;
 				ProtocolVersion = protoVersion;
+			}
+		}
+
+		public class UnknownEventArgs : EventArgs
+		{
+			public ReceivedCommand Command { get; internal set; }
+
+			public UnknownEventArgs(ReceivedCommand command)
+			{
+				Command = command;
 			}
 		}
 
