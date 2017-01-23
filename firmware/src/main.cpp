@@ -122,9 +122,9 @@ void setup() {
 	// read the initial states, and write the initial states.
     fastDigitalWrite(PIN_LATCH_OUT, LOW);
     fastDigitalWrite(PIN_LATCH_IN, HIGH);
-    in.bytes[0] = spi.transfer(out.bytes[0]);
-    in.bytes[1] = spi.transfer(out.bytes[1]);
-    in.bytes[2] = spi.transfer(out.bytes[2]);
+    previous_in.bytes[0] = spi.transfer(out.bytes[0]) | IN_MASK_0;
+    previous_in.bytes[1] = spi.transfer(out.bytes[1]) | IN_MASK_1;
+    previous_in.bytes[2] = spi.transfer(out.bytes[2]) | IN_MASK_2;
     fastDigitalWrite(PIN_LATCH_OUT, HIGH);
     fastDigitalWrite(PIN_LATCH_IN, LOW);
 
@@ -144,10 +144,6 @@ void setup() {
 	debounce_insert_1.begin(in.port.sw12, now);
 	debounce_insert_2.begin(in.port.sw13, now);
 	debounce_insert_3.begin(in.port.sw14, now);
-
-	previous_in.bytes[0] = in.bytes[0] | IN_MASK_0;
-	previous_in.bytes[1] = in.bytes[1] | IN_MASK_1;
-	previous_in.bytes[2] = in.bytes[2] | IN_MASK_2;
 
 	messenger.attach([]() {
 		switch (messenger.commandID()) {
