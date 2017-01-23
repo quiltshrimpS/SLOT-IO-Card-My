@@ -177,6 +177,13 @@ void setup() {
 					communicator.dispatchCoinCounterResult(track, conf.getCoinCount(track));
 				}
 				break;
+			case CMD_RESET_COIN_COINTER:
+				{
+					uint8_t const track = messenger.readBinArg<uint8_t>();
+					if (!conf.setCoinCount(track, 0))
+						communicator.dispatchErrorNotATrack(track);
+				}
+				break;
 			case CMD_GET_KEYS:
 				communicator.dispatchKey(3, previous_in.bytes);
 				break;
