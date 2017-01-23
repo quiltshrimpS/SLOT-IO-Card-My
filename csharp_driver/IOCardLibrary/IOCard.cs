@@ -80,15 +80,23 @@ namespace Spark.Slot.IO
 				};
 
 				var messenger = new CmdMessenger(transport);
-				messenger.Attach((int)Events.EVT_GET_INFO_RESULT, OnReceive_GetInfo);
-				var status = messenger.Connect();
-				if (status)
+				messenger.Attach((int)Events.EVT_GET_INFO_RESULT, (receivedCommand) =>
+				{
+					Model = receivedCommand.ReadBinStringArg();
+					Version = receivedCommand.ReadBinStringArg();
+					ProtocolVersion = receivedCommand.ReadBinUInt32Arg();
+
+					if (OnGetInfoResult != null)
+						OnGetInfoResult(this, new GetInfoResultEventArgs(Model, Version, ProtocolVersion));
+				});
+
+				if (messenger.Connect())
 				{
 					mMessenger = messenger;
 					if (OnConnected != null)
 						OnConnected(this, EventArgs.Empty);
+					return true;
 				}
-				return status;
 			}
 			catch (InvalidOperationException ex)
 			{
@@ -154,19 +162,6 @@ namespace Spark.Slot.IO
 		public String Model { get; private set; }
 		public String Version { get; private set; }
 		public UInt16 ProtocolVersion { get; private set; }
-
-		void OnReceive_GetInfo(ReceivedCommand receivedCommand)
-		{
-			if (receivedCommand.Available())
-				Model = receivedCommand.ReadBinStringArg();
-			if (receivedCommand.Available())
-				Version = receivedCommand.ReadBinStringArg();
-			if (receivedCommand.Available())
-				ProtocolVersion = receivedCommand.ReadBinUInt16Arg();
-
-			if (OnGetInfoResult != null)
-				OnGetInfoResult(this, new GetInfoResultEventArgs(Model, Version, ProtocolVersion));
-		}
 
 		public class GetInfoResultEventArgs : EventArgs
 		{
