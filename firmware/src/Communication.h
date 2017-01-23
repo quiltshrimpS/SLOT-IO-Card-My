@@ -18,6 +18,7 @@
 #define EVT_WRITE_STORAGE_RESULT	(0x69)
 #define EVT_READ_STORAGE_RESULT		(0x78)
 #define EVT_ERROR					(0xFF)
+#define EVT_DEBUG					(0x5A)
 
 #define ERR_EJECT_INTERRUPTED		(0x01)
 #define ERR_EJECT_TIMEOUT			(0x02)
