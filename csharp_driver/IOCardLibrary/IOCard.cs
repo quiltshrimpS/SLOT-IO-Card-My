@@ -336,6 +336,11 @@ namespace Spark.Slot.IO
 					if (OnError != null)
 						OnError(this, e);
 				});
+				messenger.Attach((int)Events.EVT_DEBUG, (receivedCommand) =>
+				{
+					if (OnDebug != null)
+						OnDebug(this, new DebugEventArgs(receivedCommand.ReadBinStringArg()));
+				});
 				messenger.Attach((receivedCommand) =>
 				{
 					if (OnUnknown != null)
@@ -384,6 +389,7 @@ namespace Spark.Slot.IO
 		public event EventHandler<ReadStorageResultEventArgs> OnReadStorageResult;
 		public event EventHandler<ErrorEventArgs> OnError;
 		public event EventHandler<UnknownEventArgs> OnUnknown;
+		public event EventHandler<DebugEventArgs> OnDebug;
 
 		#region "implementations"
 
@@ -409,6 +415,7 @@ namespace Spark.Slot.IO
 			EVT_WRITE_STORAGE_RESULT = 0x69,
 			EVT_READ_STORAGE_RESULT = 0x78,
 			EVT_ERROR = 0xFF,
+			EVT_DEBUG = 0x5A,
 		}
 
 		public enum Errors
@@ -575,6 +582,16 @@ namespace Spark.Slot.IO
 				base(error)
 			{
 				UnknownErrorCode = errorCode;
+			}
+		}
+
+		public class DebugEventArgs : EventArgs
+		{
+			public string Message { get; internal set; }
+
+			public DebugEventArgs(string message)
+			{
+				Message = message;
 			}
 		}
 
