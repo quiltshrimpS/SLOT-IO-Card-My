@@ -56,7 +56,7 @@ public:
 
 		dumpBuffer("bank0", _data.bytes, CONF_SIZE_ALL);
 		#if defined(DEBUG_SERIAL)
-		DEBUG_SERIAL.print("Configuration bank0: checksum = ");
+		DEBUG_SERIAL.print(F("Configuration bank0: checksum = "));
 		if (checksum_0 < 0x10)
 			DEBUG_SERIAL.print('0');
 		DEBUG_SERIAL.println((int)checksum_0, HEX);
@@ -69,7 +69,7 @@ public:
 
 		dumpBuffer("bank1", _data.bytes, CONF_SIZE_ALL);
 		#if defined(DEBUG_SERIAL)
-		DEBUG_SERIAL.print("Configuration bank1: checksum = ");
+		DEBUG_SERIAL.print(F("Configuration bank1: checksum = "));
 		if (checksum_1 < 0x10)
 			DEBUG_SERIAL.print('0');
 		DEBUG_SERIAL.println((int)checksum_1, HEX);
@@ -83,7 +83,7 @@ public:
 			#endif
 		} else if (!bank0_checksum_good && !bank1_checksum_good) {
 			#if defined(DEBUG_SERIAL)
-			DEBUG_SERIAL.println("Configuration: both bad, initialize bank 0 and use it.");
+			DEBUG_SERIAL.println(F("Configuration: both bad, initialize bank 0 and use it."));
 			#endif
 			// both bad, initialize bank0 and use it, write back to both bank
 			memset(_data.bytes, 0, CONF_SIZE_ALL);
@@ -93,13 +93,13 @@ public:
 		} else {
 			if (bank0_checksum_good) {
 				#if defined(DEBUG_SERIAL)
-				DEBUG_SERIAL.println("Configuration: bank 1 bad, use bank 0.");
+				DEBUG_SERIAL.println(F("Configuration: bank 1 bad, use bank 0."));
 				#endif
 				// bank1 is bad, read back bank0
 				readBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
 			} else /* if (bank1_checksum_good) */ {
 				#if defined(DEBUG_SERIAL)
-				DEBUG_SERIAL.println("Configuration: bank 0 bad, use bank 1.");
+				DEBUG_SERIAL.println(F("Configuration: bank 0 bad, use bank 1."));
 				#endif
 				// bank0 is bad, use bank1.
 			}
@@ -220,12 +220,12 @@ public:
 	__attribute__((always_inline)) inline
 	void dumpBuffer(char const * const tag, uint8_t const * const buffer, size_t const size) {
 		#if defined(DEBUG_SERIAL)
-		DEBUG_SERIAL.print("Configuration");
+		DEBUG_SERIAL.print(F("Configuration"));
 		if (tag != nullptr) {
 			DEBUG_SERIAL.print(' ');
 			DEBUG_SERIAL.print(tag);
 		}
-		DEBUG_SERIAL.print(":");
+		DEBUG_SERIAL.print(':');
 		for (size_t i = 0;i < size;++i) {
 			DEBUG_SERIAL.print(' ');
 			if (buffer[i] < 0x10)
