@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 
 using CommandMessenger;
-using CommandMessenger.Transport;
 using CommandMessenger.Transport.Serial;
 
 namespace Spark.Slot.IO
@@ -97,10 +95,6 @@ namespace Spark.Slot.IO
 			/// 2. it's "masked", not an available input.
 			/// </value>
 			StateUnavailable,
-		}
-
-		public IOCard()
-		{
 		}
 
 		/// <summary>
@@ -234,9 +228,9 @@ namespace Spark.Slot.IO
 
 			try
 			{
-				var transport = new SerialTransport()
+				var transport = new SerialTransport
 				{
-					CurrentSerialSettings = { PortName = port, BaudRate = baudrate, DtrEnable = false, },
+					CurrentSerialSettings = { PortName = port, BaudRate = baudrate, DtrEnable = false }
 				};
 
 				var messenger = new CmdMessenger(transport);
@@ -245,7 +239,7 @@ namespace Spark.Slot.IO
 					string manufacturer = receivedCommand.ReadBinStringArg();
 					string product = receivedCommand.ReadBinStringArg();
 					string version = receivedCommand.ReadBinStringArg();
-					UInt32 protocol = receivedCommand.ReadBinUInt32Arg();
+					uint protocol = receivedCommand.ReadBinUInt32Arg();
 
 					if (OnGetInfoResult != null)
 						OnGetInfoResult(this, new GetInfoResultEventArgs(manufacturer, product, version, protocol));
@@ -253,7 +247,7 @@ namespace Spark.Slot.IO
 				messenger.Attach((int)Events.EVT_COIN_COUNTER_RESULT, (receivedCommand) =>
 				{
 					int track = receivedCommand.ReadBinByteArg();
-					UInt32 coins = receivedCommand.ReadBinUInt32Arg();
+					uint coins = receivedCommand.ReadBinUInt32Arg();
 
 					if (OnCoinCounterResult != null)
 						OnCoinCounterResult(this, new CoinCounterResultEventArgs(track, coins));
@@ -369,7 +363,7 @@ namespace Spark.Slot.IO
 
 		#region "implementations"
 
-		private CmdMessenger mMessenger = null;
+		CmdMessenger mMessenger;
 
 		public enum Commands
 		{
@@ -409,9 +403,9 @@ namespace Spark.Slot.IO
 			public string Manufacturer { get; private set; }
 			public string Product { get; private set; }
 			public string Version { get; private set; }
-			public UInt32 ProtocolVersion { get; private set; }
+			public uint ProtocolVersion { get; private set; }
 
-			public GetInfoResultEventArgs(string manufacturer, string product, string version, UInt32 protoVersion)
+			public GetInfoResultEventArgs(string manufacturer, string product, string version, uint protoVersion)
 			{
 				Manufacturer = manufacturer;
 				Product = product;
@@ -423,9 +417,9 @@ namespace Spark.Slot.IO
 		public class CoinCounterResultEventArgs : EventArgs
 		{
 			public int Track { get; internal set; }
-			public UInt32 Coins { get; internal set; }
+			public uint Coins { get; internal set; }
 
-			public CoinCounterResultEventArgs(int track, UInt32 coins)
+			public CoinCounterResultEventArgs(int track, uint coins)
 			{
 				Track = track;
 				Coins = coins;
@@ -444,10 +438,10 @@ namespace Spark.Slot.IO
 
 		public class ReadStorageResultEventArgs : EventArgs
 		{
-			public UInt16 Address { get; internal set; }
+			public ushort Address { get; internal set; }
 			public byte[] Data { get; internal set; }
 
-			public ReadStorageResultEventArgs(UInt16 address, byte[] data)
+			public ReadStorageResultEventArgs(ushort address, byte[] data)
 			{
 				Address = address;
 				Data = data;
@@ -477,9 +471,9 @@ namespace Spark.Slot.IO
 
 		public class ErrorEjectInterruptedEventArgs : ErrorTrackEventArgs
 		{
-			public UInt16 CoinsFailed { get; internal set; }
+			public ushort CoinsFailed { get; internal set; }
 
-			public ErrorEjectInterruptedEventArgs(Errors error, CoinTrack track, UInt16 coins) :
+			public ErrorEjectInterruptedEventArgs(Errors error, CoinTrack track, ushort coins) :
 				base(error, track)
 			{
 				CoinsFailed = coins;
@@ -504,9 +498,9 @@ namespace Spark.Slot.IO
 
 		public class ErrorProtectedStorageEventArgs : ErrorEventArgs
 		{
-			public UInt16 Address { get; internal set; }
+			public ushort Address { get; internal set; }
 
-			public ErrorProtectedStorageEventArgs(Errors error, UInt16 address) :
+			public ErrorProtectedStorageEventArgs(Errors error, ushort address) :
 				base(error)
 			{
 				Address = address;
@@ -528,9 +522,9 @@ namespace Spark.Slot.IO
 
 		public class ErrorUnknownCommandEventArgs : ErrorEventArgs
 		{
-			public UInt16 Command { get; internal set; }
+			public ushort Command { get; internal set; }
 
-			public ErrorUnknownCommandEventArgs(Errors error, UInt16 command) :
+			public ErrorUnknownCommandEventArgs(Errors error, ushort command) :
 				base(error)
 			{
 				Command = command;
@@ -539,9 +533,9 @@ namespace Spark.Slot.IO
 
 		public class ErrorUnknownErrorEventArgs : ErrorEventArgs
 		{
-			public UInt16 UnknownErrorCode { get; internal set; }
+			public ushort UnknownErrorCode { get; internal set; }
 
-			public ErrorUnknownErrorEventArgs(Errors error, UInt16 errorCode) :
+			public ErrorUnknownErrorEventArgs(Errors error, ushort errorCode) :
 				base(error)
 			{
 				UnknownErrorCode = errorCode;
