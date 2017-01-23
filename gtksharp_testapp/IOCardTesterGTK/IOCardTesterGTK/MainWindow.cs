@@ -8,6 +8,7 @@ public partial class MainWindow : Window
 	private int mLastCmdIndex = 0;
 
 	private List<string> mPorts = new List<string>(new string[] {
+		"COM3",
 		"COM1",
 		"COM20",
 	});
@@ -112,13 +113,19 @@ public partial class MainWindow : Window
 
 		IOCard.Card.OnConnected += (sender, e) =>
 		{
-			button_send.Sensitive = true;
-			button_connect.Label = "_Disconnect";
+			Gtk.Application.Invoke(delegate
+			{
+				button_send.Sensitive = true;
+				button_connect.Label = "_Disconnect";
+			});
 		};
 		IOCard.Card.OnDisconnected += (sender, e) =>
 		{
-			button_send.Sensitive = false;
-			button_connect.Label = "_Connect";
+			Gtk.Application.Invoke(delegate
+			{
+				button_send.Sensitive = false;
+				button_connect.Label = "_Connect";
+			});
 		};
 	}
 
