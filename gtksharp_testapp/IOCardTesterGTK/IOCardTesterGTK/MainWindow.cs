@@ -20,14 +20,35 @@ public partial class MainWindow : Window
 		public readonly string CommandDescription;
 		public readonly string ParamsDescription;
 		public readonly List<string> HistoryParams;
+		private readonly Action<IOCard.Commands, string[]> SendCommandCallback;
 
-		public CommandProperties(IOCard.Commands cmd, int parameter_count, string cmdDesc, string paramsDesc, string[] history)
+		public CommandProperties(IOCard.Commands cmd, int parameter_count, string cmdDesc, string paramsDesc) :
+			this(cmd, parameter_count, cmdDesc, paramsDesc, new string[0], (command, parameters) => { })
+		{
+		}
+
+		public CommandProperties(IOCard.Commands cmd, int parameter_count, string cmdDesc, string paramsDesc, string[] history) :
+			this(cmd, parameter_count, cmdDesc, paramsDesc, history, (command, parameters) => { })
+		{
+		}
+
+		public CommandProperties(IOCard.Commands cmd, int parameter_count, string cmdDesc, string paramsDesc, Action<IOCard.Commands, string[]> callback) :
+			this(cmd, parameter_count, cmdDesc, paramsDesc, new string[0], callback)
+		{
+		}
+
+		public CommandProperties(IOCard.Commands cmd, int parameter_count, string cmdDesc, string paramsDesc, string[] history, Action<IOCard.Commands, string[]> callback)
 		{
 			Command = cmd;
 			Params = parameter_count;
 			CommandDescription = cmdDesc;
 			ParamsDescription = paramsDesc;
 			HistoryParams = new List<string>(history);
+			SendCommandCallback = callback;
+		}
+
+		public void SendCommand(string[] parameters) {
+			SendCommandCallback.Invoke(Command, parameters);
 		}
 	}
 
