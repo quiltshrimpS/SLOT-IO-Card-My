@@ -137,7 +137,7 @@ public:
 	}
 
 	__attribute__((always_inline)) inline
-	void setTrackLevel(uint8_t track, bool level) {
+	bool setTrackLevel(uint8_t track, bool level) {
 		if (track == TRACK_EJECT) // eject track
 			_data.configs.track_level_4 = level;
 		else if (track == TRACK_INSERT_1) // coin track 1
@@ -148,6 +148,8 @@ public:
 			_data.configs.track_level_2 = level;
 		else if (track == TRACK_BANKNOTE) // banknote track
 			_data.configs.track_level_3 = level;
+		else
+			return false;
 
 		++_data.configs.seq;
 		_data.configs.checksum = _getChecksum();
@@ -157,59 +159,57 @@ public:
 		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_COIN_TRACK_LEVEL, _data.bytes[CONF_OFFSET_COIN_TRACK_LEVEL]);
 		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_SEQ, _data.configs.seq);
 		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
-
 		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
+		return true;
 	}
 
 	__attribute__((always_inline)) inline
 	uint8_t getCoinsToEject(uint8_t track) {
-		uint8_t track_idx = 0xFF;
 		if (track == TRACK_EJECT)
-			track_idx = 4;
-
-		return track_idx == 0xFF ? 0 : _data.configs.coins_to_eject[track_idx];
+			return _data.configs.coins_to_eject[4];
+		return 0;
 	}
 
 	__attribute__((always_inline)) inline
-	void setCoinsToEject(uint8_t track, uint8_t coins) {
+	bool setCoinsToEject(uint8_t track, uint8_t coins) {
 		uint8_t track_idx = 0xFF;
 		if (track == TRACK_EJECT)
 			track_idx = 4;
+		else
+			return false;
 
-		if (track_idx != 0xFF) {
-			_data.configs.coins_to_eject[track_idx] = coins;
-			++_data.configs.seq;
-			_data.configs.checksum = _getChecksum();
-			_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_COINS_TO_EJECT + track_idx, coins);
-			_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_SEQ, _data.configs.seq);
-			_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
-			_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_COINS_TO_EJECT + track_idx, coins);
-			_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_SEQ, _data.configs.seq);
-			_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
+		_data.configs.coins_to_eject[track_idx] = coins;
+		++_data.configs.seq;
+		_data.configs.checksum = _getChecksum();
+		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_COINS_TO_EJECT + track_idx, coins);
+		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_SEQ, _data.configs.seq);
+		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
+		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_COINS_TO_EJECT + track_idx, coins);
+		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_SEQ, _data.configs.seq);
+		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
 
-			dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
-		}
+		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
+
+		return true;
 	}
 
 	__attribute__((always_inline)) inline
 	uint32_t getCoinCount(uint8_t track) {
-		uint8_t track_idx = 0xFF;
 		if (track == TRACK_EJECT)
-			track_idx = 4;
+			return _data.configs.coin_count[4];
 		else if (track == TRACK_INSERT_1)
-			track_idx = 0;
+			return _data.configs.coin_count[0];
 		else if (track == TRACK_INSERT_2)
-			track_idx = 1;
+			return _data.configs.coin_count[1];
 		else if (track == TRACK_INSERT_3)
-			track_idx = 2;
+			return _data.configs.coin_count[2];
 		else if (track == TRACK_BANKNOTE)
-			track_idx = 3;
-
-		return track_idx == 0xFF ? 0 : _data.configs.coin_count[track_idx];
+			return _data.configs.coin_count[3];
+		return 0;
 	}
 
 	__attribute__((always_inline)) inline
-	void setCoinCount(uint8_t track, uint32_t count) {
+	bool setCoinCount(uint8_t track, uint32_t count) {
 		uint8_t track_idx = 0xFF;
 		if (track == TRACK_EJECT)
 			track_idx = 4;
@@ -221,20 +221,22 @@ public:
 			track_idx = 2;
 		else if (track == TRACK_BANKNOTE)
 			track_idx = 3;
+		else
+		 	return false;
 
-		if (track_idx != 0xFF) {
-			_data.configs.coin_count[track_idx] = count;
-			++_data.configs.seq;
-			_data.configs.checksum = _getChecksum();
-			_fram.writeLong(CONF_ADDR_BANK_0 + CONF_OFFSET_COIN_COUNT + track_idx * sizeof(uint32_t), count);
-			_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_SEQ, _data.configs.seq);
-			_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
-			_fram.writeLong(CONF_ADDR_BANK_1 + CONF_OFFSET_COIN_COUNT + track_idx * sizeof(uint32_t), count);
-			_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_SEQ, _data.configs.seq);
-			_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
+		_data.configs.coin_count[track_idx] = count;
+		++_data.configs.seq;
+		_data.configs.checksum = _getChecksum();
+		_fram.writeLong(CONF_ADDR_BANK_0 + CONF_OFFSET_COIN_COUNT + track_idx * sizeof(uint32_t), count);
+		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_SEQ, _data.configs.seq);
+		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
+		_fram.writeLong(CONF_ADDR_BANK_1 + CONF_OFFSET_COIN_COUNT + track_idx * sizeof(uint32_t), count);
+		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_SEQ, _data.configs.seq);
+		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
 
-			dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
-		}
+		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
+
+		return true;
 	}
 
 	__attribute__((always_inline)) inline
