@@ -7,6 +7,8 @@ using Spark.Slot.IO;
 
 public partial class MainWindow : Window
 {
+	private static IOCard sCard = new IOCard();
+
 	private int mLastCmdIndex = 0;
 
 	private List<string> mPorts = new List<string>(new string[] {
@@ -61,7 +63,7 @@ public partial class MainWindow : Window
 			"Get device information",
 			"Params: N/A",
 			(command, parameters) => {
-				IOCard.Card.QueryGetInfo();
+				sCard.QueryGetInfo();
 			}
 		),
 		new CommandProperties(
@@ -76,7 +78,7 @@ public partial class MainWindow : Window
 			(command, parameters) => {
 				var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
 				var count = _getTfromString<byte>(parameters[1].Trim());
-				IOCard.Card.QueryEjectCoin(track, count);
+				sCard.QueryEjectCoin(track, count);
 			}
 		),
 		new CommandProperties(
@@ -89,7 +91,7 @@ public partial class MainWindow : Window
 			},
 			(command, parameters) => {
 				var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
-				IOCard.Card.QueryGetCoinCounter(track);
+				sCard.QueryGetCoinCounter(track);
 			}
 		),
 		new CommandProperties(
@@ -97,7 +99,7 @@ public partial class MainWindow : Window
 			"Get key states from device",
 			"Params: N/A",
 			(command, parameters) => {
-				IOCard.Card.QueryGetKeys();
+				sCard.QueryGetKeys();
 			}
 		),
 		new CommandProperties(
@@ -157,7 +159,7 @@ public partial class MainWindow : Window
 		comboboxentry_params.Sensitive = sCommands[mLastCmdIndex].Params != 0;
 		_populateComboBoxEntry(comboboxentry_port, mPorts);
 
-		IOCard.Card.OnConnected += (sender, e) =>
+		sCard.OnConnected += (sender, e) =>
 		{
 			Gtk.Application.Invoke(delegate
 			{
@@ -165,7 +167,7 @@ public partial class MainWindow : Window
 				button_connect.Label = "_Disconnect";
 			});
 		};
-		IOCard.Card.OnDisconnected += (sender, e) =>
+		sCard.OnDisconnected += (sender, e) =>
 		{
 			Gtk.Application.Invoke(delegate
 			{
@@ -173,7 +175,7 @@ public partial class MainWindow : Window
 				button_connect.Label = "_Connect";
 			});
 		};
-		IOCard.Card.OnError += (sender, e) =>
+		sCard.OnError += (sender, e) =>
 		{
 			Gtk.Application.Invoke(delegate
 			{
@@ -232,7 +234,7 @@ public partial class MainWindow : Window
 				}
 			});
 		};
-		IOCard.Card.OnGetInfoResult += (sender, e) =>
+		sCard.OnGetInfoResult += (sender, e) =>
 		{
 			Gtk.Application.Invoke(delegate
 			{
@@ -247,7 +249,7 @@ public partial class MainWindow : Window
 				);
 			});
 		};
-		IOCard.Card.OnCoinCounterResult += (sender, e) =>
+		sCard.OnCoinCounterResult += (sender, e) =>
 		{
 			Gtk.Application.Invoke(delegate
 			{
@@ -260,7 +262,7 @@ public partial class MainWindow : Window
 				);
 			});
 		};
-		IOCard.Card.OnKey += (sender, e) =>
+		sCard.OnKey += (sender, e) =>
 		{
 			Gtk.Application.Invoke(delegate
 			{
@@ -275,7 +277,7 @@ public partial class MainWindow : Window
 				);
 			});
 		};
-		IOCard.Card.OnUnknown += (sender, e) =>
+		sCard.OnUnknown += (sender, e) =>
 		{
 			Gtk.Application.Invoke(delegate
 			{
@@ -291,7 +293,7 @@ public partial class MainWindow : Window
 
 	protected void OnDeleteEvent(object sender, DeleteEventArgs a)
 	{
-		IOCard.Card.Disconnect();
+		sCard.Disconnect();
 		Application.Quit();
 		a.RetVal = true;
 	}
@@ -335,9 +337,9 @@ public partial class MainWindow : Window
 
 	protected void OnButtonConnect_Clicked(object sender, EventArgs e)
 	{
-		if (IOCard.Card.IsConnected)
+		if (sCard.IsConnected)
 		{
-			IOCard.Card.Disconnect();
+			sCard.Disconnect();
 		}
 		else
 		{
@@ -348,7 +350,7 @@ public partial class MainWindow : Window
 				mPorts.Insert(0, port);
 				_populateComboBoxEntry(comboboxentry_port, mPorts);
 			}
-			var status = IOCard.Card.Connect(port, 250000);
+			var status = sCard.Connect(port, 250000);
 		}
 	}
 
