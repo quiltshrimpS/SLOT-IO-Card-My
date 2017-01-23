@@ -167,7 +167,59 @@ public partial class MainWindow : Window
 		{
 			Gtk.Application.Invoke(delegate
 			{
-				textview_received.Buffer.Text = string.Format("<= {0}: {1} - {2}\r\n{3}", DateTime.Now, e.Error, e.Message, textview_received.Buffer.Text);
+				switch (e.ErrorCode)
+				{
+					case IOCard.Errors.ERR_EJECT_INTERRUPTED:
+						{
+							var ev = (IOCard.ErrorEjectInterruptedEventArgs)e;
+							textview_received.Buffer.Text = string.Format(
+								"<= {0}: {1} - Track = {2}, Coins failed = {3}\r\n{4}",
+								DateTime.Now,
+								ev.ErrorCode,
+								ev.Track,
+								ev.CoinsFailed,
+								textview_received.Buffer.Text
+							);
+						}
+						break;
+					case IOCard.Errors.ERR_EJECT_TIMEOUT:
+					case IOCard.Errors.ERR_NOT_A_TRACK:
+						{
+							var ev = (IOCard.ErrorTrackEventArgs)e;
+							textview_received.Buffer.Text = string.Format(
+								"<= {0}: {1} - Track = {2}\r\n{3}",
+								DateTime.Now,
+								ev.ErrorCode,
+								ev.Track,
+								textview_received.Buffer.Text
+							);
+						}
+						break;
+					case IOCard.Errors.ERR_UNKNOWN_COMMAND:
+						{
+							var ev = (IOCard.ErrorUnknownCommandEventArgs)e;
+							textview_received.Buffer.Text = string.Format(
+								"<= {0}: {1} - CommandID = 0x{2:X}\r\n{3}",
+								DateTime.Now,
+								ev.ErrorCode,
+								ev.Command,
+								textview_received.Buffer.Text
+							);
+						}
+						break;
+					case IOCard.Errors.ERR_UNKNOWN_ERROR:
+						{
+							var ev = (IOCard.ErrorUnknownErrorEventArgs)e;
+							textview_received.Buffer.Text = string.Format(
+								"<= {0}: {1} - Unknown error code = 0x{2:X}\r\n{3}",
+								DateTime.Now,
+								ev.ErrorCode,
+								ev.UnknownErrorCode,
+								textview_received.Buffer.Text
+							);
+						}
+						break;
+				}
 			});
 		};
 		IOCard.Card.OnGetInfoResult += (sender, e) =>
