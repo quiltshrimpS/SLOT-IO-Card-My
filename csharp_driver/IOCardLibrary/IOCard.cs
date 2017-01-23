@@ -181,7 +181,22 @@ namespace Spark.Slot.IO
 			return false;
 		}
 
-		public bool QueryReadStorage(UInt16 address, byte length, SendQueue queuePosition = SendQueue.AtEndQueue)
+		public bool QueryWriteStorage(ushort address, byte[] data, SendQueue queuePosition = SendQueue.InFrontQueue)
+		{
+			if (IsConnected)
+			{
+				var cmd = new SendCommand((int)Commands.CMD_WRITE_STORAGE);
+				cmd.AddBinArgument(address);
+				cmd.AddBinArgument((byte)data.Length);
+				for (int i = 0; i < data.Length; ++i)
+					cmd.AddBinArgument(data[i]);
+				mMessenger.SendCommand(cmd, queuePosition);
+				return true;
+			}
+			return false;
+		}
+
+		public bool QueryReadStorage(ushort address, byte length, SendQueue queuePosition = SendQueue.AtEndQueue)
 		{
 			if (IsConnected)
 			{
@@ -261,6 +276,14 @@ namespace Spark.Slot.IO
 
 					if (OnKey != null)
 						OnKey(this, new KeyEventArgs(keys));
+				});
+				messenger.Attach((int)Events.EVT_WRITE_STORAGE_RESULT, (receivedCommand) =>
+				{
+					var address = receivedCommand.ReadBinUInt16Arg();
+					var length = receivedCommand.ReadBinByteArg();
+
+					if (OnWriteStorageResult != null)
+						OnWriteStorageResult(this, new WriteStorageResultEventArgs(address, (byte)length));
 				});
 				messenger.Attach((int)Events.EVT_READ_STORAGE_RESULT, (receivedCommand) =>
 				{
@@ -357,6 +380,7 @@ namespace Spark.Slot.IO
 		public event EventHandler<GetInfoResultEventArgs> OnGetInfoResult;
 		public event EventHandler<CoinCounterResultEventArgs> OnCoinCounterResult;
 		public event EventHandler<KeyEventArgs> OnKey;
+		public event EventHandler<WriteStorageResultEventArgs> OnWriteStorageResult;
 		public event EventHandler<ReadStorageResultEventArgs> OnReadStorageResult;
 		public event EventHandler<ErrorEventArgs> OnError;
 		public event EventHandler<UnknownEventArgs> OnUnknown;
@@ -433,6 +457,18 @@ namespace Spark.Slot.IO
 			public KeyEventArgs(byte[] keys)
 			{
 				Keys = keys;
+			}
+		}
+
+		public class WriteStorageResultEventArgs : EventArgs
+		{
+			public ushort Address { get; internal set; }
+			public byte Length { get; internal set; }
+
+			public WriteStorageResultEventArgs(ushort address, byte length)
+			{
+				Address = address;
+				Length = length;
 			}
 		}
 
