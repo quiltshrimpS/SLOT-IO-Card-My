@@ -225,11 +225,13 @@ public partial class MainWindow : Window
 
 		parameters_raw = parameters_raw.Trim();
 		var comment_idx = parameters_raw.IndexOf("//", StringComparison.Ordinal);
-		parameters_raw = parameters_raw.Substring(0, comment_idx == -1 ? parameters_raw.Length : comment_idx);
+		parameters_raw = parameters_raw.Substring(0, comment_idx == -1 ? parameters_raw.Length : comment_idx).Trim();
 
 		textview_received.Buffer.Text =
-			string.Format("{0}: {1}\r\n", DateTime.Now, parameters_raw) +
+			string.Format("=> {0}: cmd = {1}, params = {2}\r\n", DateTime.Now, sCommands[mLastCmdIndex].Command, parameters_raw.Length == 0 ? "<null>" : parameters_raw) +
 			textview_received.Buffer.Text;
+
+		sCommands[mLastCmdIndex].SendCommand(parameters_raw.Split(','));
 	}
 
 	private void _populateComboBox(ComboBox cb, List<string> contents)
