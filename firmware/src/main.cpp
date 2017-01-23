@@ -40,8 +40,6 @@ union {
     struct InPort port;
 } in, previous_in;
 
-
-bool do_print = false;
 bool do_send = false;
 
 Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_score;
@@ -53,7 +51,6 @@ Debounce<LOW, DEBOUNCE_TIMEOUT> debounce_banknote(
 	nullptr,
 	[] () {
 		conf.setCoinCount(TRACK_INSERT_3, conf.getCoinCount(TRACK_INSERT_3) + 1);
-		do_print = true;
 	}
 );
 
@@ -62,14 +59,12 @@ Debounce<HIGH, DEBOUNCE_TIMEOUT> debounce_eject(
 	[] () {
 		conf.setCoinCount(TRACK_EJECT, conf.getCoinCount(TRACK_EJECT) + 1);
 		pulse_counter_eject.pulse(1);
-		// FIXME: had to issue stop early, or inertia ejects an extra coin
 		uint8_t to_eject = conf.getCoinsToEject(TRACK_EJECT);
 		conf.setCoinsToEject(TRACK_EJECT, to_eject - 1);
 		if (to_eject < 2) {
 			out.port.ssr1 = false; // pull LOW to stop the motor
 			do_send = true;
 		}
-		do_print = true;
 	}
 );
 
@@ -78,7 +73,6 @@ Debounce<LOW, DEBOUNCE_TIMEOUT> debounce_insert_1(
 	[] () {
 		conf.setCoinCount(TRACK_INSERT_1, conf.getCoinCount(TRACK_INSERT_1) + 1);
 		pulse_counter_insert.pulse(1);
-		do_print = true;
 	}
 );
 
@@ -87,7 +81,6 @@ Debounce<LOW, DEBOUNCE_TIMEOUT> debounce_insert_2(
 	[] () {
 		conf.setCoinCount(TRACK_INSERT_2, conf.getCoinCount(TRACK_INSERT_2) + 1);
 		pulse_counter_insert.pulse(1);
-		do_print = true;
 	}
 );
 
@@ -96,7 +89,6 @@ Debounce<LOW, DEBOUNCE_TIMEOUT> debounce_insert_3(
 	[] () {
 		conf.setCoinCount(TRACK_INSERT_3, conf.getCoinCount(TRACK_INSERT_3) + 1);
 		pulse_counter_insert.pulse(1);
-		do_print = true;
 	}
 );
 
@@ -144,15 +136,11 @@ void setup() {
 }
 
 void loop() {
-    uint32_t t1, t2, t3;
-
-    t1 = micros();
     fastDigitalWrite(PIN_LATCH_IN, HIGH);
     in.bytes[0] = spi.receive();
     in.bytes[1] = spi.receive();
     in.bytes[2] = spi.receive();
     fastDigitalWrite(PIN_LATCH_IN, LOW);
-    t2 = micros();
 	uint32_t now = micros();
 	debounce_banknote.feed(in.port.sw20, now);
 	debounce_eject.feed(in.port.sw11, now);
@@ -191,61 +179,17 @@ void loop() {
 		masked[1] != previous_in.bytes[1] ||
 		masked[2] != previous_in.bytes[2])
 	{
-		do_print = true;
 		previous_in.bytes[0] = masked[0];
 		previous_in.bytes[1] = masked[1];
 		previous_in.bytes[2] = masked[2];
 	}
-	t3 = micros();
 
     if (do_send) {
 		do_send = false;
-		uint32_t t5, t6;
-        t5 = micros();
         fastDigitalWrite(PIN_LATCH_OUT, LOW);
         spi.send(out.bytes[0]);
         spi.send(out.bytes[1]);
         spi.send(out.bytes[2]);
         fastDigitalWrite(PIN_LATCH_OUT, HIGH);
-        t6 = micros();
-
-        Serial.print(millis());
-        Serial.print(": out = ");
-        Serial.print((int) (out.bytes[0]), BIN);
-        Serial.print(" ");
-        Serial.print((int) (out.bytes[1]), BIN);
-        Serial.print(" ");
-        Serial.print((int) (out.bytes[2]), BIN);
-        Serial.print(", inserted = ");
-        Serial.print(conf.getCoinCount(TRACK_INSERT_1));
-        Serial.print(", ejected = ");
-        Serial.print(conf.getCoinCount(TRACK_EJECT));
-		Serial.print(", debounce took ");
-		Serial.print(t3 - t2);
-		Serial.print("us, receive took ");
-		Serial.print(t2 - t1);
-        Serial.print("us, send took ");
-		Serial.print(t6 - t5);
-        Serial.println("us");
-    }
-
-    if (do_print) {
-		do_print = false;
-        Serial.print(millis());
-        Serial.print(": in = ");
-        Serial.print((int) (in.bytes[0]), BIN);
-        Serial.print(" ");
-        Serial.print((int) (in.bytes[1]), BIN);
-        Serial.print(" ");
-        Serial.print((int) (in.bytes[2]), BIN);
-        Serial.print(", inserted = ");
-		Serial.print(conf.getCoinCount(TRACK_INSERT_1));
-        Serial.print(", ejected = ");
-        Serial.print(conf.getCoinCount(TRACK_EJECT));
-		Serial.print(", debounce took ");
-		Serial.print(t3 - t2);
-		Serial.print("us, receive took ");
-		Serial.print(t2 - t1);
-        Serial.println("us");
     }
 }
