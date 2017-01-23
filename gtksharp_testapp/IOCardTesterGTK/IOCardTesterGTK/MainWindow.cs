@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
+using System.Text.RegularExpressions;
 using Gtk;
 using Spark.Slot.IO;
 
@@ -211,7 +212,32 @@ public partial class MainWindow : Window
 					"0x100, 0x12 0x34 0x56 0x78 0x90 0xAB 0xCD 0xEF",
 					"0x200, 0xFE 0xDC 0xBA 0x09 0x87 0x65 0x43 0x21"
 				},
-				unhandled_send_callback
+				(command, parameters) => {
+					var address = _getTfromString<ushort>(parameters[0].Trim());
+					var data = Regex.Replace(parameters[1].Trim(), @"\s+", " ").Split(' ');
+					var bytes = new byte[data.Length];
+					for (int i = 0;i < data.Length; ++i)
+						bytes[i] = _getTfromString<byte>(data[i]);
+
+					StringBuilder builder = new StringBuilder(bytes.Length * 5);
+					foreach (var b in bytes)
+						builder.AppendFormat(" 0x{0:X2}", b);
+
+					var iter = textview_received.Buffer.StartIter;
+					textview_received.Buffer.Insert(
+						ref iter,
+						string.Format(
+							"=> {0}: cmd = {1}, address = 0x{2:X4}, length = {3}, data ={4}\r\n",
+							DateTime.Now,
+							sCommands[mLastCmdIndex].Command,
+							address,
+							data.Length,
+							builder
+						)
+					);
+
+					sCard.QueryWriteStorage(address, bytes);
+				}
 			),
 			new CommandProperties(
 				IOCard.Commands.CMD_READ_STORAGE, 2,
@@ -423,6 +449,22 @@ public partial class MainWindow : Window
 						"<= {0}: Keys:{1}\r\n",
 						DateTime.Now,
 						builder
+					)
+				);
+			});
+		};
+		sCard.OnWriteStorageResult += (sender, e) =>
+		{
+			Application.Invoke(delegate
+			{
+				var iter = textview_received.Buffer.StartIter;
+				textview_received.Buffer.Insert(
+					ref iter,
+					string.Format(
+						"<= {0}: Address = 0x{1:X4}, Length = {2}\r\n",
+						DateTime.Now,
+						e.Address,
+						e.Length
 					)
 				);
 			});
