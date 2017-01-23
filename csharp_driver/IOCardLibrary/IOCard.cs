@@ -34,20 +34,6 @@ namespace Spark.Slot.IO
 			StateUnavailable,
 		}
 
-		public UInt32 GetCachedCoinCount(CoinTrack trackId)
-		{
-			if (mCoinCounts.ContainsKey(trackId))
-				return mCoinCounts[trackId];
-			return 0;
-		}
-
-		public ButtonState GetCachedButtonState(byte buttonId)
-		{
-			if (mButtonStates.ContainsKey(buttonId))
-				return mButtonStates[buttonId];
-			return ButtonState.StateUnavailable;
-		}
-
 		/// <summary>
 		/// queue a GET_INFO command
 		/// </summary>
@@ -128,13 +114,13 @@ namespace Spark.Slot.IO
 				var messenger = new CmdMessenger(transport);
 				messenger.Attach((int)Events.EVT_GET_INFO_RESULT, (receivedCommand) =>
 				{
-					Manufacturer = receivedCommand.ReadBinStringArg();
-					Product = receivedCommand.ReadBinStringArg();
-					Version = receivedCommand.ReadBinStringArg();
-					ProtocolVersion = receivedCommand.ReadBinUInt32Arg();
+					string manufacturer = receivedCommand.ReadBinStringArg();
+					string product = receivedCommand.ReadBinStringArg();
+					string version = receivedCommand.ReadBinStringArg();
+					UInt32 protocol = receivedCommand.ReadBinUInt32Arg();
 
 					if (OnGetInfoResult != null)
-						OnGetInfoResult(this, new GetInfoResultEventArgs(Manufacturer, Product, Version, ProtocolVersion));
+						OnGetInfoResult(this, new GetInfoResultEventArgs(manufacturer, product, version, protocol));
 				});
 				messenger.Attach((int)Events.EVT_COIN_COUNTER_RESULT, (receivedCommand) =>
 				{
@@ -157,7 +143,7 @@ namespace Spark.Slot.IO
 					if (OnUnknown != null)
 						OnUnknown(this, new UnknownEventArgs(receivedCommand));
 				});
-                
+
 				if (messenger.Connect())
 				{
 					mMessenger = messenger;
@@ -207,9 +193,6 @@ namespace Spark.Slot.IO
 		{
 		}
 
-		private Dictionary<CoinTrack, UInt32> mCoinCounts = new Dictionary<CoinTrack, UInt32>();
-		private Dictionary<int, ButtonState> mButtonStates = new Dictionary<int, ButtonState>();
-
 		public enum Commands
 		{
 			CMD_READ_STORAGE = 0x87,
@@ -231,10 +214,6 @@ namespace Spark.Slot.IO
 			EVT_ERROR = 0xFF,
 		}
 
-		public string Manufacturer { get; private set; }
-		public string Product { get; private set; }
-		public string Version { get; private set; }
-		public UInt32 ProtocolVersion { get; private set; }
 
 		public class GetInfoResultEventArgs : EventArgs
 		{
