@@ -489,6 +489,21 @@ public partial class MainWindow : Window
 				);
 			});
 		};
+		sCard.OnDebug += (sender, e) =>
+		{
+			Application.Invoke(delegate
+			{
+				var iter = textview_received.Buffer.StartIter;
+				textview_received.Buffer.Insert(
+					ref iter,
+					string.Format(
+						"<= {0}: Debug = {1}\r\n",
+						DateTime.Now,
+						e.Message
+					)
+				);
+			});
+		};
 		sCard.OnUnknown += (sender, e) =>
 		{
 			Application.Invoke(delegate
