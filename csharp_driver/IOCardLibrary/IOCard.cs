@@ -67,6 +67,28 @@ namespace Spark.Slot.IO
 			return false;
 		}
 
+		/// <summary>
+		/// queue a GET_COIN_COUNTER command
+		/// </summary>
+		/// <returns><c>true</c>, if get info was queued, <c>false</c> otherwise.</returns>
+		/// <param name="track"><c>CoinTrack</c> indicates which track to eject</param>
+		/// <param name="queuePosition">
+		/// position of the command to be placed, either <c>SendQueue.InFrontQueue</c> to place the command in front of
+		/// the queue, or <c>SendQueue.AtEndQueue</c> to place the command at the end of the queue. Defaults to
+		/// <c>SendQueue.InFrontQueue</c>.
+		/// </param>
+		public bool QueryGetCoinCounter(CoinTrack track, SendQueue queuePosition = SendQueue.InFrontQueue)
+		{
+			if (IsConnected)
+			{
+				var cmd = new SendCommand((int)Commands.CMD_GET_COIN_COUNTER);
+				cmd.AddBinArgument((uint)track);
+				mMessenger.SendCommand(cmd, queuePosition);
+				return true;
+			}
+			return false;
+		}
+
 		public bool Connect(string port, int baudrate)
 		{
 			if (mMessenger != null)
@@ -89,6 +111,14 @@ namespace Spark.Slot.IO
 
 					if (OnGetInfoResult != null)
 						OnGetInfoResult(this, new GetInfoResultEventArgs(Manufacturer, Product, Version, ProtocolVersion));
+				});
+				messenger.Attach((int)Events.EVT_COIN_COUNTER_RESULT, (receivedCommand) =>
+				{
+					int track = receivedCommand.ReadBinUInt16Arg();
+					UInt32 coins = receivedCommand.ReadBinUInt32Arg();
+
+					if (OnCoinCounterResult != null)
+						OnCoinCounterResult(this, new CoinCounterResultEventArgs(track, coins));
 				});
 				messenger.Attach((int)Events.EVT_ERROR, (receivedCommand) =>
 				{
@@ -140,6 +170,7 @@ namespace Spark.Slot.IO
 		public event EventHandler OnConnected;
 		public event EventHandler OnDisconnected;
 		public event EventHandler<GetInfoResultEventArgs> OnGetInfoResult;
+		public event EventHandler<CoinCounterResultEventArgs> OnCoinCounterResult;
 		public event EventHandler<ErrorEventArgs> OnError;
 		public event EventHandler<UnknownEventArgs> OnUnknown;
 
@@ -194,6 +225,18 @@ namespace Spark.Slot.IO
 				Product = product;
 				Version = version;
 				ProtocolVersion = protoVersion;
+			}
+		}
+        
+        public class CoinCounterResultEventArgs : EventArgs
+		{
+			public int Track { get; internal set; }
+			public UInt32 Coins { get; internal set; }
+
+			public CoinCounterResultEventArgs(int track, UInt32 coins)
+			{
+				Track = track;
+				Coins = coins;
 			}
 		}
 
