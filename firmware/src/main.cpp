@@ -32,6 +32,8 @@ WreckedSPI< /* MISO */ 7, /* MOSI */ 2, /* SCLK_MISO */ 8, /* SCLK_MOSI */ 3, /*
 Configuration conf(fram);
 
 CmdMessenger messenger(Serial);
+Communicator communicator(messenger);
+
 union {
     uint8_t bytes[3];
     struct OutPort port;
@@ -136,6 +138,16 @@ void setup() {
 	previous_in.bytes[0] = in.bytes[0] | IN_MASK_0;
 	previous_in.bytes[1] = in.bytes[1] | IN_MASK_1;
 	previous_in.bytes[2] = in.bytes[2] | IN_MASK_2;
+
+	messenger.attach([]() {
+		switch (messenger.commandID()) {
+			case CMD_GET_INFO:
+				communicator.dispatchGetInfoResult();
+				break;
+			default:
+				communicator.dispatchError(messenger.commandID(), F("Unknown command"));
+		}
+	});
 }
 
 void loop() {

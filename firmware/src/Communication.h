@@ -16,4 +16,32 @@
 #define EVT_WRITE_STORAGE_RESULT	(0x69)
 #define EVT_READ_STORAGE_RESULT		(0x78)
 
+class Communicator {
+public:
+	Communicator(CmdMessenger & messenger):
+		_messenger(messenger)
+	{
+	}
+
+	void dispatchGetInfoResult() {
+		_messenger.sendCmdStart(EVT_GET_INFO_RESULT);
+		_messenger.sendCmdArg(F("Spark"));
+		_messenger.sendCmdArg(F("SLOT-IO-Card"));
+		_messenger.sendCmdArg(F("v0.0.1"));
+		_messenger.sendCmdBinArg(20170123L);
+		_messenger.sendCmdEnd();
+	}
+
+	template < typename T >
+	void dispatchError(uint8_t id, T msg) {
+		_messenger.sendCmdStart(EVT_ERROR);
+		_messenger.sendCmdArg(id);
+		_messenger.sendCmdArg(msg);
+		_messenger.sendCmdEnd();
+	}
+
+private:
+	CmdMessenger & _messenger;
+};
+
 #endif
