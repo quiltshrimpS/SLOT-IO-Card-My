@@ -149,24 +149,6 @@ public partial class MainWindow : Window
 				}
 			),
 			new CommandProperties(
-				IOCard.Commands.CMD_GET_KEYS, 0,
-				"Get key states from device",
-				"Params: N/A",
-				(command, parameters) =>
-				{
-					var iter = textview_received.Buffer.StartIter;
-					textview_received.Buffer.Insert(
-						ref iter,
-						string.Format(
-							"=> {0}: cmd = {1}\r\n",
-							DateTime.Now,
-							sCommands[mLastCmdIndex].Command
-						)
-					);
-					sCard.QueryGetKeys();
-				}
-			),
-			new CommandProperties(
 				IOCard.Commands.CMD_RESET_COIN_COINTER, 1,
 				"Reset coin counter.",
 				"Params: <track (byte)>",
@@ -191,6 +173,24 @@ public partial class MainWindow : Window
 					);
 
 					sCard.QueryResetCoinCounter(track);
+				}
+			),
+			new CommandProperties(
+				IOCard.Commands.CMD_GET_KEYS, 0,
+				"Get key states from device",
+				"Params: N/A",
+				(command, parameters) =>
+				{
+					var iter = textview_received.Buffer.StartIter;
+					textview_received.Buffer.Insert(
+						ref iter,
+						string.Format(
+							"=> {0}: cmd = {1}\r\n",
+							DateTime.Now,
+							sCommands[mLastCmdIndex].Command
+						)
+					);
+					sCard.QueryGetKeys();
 				}
 			),
 			new CommandProperties(
