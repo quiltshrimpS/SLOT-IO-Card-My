@@ -51,7 +51,7 @@ public:
 		// this class will try to use the one with good `checksum` and newer `seq`
 
 		// read the data from bank 0
-		_readBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
+		readBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
 		uint8_t checksum_0 = _getChecksum();
 		bool bank0_checksum_good = checksum_0 == _data.configs.checksum;
 		uint8_t bank0_seq = _data.configs.seq + 1;
@@ -65,7 +65,7 @@ public:
 		#endif
 
 		// read the data from bank 1
-		_readBytes(CONF_ADDR_BANK_1, CONF_SIZE_ALL, _data.bytes);
+		readBytes(CONF_ADDR_BANK_1, CONF_SIZE_ALL, _data.bytes);
 		uint8_t checksum_1 = _getChecksum();
 		bool bank1_checksum_good = checksum_1 == _data.configs.checksum;
 
@@ -91,7 +91,7 @@ public:
 				DEBUG_SERIAL.println("Configuration: both good, using bank 0");
 				#endif
 				// bank0 is newer, read them back from fram
-				_readBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
+				readBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
 			}
 		} else if (!bank0_checksum_good && !bank1_checksum_good) {
 			#if defined(DEBUG_SERIAL)
@@ -100,15 +100,15 @@ public:
 			// both bad, initialize bank0 and use it, write back to both bank
 			memset(_data.bytes, 0, CONF_SIZE_ALL);
 			_data.configs.checksum = _getChecksum();
-			_writeBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
-			_writeBytes(CONF_ADDR_BANK_1, CONF_SIZE_ALL, _data.bytes);
+			writeBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
+			writeBytes(CONF_ADDR_BANK_1, CONF_SIZE_ALL, _data.bytes);
 		} else {
 			if (bank0_checksum_good) {
 				#if defined(DEBUG_SERIAL)
 				DEBUG_SERIAL.println("Configuration: bank 1 bad, use bank 0.");
 				#endif
 				// bank1 is bad, read back bank0
-				_readBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
+				readBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
 			} else /* if (bank1_checksum_good) */ {
 				#if defined(DEBUG_SERIAL)
 				DEBUG_SERIAL.println("Configuration: bank 0 bad, use bank 1.");
@@ -257,29 +257,29 @@ public:
 		#endif
 	}
 
+	__attribute__((always_inline)) inline
+	void readBytes(uint16_t addr, uint8_t length, uint8_t * buffer) {
+		while (length != 0) {
+			uint8_t bytes = min(length, TWI_BUFFER_LENGTH);
+			_fram.readArray(addr, bytes, buffer);
+			addr += bytes;
+			buffer += bytes;
+			length -= bytes;
+		}
+	}
+
+	__attribute__((always_inline)) inline
+	void writeBytes(uint16_t addr, uint8_t length, uint8_t * buffer) {
+		while (length != 0) {
+			uint8_t bytes = min(length, TWI_BUFFER_LENGTH);
+			_fram.writeArray(addr, bytes, buffer);
+			addr += bytes;
+			buffer += bytes;
+			length -= bytes;
+		}
+	}
+
 private:
-	__attribute__((always_inline)) inline
-	void _readBytes(uint16_t addr, uint8_t length, uint8_t * buffer) {
-		while (length != 0) {
-			uint8_t bytes_to_read = min(length, TWI_BUFFER_LENGTH);
-			_fram.readArray(addr, bytes_to_read, buffer);
-			addr += bytes_to_read;
-			buffer += bytes_to_read;
-			length -= bytes_to_read;
-		}
-	}
-
-	__attribute__((always_inline)) inline
-	void _writeBytes(uint16_t addr, uint8_t length, uint8_t *buffer) {
-		while (length != 0) {
-			uint8_t bytes_to_write = min(length, TWI_BUFFER_LENGTH);
-			_fram.writeArray(addr, bytes_to_write, buffer);
-			addr += bytes_to_write;
-			buffer += bytes_to_write;
-			length -= bytes_to_write;
-		}
-	}
-
 	__attribute__((always_inline)) inline
 	uint8_t _getChecksum() {
 		uint8_t checksum = 0x87; // randomly picked seed...
