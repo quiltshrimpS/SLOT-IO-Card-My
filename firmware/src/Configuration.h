@@ -264,22 +264,6 @@ public:
 		while (length != 0) {
 			uint8_t bytes = min(length, TWI_BUFFER_LENGTH);
 			_fram.readArray(addr, bytes, buffer);
-			#if defined(DEBUG_SERIAL)
-			DEBUG_SERIAL.print("readBytes(): 0x");
-			DEBUG_SERIAL.print(addr, HEX);
-			DEBUG_SERIAL.print(' ');
-			DEBUG_SERIAL.print(bytes);
-			DEBUG_SERIAL.print(" / ");
-			DEBUG_SERIAL.print(length);
-			DEBUG_SERIAL.print(":");
-			for (size_t i = 0;i < bytes;++i) {
-				DEBUG_SERIAL.print(' ');
-				if (buffer[i] < 0x10)
-					DEBUG_SERIAL.print('0');
-				DEBUG_SERIAL.print((int)(buffer[i]), HEX);
-			}
-			DEBUG_SERIAL.println();
-			#endif
 			addr += bytes;
 			buffer += bytes;
 			length -= bytes;
@@ -291,22 +275,6 @@ public:
 		while (length != 0) {
 			uint8_t bytes = min(length, TWI_BUFFER_LENGTH);
 			_fram.writeArray(addr, bytes, buffer);
-			#if defined(DEBUG_SERIAL)
-			DEBUG_SERIAL.print("writeBytes(): 0x");
-			DEBUG_SERIAL.print(addr, HEX);
-			DEBUG_SERIAL.print(' ');
-			DEBUG_SERIAL.print(bytes);
-			DEBUG_SERIAL.print(" / ");
-			DEBUG_SERIAL.print(length);
-			DEBUG_SERIAL.print(":");
-			for (size_t i = 0;i < bytes;++i) {
-				DEBUG_SERIAL.print(' ');
-				if (buffer[i] < 0x10)
-					DEBUG_SERIAL.print('0');
-				DEBUG_SERIAL.print((int)(buffer[i]), HEX);
-			}
-			DEBUG_SERIAL.println();
-			#endif
 			addr += bytes;
 			buffer += bytes;
 			length -= bytes;
