@@ -164,6 +164,25 @@ namespace Spark.Slot.IO
 			return false;
 		}
 
+		/// <summary>
+		/// queue a GET_KEYS command
+		/// </summary>
+		/// <returns><c>true</c>, if get info was queued, <c>false</c> otherwise.</returns>
+		/// <param name="queuePosition">
+		/// position of the command to be placed, either <c>SendQueue.InFrontQueue</c> to place the command in front of
+		/// the queue, or <c>SendQueue.AtEndQueue</c> to place the command at the end of the queue. Defaults to
+		/// <c>SendQueue.AtEndQueue</c>.
+		/// </param>
+		public bool QueryGetKeys(SendQueue queuePosition = SendQueue.AtEndQueue)
+		{
+			if (IsConnected)
+			{
+				mMessenger.SendCommand(new SendCommand((int)Commands.CMD_GET_KEYS), queuePosition);
+				return true;
+			}
+			return false;
+		}
+
 		public bool Connect(string port, int baudrate)
 		{
 			if (mMessenger != null)
@@ -300,6 +319,7 @@ namespace Spark.Slot.IO
 			CMD_GET_COIN_COUNTER = 0xD2,
 			CMD_EJECT_COIN = 0xE1,
 			CMD_GET_INFO = 0xF0,
+			CMD_GET_KEYS = 0xA5,
 		}
 
 		public enum Events
