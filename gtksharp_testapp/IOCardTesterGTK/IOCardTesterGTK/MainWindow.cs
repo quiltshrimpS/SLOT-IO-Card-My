@@ -69,7 +69,7 @@ public partial class MainWindow : Window
 			textview_received.Buffer.Insert(
 				ref iter,
 				string.Format(
-					"=> {0}: cmd = {1}, params = {2}\r\n",
+					"=> {0}: unknown cmd = {1}, params = {2}\r\n",
 					DateTime.Now,
 					sCommands[mLastCmdIndex].Command,
 					parameters.Length == 0 ? "<null>" : String.Join(", ", parameters)
@@ -84,6 +84,15 @@ public partial class MainWindow : Window
 				"Params: N/A",
 				(command, parameters) =>
 				{
+					var iter = textview_received.Buffer.StartIter;
+					textview_received.Buffer.Insert(
+						ref iter,
+						string.Format(
+							"=> {0}: cmd = {1}\r\n",
+							DateTime.Now,
+							sCommands[mLastCmdIndex].Command
+						)
+					);
 					sCard.QueryGetInfo();
 				}
 			),
@@ -100,6 +109,19 @@ public partial class MainWindow : Window
 				{
 					var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
 					var count = _getTfromString<byte>(parameters[1].Trim());
+
+					var iter = textview_received.Buffer.StartIter;
+					textview_received.Buffer.Insert(
+						ref iter,
+						string.Format(
+							"=> {0}: cmd = {1}, track = {2}, count = {3}\r\n",
+							DateTime.Now,
+							sCommands[mLastCmdIndex].Command,
+							track,
+							count
+						)
+					);
+
 					sCard.QueryEjectCoin(track, count);
 				}
 			),
@@ -115,6 +137,18 @@ public partial class MainWindow : Window
 				(command, parameters) =>
 				{
 					var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
+
+					var iter = textview_received.Buffer.StartIter;
+					textview_received.Buffer.Insert(
+						ref iter,
+						string.Format(
+							"=> {0}: cmd = {1}, track = {2}\r\n",
+							DateTime.Now,
+							sCommands[mLastCmdIndex].Command,
+							track
+						)
+					);
+
 					sCard.QueryGetCoinCounter(track);
 				}
 			),
@@ -124,6 +158,15 @@ public partial class MainWindow : Window
 				"Params: N/A",
 				(command, parameters) =>
 				{
+					var iter = textview_received.Buffer.StartIter;
+					textview_received.Buffer.Insert(
+						ref iter,
+						string.Format(
+							"=> {0}: cmd = {1}\r\n",
+							DateTime.Now,
+							sCommands[mLastCmdIndex].Command
+						)
+					);
 					sCard.QueryGetKeys();
 				}
 			),
