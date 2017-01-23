@@ -222,11 +222,29 @@ public partial class MainWindow : Window
 				"Read data from onboard storage.",
 				"Params: <address (UInt16)>, <length (byte)>",
 				new string[] {
+					"0x000, 64 // read 64 bytes from 0x000",
 					"0x100, 8 // read 8 bytes from 0x100",
-					"0x200, 4 // read 4 bytes from 0x200",
+					"0x200, 16 // read 16 bytes from 0x200",
 					"0x204, 4 // read 4 bytes from 0x204",
 				},
-				unhandled_send_callback
+				(command, parameters) => {
+					var address = _getTfromString<ushort>(parameters[0].Trim());
+					var length = _getTfromString<byte>(parameters[1].Trim());
+
+					var iter = textview_received.Buffer.StartIter;
+					textview_received.Buffer.Insert(
+						ref iter,
+						string.Format(
+							"=> {0}: cmd = {1}, address = 0x{2:X}, length = {3}\r\n",
+							DateTime.Now,
+							sCommands[mLastCmdIndex].Command,
+							address,
+							length
+						)
+					);
+
+					sCard.QueryReadStorage(address, length);
+				}
 			),
 		};
 
@@ -413,6 +431,26 @@ public partial class MainWindow : Window
 					string.Format(
 						"<= {0}: Keys:{1}\r\n",
 						DateTime.Now,
+						builder
+					)
+				);
+			});
+		};
+		sCard.OnReadStorageResult += (sender, e) =>
+		{
+			Application.Invoke(delegate
+			{
+				var builder = new StringBuilder(e.Data.Length * 5);
+				foreach (var data in e.Data)
+					builder.Append(string.Format(" 0x{0:X2}", data));
+
+				var iter = textview_received.Buffer.StartIter;
+				textview_received.Buffer.Insert(
+					ref iter,
+					string.Format(
+						"<= {0}: Address = 0x{1:X4}, Data:{2}\r\n",
+						DateTime.Now,
+						e.Address,
 						builder
 					)
 				);
