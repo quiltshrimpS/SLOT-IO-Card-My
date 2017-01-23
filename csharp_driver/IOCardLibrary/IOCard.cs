@@ -274,6 +274,13 @@ namespace Spark.Slot.IO
 						case Errors.ERR_PROTECTED_STORAGE:
 							e = new ErrorProtectedStorageEventArgs(err, receivedCommand.ReadBinUInt16Arg());
 							break;
+						case Errors.ERR_TOO_LONG:
+							{
+								var desired = receivedCommand.ReadBinByteArg();
+								var requested = receivedCommand.ReadBinByteArg();
+								e = new ErrorTooLongEventArgs(err, desired, requested);
+							}
+							break;
 						case Errors.ERR_UNKNOWN_COMMAND:
 							e = new ErrorUnknownCommandEventArgs(err, receivedCommand.ReadBinByteArg());
 							break;
@@ -365,6 +372,7 @@ namespace Spark.Slot.IO
 			ERR_EJECT_TIMEOUT = 0x02,
 			ERR_NOT_A_TRACK = 0x03,
 			ERR_PROTECTED_STORAGE = 0x04,
+			ERR_TOO_LONG = 0x05,
 			ERR_UNKNOWN_COMMAND = 0xFF,
 		}
 
@@ -462,6 +470,19 @@ namespace Spark.Slot.IO
 				base(error)
 			{
 				Address = address;
+			}
+		}
+
+		public class ErrorTooLongEventArgs : ErrorEventArgs
+		{
+			public byte DesiredLength { get; internal set; }
+			public byte RequestedLength { get; internal set; }
+
+			public ErrorTooLongEventArgs(Errors error, byte desired, byte requested) :
+				base(error)
+			{
+				DesiredLength = desired;
+				RequestedLength = requested;
 			}
 		}
 
