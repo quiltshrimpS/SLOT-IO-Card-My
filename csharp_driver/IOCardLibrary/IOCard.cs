@@ -248,7 +248,7 @@ namespace Spark.Slot.IO
 					CurrentSerialSettings = { PortName = port, BaudRate = baudrate, DtrEnable = false }
 				};
 
-				var messenger = new CmdMessenger(transport);
+				var messenger = new CmdMessenger(transport, 512);
 				messenger.Attach((int)Events.EVT_GET_INFO_RESULT, (receivedCommand) =>
 				{
 					string manufacturer = receivedCommand.ReadBinStringArg();
