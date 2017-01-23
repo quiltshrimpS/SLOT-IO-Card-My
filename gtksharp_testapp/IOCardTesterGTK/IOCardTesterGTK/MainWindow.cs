@@ -48,7 +48,8 @@ public partial class MainWindow : Window
 			SendCommandCallback = callback;
 		}
 
-		public void SendCommand(string[] parameters) {
+		public void SendCommand(string[] parameters)
+		{
 			SendCommandCallback.Invoke(Command, parameters);
 		}
 	}
@@ -81,13 +82,13 @@ public partial class MainWindow : Window
 			IOCard.Commands.CMD_GET_COIN_COUNTER, 1,
 			"Get coin counter.",
 			"Params: <track (byte)>",
-			new string[] { 
+			new string[] {
 				"0x00 // track 0x00 (insert 1)",
 				"0x80 // track 0x80 (eject track)",
 			},
 			(command, parameters) => {
 				var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
-				IOCard.Card.QueryGetCoinCounter(track);				
+				IOCard.Card.QueryGetCoinCounter(track);
 			}
 		),
 		new CommandProperties(
@@ -224,22 +225,42 @@ public partial class MainWindow : Window
 		};
 		IOCard.Card.OnGetInfoResult += (sender, e) =>
 		{
-			Gtk.Application.Invoke(delegate 
+			Gtk.Application.Invoke(delegate
 			{
-				textview_received.Buffer.Text = string.Format("<= {0}: Manufacturer = {1}, Product = {2}, Version = {3}, Protocol = {4}\r\n{5}", DateTime.Now, e.Manufacturer, e.Product, e.Version, e.ProtocolVersion, textview_received.Buffer.Text);
+				textview_received.Buffer.Text = string.Format(
+					"<= {0}: Manufacturer = {1}, Product = {2}, Version = {3}, Protocol = {4}\r\n{5}",
+					DateTime.Now,
+					e.Manufacturer,
+					e.Product,
+					e.Version,
+					e.ProtocolVersion,
+					textview_received.Buffer.Text
+				);
 			});
 		};
 		IOCard.Card.OnCoinCounterResult += (sender, e) =>
 		{
-			Gtk.Application.Invoke(delegate {
-				textview_received.Buffer.Text = string.Format("<= {0}: Track = {1}, Coins = {2}\r\n{3}", DateTime.Now, e.Track, e.Coins, textview_received.Buffer.Text);
+			Gtk.Application.Invoke(delegate
+			{
+				textview_received.Buffer.Text = string.Format(
+					"<= {0}: Track = {1}, Coins = {2}\r\n{3}",
+					DateTime.Now,
+					e.Track,
+					e.Coins,
+					textview_received.Buffer.Text
+				);
 			});
 		};
 		IOCard.Card.OnUnknown += (sender, e) =>
 		{
 			Gtk.Application.Invoke(delegate
 			{
-				textview_received.Buffer.Text = string.Format("<= {0}: Unknown - {1}\r\n{2}", DateTime.Now, e.Command.CommandString(), textview_received.Buffer.Text);
+				textview_received.Buffer.Text = string.Format(
+					"<= {0}: Unknown - {1}\r\n{2}",
+					DateTime.Now,
+					e.Command.CommandString(),
+					textview_received.Buffer.Text
+				);
 			});
 		};
 	}
@@ -321,9 +342,13 @@ public partial class MainWindow : Window
 		var comment_idx = parameters_raw.IndexOf("//", StringComparison.Ordinal);
 		parameters_raw = parameters_raw.Substring(0, comment_idx == -1 ? parameters_raw.Length : comment_idx).Trim();
 
-		textview_received.Buffer.Text =
-			string.Format("=> {0}: cmd = {1}, params = {2}\r\n", DateTime.Now, sCommands[mLastCmdIndex].Command, parameters_raw.Length == 0 ? "<null>" : parameters_raw) +
-			textview_received.Buffer.Text;
+		textview_received.Buffer.Text = string.Format(
+			"=> {0}: cmd = {1}, params = {2}\r\n{3}",
+			DateTime.Now,
+			sCommands[mLastCmdIndex].Command,
+			parameters_raw.Length == 0 ? "<null>" : parameters_raw,
+			textview_received.Buffer.Text
+		);
 
 		sCommands[mLastCmdIndex].SendCommand(parameters_raw.Split(','));
 	}
