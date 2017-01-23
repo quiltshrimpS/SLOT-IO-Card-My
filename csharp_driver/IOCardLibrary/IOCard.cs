@@ -9,9 +9,6 @@ namespace Spark.Slot.IO
 {
 	public class IOCard
 	{
-		private static readonly IOCard sCard = new IOCard();
-		public static IOCard Card { get { return sCard; } }
-
 		public enum CoinTrack
 		{
 			/* 0x00 ~ 0x7F are coin insert tracks */
@@ -97,6 +94,10 @@ namespace Spark.Slot.IO
 			/// 2. it's "masked", not an available input.
 			/// </value>
 			StateUnavailable,
+		}
+
+		public IOCard()
+		{
 		}
 
 		/// <summary>
@@ -304,11 +305,6 @@ namespace Spark.Slot.IO
 		#region "implementations"
 
 		private CmdMessenger mMessenger = null;
-
-		// disallow instantiation
-		private IOCard()
-		{
-		}
 
 		public enum Commands
 		{
