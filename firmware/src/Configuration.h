@@ -23,11 +23,11 @@
 #define CONF_ADDR_BANK_0				(CONF_ADDR_BEGIN)
 #define CONF_ADDR_BANK_1				(CONF_ADDR_BEGIN + 0x0100)
 
-#define TRACK_EJECT			(0x80)
 #define TRACK_INSERT_1		(0x00)
 #define TRACK_INSERT_2		(0x01)
 #define TRACK_INSERT_3		(0x02)
-#define TRACK_BANKNOTE		(0x40)
+#define TRACK_BANKNOTE		(0x80)
+#define TRACK_EJECT			(0xC0)
 #define TRACK_NOT_A_TRACK	(0xFF)
 
 class Configuration {
