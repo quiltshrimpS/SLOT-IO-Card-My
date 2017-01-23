@@ -32,14 +32,14 @@ public:
 		_messenger.sendCmdEnd();
 	}
 
-	void dispatchCoinCounterResult(uint8_t track, uint32_t coins) {
+	void dispatchCoinCounterResult(uint8_t const track, uint32_t const coins) {
 		_messenger.sendCmdStart(EVT_COIN_COUNTER_RESULT);
 		_messenger.sendCmdBinArg((uint16_t)track);
 		_messenger.sendCmdBinArg(coins);
 		_messenger.sendCmdEnd();
 	}
 
-	void dispatchKey(uint8_t length, uint8_t *keys) {
+	void dispatchKey(uint8_t const length, uint8_t const * const keys) {
 		_messenger.sendCmdStart(EVT_KEY);
 		_messenger.sendCmdBinArg(length);
 		for (uint8_t i = 0;i < length;++i)
