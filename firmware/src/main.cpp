@@ -54,14 +54,17 @@ Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_eject;
 Debounce<LOW, DEBOUNCE_TIMEOUT> debounce_banknote(
 	nullptr,
 	[] () {
-		conf.setCoinCount(TRACK_INSERT_3, conf.getCoinCount(TRACK_INSERT_3) + 1);
+		uint32_t coins = conf.getCoinCount(TRACK_BANKNOTE) + 1;
+		conf.setCoinCount(TRACK_BANKNOTE, coins);
+		communicator.dispatchCoinCounterResult(TRACK_BANKNOTE, coins);
 	}
 );
 
 Debounce<HIGH, DEBOUNCE_TIMEOUT> debounce_eject(
 	nullptr,
 	[] () {
-		conf.setCoinCount(TRACK_EJECT, conf.getCoinCount(TRACK_EJECT) + 1);
+		uint32_t coins = conf.getCoinCount(TRACK_EJECT) + 1;
+		conf.setCoinCount(TRACK_EJECT, coins);
 		pulse_counter_eject.pulse(1);
 		uint8_t to_eject = conf.getCoinsToEject(TRACK_EJECT);
 		if (to_eject < 2) {
@@ -70,13 +73,16 @@ Debounce<HIGH, DEBOUNCE_TIMEOUT> debounce_eject(
 		}
 		if (to_eject > 0)
 			conf.setCoinsToEject(TRACK_EJECT, to_eject - 1);
+		communicator.dispatchCoinCounterResult(TRACK_EJECT, coins);
 	}
 );
 
 Debounce<LOW, DEBOUNCE_TIMEOUT> debounce_insert_1(
 	nullptr,
 	[] () {
-		conf.setCoinCount(TRACK_INSERT_1, conf.getCoinCount(TRACK_INSERT_1) + 1);
+		uint32_t coins = conf.getCoinCount(TRACK_INSERT_1) + 1;
+		conf.setCoinCount(TRACK_INSERT_1, coins);
+		communicator.dispatchCoinCounterResult(TRACK_INSERT_1, coins);
 		pulse_counter_insert.pulse(1);
 	}
 );
@@ -84,7 +90,9 @@ Debounce<LOW, DEBOUNCE_TIMEOUT> debounce_insert_1(
 Debounce<LOW, DEBOUNCE_TIMEOUT> debounce_insert_2(
 	nullptr,
 	[] () {
-		conf.setCoinCount(TRACK_INSERT_2, conf.getCoinCount(TRACK_INSERT_2) + 1);
+		uint32_t coins = conf.getCoinCount(TRACK_INSERT_2) + 1;
+		conf.setCoinCount(TRACK_INSERT_2, coins);
+		communicator.dispatchCoinCounterResult(TRACK_INSERT_2, coins);
 		pulse_counter_insert.pulse(1);
 	}
 );
@@ -92,7 +100,9 @@ Debounce<LOW, DEBOUNCE_TIMEOUT> debounce_insert_2(
 Debounce<LOW, DEBOUNCE_TIMEOUT> debounce_insert_3(
 	nullptr,
 	[] () {
-		conf.setCoinCount(TRACK_INSERT_3, conf.getCoinCount(TRACK_INSERT_3) + 1);
+		uint32_t coins = conf.getCoinCount(TRACK_INSERT_3) + 1;
+		conf.setCoinCount(TRACK_INSERT_3, coins);
+		communicator.dispatchCoinCounterResult(TRACK_INSERT_3, coins);
 		pulse_counter_insert.pulse(1);
 	}
 );
@@ -143,6 +153,29 @@ void setup() {
 		switch (messenger.commandID()) {
 			case CMD_GET_INFO:
 				communicator.dispatchGetInfoResult();
+				break;
+			case CMD_EJECT_COIN:
+				{
+					uint8_t const track = messenger.readBinArg<uint8_t>();
+					uint8_t const count = messenger.readBinArg<uint8_t>();
+
+					// block newer command if there are still coins left to be ejected
+					uint8_t const coins = conf.getCoinsToEject(TRACK_EJECT);
+					if (count != 0 && coins != 0) {
+						communicator.dispatchError(coins, F("Previous ejection interrupted."));
+					} else if (!conf.setCoinsToEject(track, count)) {
+						communicator.dispatchError(track, F("Ejection failed"));
+					} else if (count != 0) {
+						out.port.ssr1 = true;
+						do_send = true;
+					}
+				}
+				break;
+			case CMD_GET_COIN_COUNTER:
+			 	{
+					uint8_t const track = messenger.readBinArg<uint8_t>();
+					communicator.dispatchCoinCounterResult(track, conf.getCoinCount(track));
+				}
 				break;
 			default:
 				communicator.dispatchError(messenger.commandID(), F("Unknown command"));

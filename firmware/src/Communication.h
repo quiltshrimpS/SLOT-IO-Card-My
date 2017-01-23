@@ -32,6 +32,13 @@ public:
 		_messenger.sendCmdEnd();
 	}
 
+	void dispatchCoinCounterResult(uint8_t track, uint32_t coins) {
+		_messenger.sendCmdStart(EVT_COIN_COUNTER_RESULT);
+		_messenger.sendCmdBinArg((uint16_t)track);
+		_messenger.sendCmdBinArg(coins);
+		_messenger.sendCmdEnd();
+	}
+
 	template < typename T >
 	void dispatchError(uint8_t id, T msg) {
 		_messenger.sendCmdStart(EVT_ERROR);
