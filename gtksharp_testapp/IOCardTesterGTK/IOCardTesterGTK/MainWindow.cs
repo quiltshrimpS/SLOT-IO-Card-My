@@ -117,7 +117,6 @@ public partial class MainWindow : Window
 	public MainWindow() : base(WindowType.Toplevel)
 	{
 		Build();
-		mLastCmdIndex = combobox_cmd.Active;
 
 		var cmds = new List<string>(sCommands.Length);
 		foreach (var desc in sCommands)
@@ -128,6 +127,7 @@ public partial class MainWindow : Window
 				desc.Command.ToString().Replace("CMD_", "")
 			));
 		_populateComboBox(combobox_cmd, cmds);
+		mLastCmdIndex = combobox_cmd.Active;
 		label_cmd_desc.Text = sCommands[mLastCmdIndex].CommandDescription;
 		label_params_desc.Text = sCommands[mLastCmdIndex].ParamsDescription;
 
