@@ -57,6 +57,15 @@ public:
 		_messenger.sendCmdEnd();
 	}
 
+	void dispatchReadStorage(uint16_t const address, uint8_t const length, uint8_t const * const buffer) {
+		_messenger.sendCmdStart(EVT_READ_STORAGE_RESULT);
+		_messenger.sendCmdBinArg<uint16_t>(address);
+		_messenger.sendCmdBinArg<uint8_t>(length);
+		for (uint8_t i = 0;i < length;++i)
+			_messenger.sendCmdBinArg<uint8_t>(buffer[i]);
+		_messenger.sendCmdEnd();
+	}
+
 	void dispatchErrorEjectInterrupted(uint8_t const track, uint8_t const count) {
 		_messenger.sendCmdStart(EVT_ERROR);
 		_messenger.sendCmdBinArg<uint8_t>(ERR_EJECT_INTERRUPTED);
