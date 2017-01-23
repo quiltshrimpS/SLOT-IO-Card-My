@@ -227,6 +227,8 @@ void loop() {
 		masked[1] != previous_in.bytes[1] ||
 		masked[2] != previous_in.bytes[2])
 	{
+		communicator.dispatchKey(3, masked);
+
 		previous_in.bytes[0] = masked[0];
 		previous_in.bytes[1] = masked[1];
 		previous_in.bytes[2] = masked[2];

@@ -39,6 +39,14 @@ public:
 		_messenger.sendCmdEnd();
 	}
 
+	void dispatchKey(uint8_t length, uint8_t *keys) {
+		messenger.sendCmdStart(EVT_KEY);
+		messenger.sendCmdBinArg(length);
+		for (uint8_t i = 0;i < length;++i)
+			messenger.sendCmdArg(masked[i]);
+		messenger.sendCmdEnd();
+	}
+
 	template < typename T >
 	void dispatchError(uint8_t id, T msg) {
 		_messenger.sendCmdStart(EVT_ERROR);
