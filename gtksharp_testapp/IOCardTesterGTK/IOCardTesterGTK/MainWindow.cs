@@ -301,6 +301,21 @@ public partial class MainWindow : Window
 							);
 						}
 						break;
+					case IOCard.Errors.ERR_PROTECTED_STORAGE:
+						{
+							var ev = (IOCard.ErrorProtectedStorageEventArgs)e;
+							var iter = textview_received.Buffer.StartIter;
+							textview_received.Buffer.Insert(
+								ref iter,
+								string.Format(
+									"<= {0}: error = {1}, address = 0x{2:X}\r\n",
+									DateTime.Now,
+									ev.ErrorCode,
+									ev.Address
+								)
+							);
+						}
+						break;
 					case IOCard.Errors.ERR_UNKNOWN_COMMAND:
 						{
 							var ev = (IOCard.ErrorUnknownCommandEventArgs)e;
