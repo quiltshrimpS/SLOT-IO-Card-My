@@ -197,11 +197,39 @@ namespace Spark.Slot.IO
 				});
 				messenger.Attach((int)Events.EVT_ERROR, (receivedCommand) =>
 				{
-					UInt16 err = receivedCommand.ReadUInt16Arg();
-					string message = receivedCommand.ReadBinStringArg();
+					ErrorEventArgs e = null;
+					var err = (Errors)receivedCommand.ReadBinUInt16Arg();
+					switch (err)
+					{
+						case Errors.ERR_EJECT_INTERRUPTED:
+							{
+								var track = (CoinTrack)receivedCommand.ReadBinUInt16Arg();
+								UInt16 coins = receivedCommand.ReadBinUInt16Arg();
+								e = new ErrorEjectInterruptedEventArgs(err, track, coins);
+							}
+							break;
+						case Errors.ERR_EJECT_TIMEOUT:
+							{
+								UInt16 track = receivedCommand.ReadBinUInt16Arg();
+								e = new ErrorEjectTimeoutEventArgs(err, (CoinTrack)track);
+							}
+							break;
+						case Errors.ERR_NOT_A_TRACK:
+							{
+								UInt16 track = receivedCommand.ReadBinUInt16Arg();
+								e = new ErrorNotATrackEventArgs(err, (CoinTrack)track);
+							}
+							break;
+						case Errors.ERR_UNKNOWN_COMMAND:
+							e = new ErrorUnknownCommandEventArgs(err, receivedCommand.ReadBinUInt16Arg());
+							break;
+						default:
+							e = new ErrorUnknownErrorEventArgs(err, receivedCommand.ReadBinUInt16Arg());
+							break;
+					}
 
 					if (OnError != null)
-						OnError(this, new ErrorEventArgs(err, message));
+						OnError(this, e);
 				});
 				messenger.Attach((receivedCommand) =>
 				{
@@ -279,6 +307,14 @@ namespace Spark.Slot.IO
 			EVT_ERROR = 0xFF,
 		}
 
+		public enum Errors
+		{
+			ERR_UNKNOWN_ERROR = 0x00,
+			ERR_EJECT_INTERRUPTED = 0x01,
+			ERR_EJECT_TIMEOUT = 0x02,
+			ERR_NOT_A_TRACK = 0x03,
+			ERR_UNKNOWN_COMMAND = 0xFF,
+		}
 
 		public class GetInfoResultEventArgs : EventArgs
 		{
@@ -310,13 +346,71 @@ namespace Spark.Slot.IO
 
 		public class ErrorEventArgs : EventArgs
 		{
-			public UInt16 Error { get; internal set; }
-			public string Message { get; internal set; }
+			public Errors ErrorCode { get; internal set; }
 
-			public ErrorEventArgs(UInt16 error, string message)
+			public ErrorEventArgs(Errors error)
 			{
-				Error = error;
-				Message = message;
+				ErrorCode = error;
+			}
+		}
+
+		public class ErrorTrackEventArgs : ErrorEventArgs
+		{
+			public CoinTrack Track { get; internal set; }
+
+			public ErrorTrackEventArgs(Errors error, CoinTrack track) :
+				base(error)
+			{
+				Track = track;
+			}
+		}
+
+		public class ErrorEjectInterruptedEventArgs : ErrorTrackEventArgs
+		{
+			public UInt16 CoinsFailed { get; internal set; }
+
+			public ErrorEjectInterruptedEventArgs(Errors error, CoinTrack track, UInt16 coins) :
+				base(error, track)
+			{
+				CoinsFailed = coins;
+			}
+		}
+
+		public class ErrorEjectTimeoutEventArgs : ErrorTrackEventArgs
+		{
+			public ErrorEjectTimeoutEventArgs(Errors error, CoinTrack track) :
+				base(error, track)
+			{
+			}
+		}
+
+		public class ErrorNotATrackEventArgs : ErrorTrackEventArgs
+		{
+			public ErrorNotATrackEventArgs(Errors error, CoinTrack track) :
+				base(error, track)
+			{
+			}
+		}
+
+		public class ErrorUnknownCommandEventArgs : ErrorEventArgs
+		{
+			public UInt16 Command { get; internal set; }
+
+			public ErrorUnknownCommandEventArgs(Errors error, UInt16 command) :
+				base(error)
+			{
+				Command = command;
+			}
+		}
+
+		public class ErrorUnknownErrorEventArgs : ErrorEventArgs
+		{
+			public UInt16 UnknownErrorCode { get; internal set; }
+
+			public ErrorUnknownErrorEventArgs(Errors error, UInt16 errorCode) :
+				base(error)
+			{
+				UnknownErrorCode = errorCode;
 			}
 		}
 
