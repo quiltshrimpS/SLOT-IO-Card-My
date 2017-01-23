@@ -58,7 +58,9 @@ public partial class MainWindow : Window
 			IOCard.Commands.CMD_GET_INFO, 0,
 			"Get device information",
 			"Params: N/A",
-			new string[0]
+			(command, parameters) => {
+				IOCard.Card.QueryGetInfo();
+			}
 		),
 		new CommandProperties(
 			IOCard.Commands.CMD_EJECT_COIN, 2,
@@ -147,6 +149,13 @@ public partial class MainWindow : Window
 			{
 				button_send.Sensitive = false;
 				button_connect.Label = "_Connect";
+			});
+		};
+		IOCard.Card.OnGetInfoResult += (sender, e) =>
+		{
+			Gtk.Application.Invoke(delegate 
+			{
+				textview_received.Buffer.Text = string.Format("<= {0}: Manufacturer = {1}, Product = {2}, Version = {3}, Protocol = {4}\r\n{5}", DateTime.Now, e.Manufacturer, e.Product, e.Version, e.ProtocolVersion, textview_received.Buffer.Text);
 			});
 		};
 	}
