@@ -93,6 +93,14 @@ public partial class MainWindow : Window
 			}
 		),
 		new CommandProperties(
+			IOCard.Commands.CMD_GET_KEYS, 0,
+			"Get key states from device",
+			"Params: N/A",
+			(command, parameters) => {
+				IOCard.Card.QueryGetKeys();
+			}
+		),
+		new CommandProperties(
 			IOCard.Commands.CMD_RESET_COIN_COINTER, 1,
 			"Reset coin counter.",
 			"Params: <track (byte)>",
