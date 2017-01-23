@@ -179,7 +179,23 @@ public partial class MainWindow : Window
 					"0x80 // track 0x80 (banknote 1)",
 					"0xC0 // track 0xC0 (eject track 1)",
 				},
-				unhandled_send_callback
+				(command, parameters) =>
+				{
+					var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
+
+					var iter = textview_received.Buffer.StartIter;
+					textview_received.Buffer.Insert(
+						ref iter,
+						string.Format(
+							"=> {0}: cmd = {1}, track = {2}\r\n",
+							DateTime.Now,
+							sCommands[mLastCmdIndex].Command,
+							track
+						)
+					);
+
+					sCard.QueryResetCoinCounter(track);
+				}
 			),
 			new CommandProperties(
 				IOCard.Commands.CMD_SET_OUTPUT, 1,
