@@ -244,10 +244,23 @@ public partial class MainWindow : Window
 				"Read data from onboard storage.",
 				"Params: <address (UInt16)>, <length (byte)>",
 				new string[] {
-					"0x000, 64 // read 64 bytes from 0x000",
-					"0x100, 8 // read 8 bytes from 0x100",
-					"0x200, 16 // read 16 bytes from 0x200",
-					"0x204, 4 // read 4 bytes from 0x204"
+					//"0x000, 64 // read 64 bytes from 0x000",
+					//"0x100, 8 // read 8 bytes from 0x100",
+					//"0x200, 16 // read 16 bytes from 0x200",
+					//"0x204, 4 // read 4 bytes from 0x204"
+					"0x080, 64",
+					"0x180, 64",
+					"0x280, 64",
+					"0x380, 64",
+					"0x480, 64",
+					"0x580, 64",
+					"0x680, 64",
+					"0x780, 64",
+					"0x880, 64",
+					"0x980, 64",
+					"0xa80, 64",
+					"0xb80, 64",
+					"0xc80, 64",
 				},
 				(command, parameters) => {
 					var address = _getTfromString<ushort>(parameters[0].Trim());
