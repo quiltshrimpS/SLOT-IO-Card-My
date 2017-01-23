@@ -76,7 +76,14 @@ public partial class MainWindow : Window
 			IOCard.Commands.CMD_GET_COIN_COUNTER, 1,
 			"Get coin counter.",
 			"Params: <track (byte)>",
-			new string[] { "0x80 // track 0x80" }
+			new string[] { 
+				"0x00 // track 0x00 (insert 1)",
+				"0x80 // track 0x80 (eject track)",
+			},
+			(command, parameters) => {
+				var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
+				IOCard.Card.QueryGetCoinCounter(track);				
+			}
 		),
 		new CommandProperties(
 			IOCard.Commands.CMD_RESET_COIN_COINTER, 1,
@@ -163,6 +170,12 @@ public partial class MainWindow : Window
 			Gtk.Application.Invoke(delegate 
 			{
 				textview_received.Buffer.Text = string.Format("<= {0}: Manufacturer = {1}, Product = {2}, Version = {3}, Protocol = {4}\r\n{5}", DateTime.Now, e.Manufacturer, e.Product, e.Version, e.ProtocolVersion, textview_received.Buffer.Text);
+			});
+		};
+		IOCard.Card.OnCoinCounterResult += (sender, e) =>
+		{
+			Gtk.Application.Invoke(delegate {
+				textview_received.Buffer.Text = string.Format("<= {0}: Track = {1}, Coins = {2}\r\n{3}", DateTime.Now, e.Track, e.Coins, textview_received.Buffer.Text);
 			});
 		};
 		IOCard.Card.OnUnknown += (sender, e) =>
