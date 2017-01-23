@@ -27,7 +27,7 @@
 #include "Pulse.h"
 #include "Configuration.h"
 
-FRAM_MB85RC_I2C fram(MB85RC_ADDRESS_A000, true, /* WP */ A7, 16 /* kb */);
+FRAM_MB85RC_I2C fram(MB85RC_DEFAULT_ADDRESS, true, /* WP */ A7, 16 /* kb */);
 WreckedSPI< /* MISO */ 7, /* MOSI */ 2, /* SCLK_MISO */ 8, /* SCLK_MOSI */ 3, /* MODE_MISO */ 2, /* MODE_MOSI */ 0 > spi;
 Configuration conf(fram);
 
