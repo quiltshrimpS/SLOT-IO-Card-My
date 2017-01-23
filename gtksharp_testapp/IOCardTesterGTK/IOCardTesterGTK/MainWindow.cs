@@ -71,9 +71,9 @@ public partial class MainWindow : Window
 			"Eject N coins.",
 			"Params: <track (byte)>, <coins (byte)>",
 			new string[] {
-				"0x80, 0x0A // eject 10 coins from track 0x80",
-				"0x80, 010 // eject 8 coins from track 0x80",
-				"0x80, 0 // interrupt track 0x80",
+				"0xC0, 0x0A // eject 10 coins from track 0xC0 (eject track 1)",
+				"0xC0, 5 // eject 5 coins from track 0xC0 (eject track 1)",
+				"0xC0, 0 // interrupt track 0xC0 (eject track 1)",
 			},
 			(command, parameters) => {
 				var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
@@ -87,7 +87,8 @@ public partial class MainWindow : Window
 			"Params: <track (byte)>",
 			new string[] {
 				"0x00 // track 0x00 (insert 1)",
-				"0x80 // track 0x80 (eject track)",
+				"0x80 // track 0x80 (banknote 1)",
+				"0xC0 // track 0xC0 (eject track 1)",
 			},
 			(command, parameters) => {
 				var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
@@ -106,7 +107,11 @@ public partial class MainWindow : Window
 			IOCard.Commands.CMD_RESET_COIN_COINTER, 1,
 			"Reset coin counter.",
 			"Params: <track (byte)>",
-			new string[] { "0x80 // track 0x80" }
+			new string[] {
+				"0x00 // track 0x00 (insert 1)",
+				"0x80 // track 0x80 (banknote 1)",
+				"0xC0 // track 0xC0 (eject track 1)",
+			}
 		),
 		new CommandProperties(
 			IOCard.Commands.CMD_SET_OUTPUT, 1,
