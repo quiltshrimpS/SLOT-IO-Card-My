@@ -57,95 +57,119 @@ public partial class MainWindow : Window
 		}
 	}
 
-	private static CommandProperties[] sCommands = {
-		new CommandProperties(
-			IOCard.Commands.CMD_GET_INFO, 0,
-			"Get device information",
-			"Params: N/A",
-			(command, parameters) => {
-				sCard.QueryGetInfo();
-			}
-		),
-		new CommandProperties(
-			IOCard.Commands.CMD_EJECT_COIN, 2,
-			"Eject N coins.",
-			"Params: <track (byte)>, <coins (byte)>",
-			new string[] {
-				"0xC0, 0x0A // eject 10 coins from track 0xC0 (eject track 1)",
-				"0xC0, 5 // eject 5 coins from track 0xC0 (eject track 1)",
-				"0xC0, 0 // interrupt track 0xC0 (eject track 1)",
-			},
-			(command, parameters) => {
-				var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
-				var count = _getTfromString<byte>(parameters[1].Trim());
-				sCard.QueryEjectCoin(track, count);
-			}
-		),
-		new CommandProperties(
-			IOCard.Commands.CMD_GET_COIN_COUNTER, 1,
-			"Get coin counter.",
-			"Params: <track (byte)>",
-			new string[] {
-				"0x00 // track 0x00 (insert 1)",
-				"0x80 // track 0x80 (banknote 1)",
-				"0xC0 // track 0xC0 (eject track 1)",
-			},
-			(command, parameters) => {
-				var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
-				sCard.QueryGetCoinCounter(track);
-			}
-		),
-		new CommandProperties(
-			IOCard.Commands.CMD_GET_KEYS, 0,
-			"Get key states from device",
-			"Params: N/A",
-			(command, parameters) => {
-				sCard.QueryGetKeys();
-			}
-		),
-		new CommandProperties(
-			IOCard.Commands.CMD_RESET_COIN_COINTER, 1,
-			"Reset coin counter.",
-			"Params: <track (byte)>",
-			new string[] {
-				"0x00 // track 0x00 (insert 1)",
-				"0x80 // track 0x80 (banknote 1)",
-				"0xC0 // track 0xC0 (eject track 1)",
-			}
-		),
-		new CommandProperties(
-			IOCard.Commands.CMD_SET_OUTPUT, 1,
-			"Set 74HC595 output.",
-			"Params: <states (byte[])>",
-			new string[] {
-				"0x12 0x34 0x56 // 3 bytes",
-				"0x34 0x56 0x78 // 3 bytes",
-			}
-		),
-		new CommandProperties(
-			IOCard.Commands.CMD_WRITE_STORAGE, 2,
-			"Write data to the onboard storage.",
-			"Params: <address (UInt16)>, <data (byte[])>",
-			new string[] {
-				"0x100, 0x12 0x34 0x56 0x78 0x90 0xAB 0xCD 0xEF",
-				"0x200, 0xFE 0xDC 0xBA 0x09 0x87 0x65 0x43 0x21",
-			}
-		),
-		new CommandProperties(
-			IOCard.Commands.CMD_READ_STORAGE, 2,
-			"Read data from onboard storage.",
-			"Params: <address (UInt16)>, <length (byte)>",
-			new string[] {
-				"0x100, 8 // read 8 bytes from 0x100",
-				"0x200, 4 // read 4 bytes from 0x200",
-				"0x204, 4 // read 4 bytes from 0x204",
-			}
-		),
-	};
+	private CommandProperties[] sCommands = null;
 
 	public MainWindow() : base(WindowType.Toplevel)
 	{
 		Build();
+
+		Action<IOCard.Commands, string[]> unhandled_send_callback = (command, parameters) =>
+		{
+			var iter = textview_received.Buffer.StartIter;
+			textview_received.Buffer.Insert(
+				ref iter,
+				string.Format(
+					"=> {0}: cmd = {1}, params = {2}\r\n",
+					DateTime.Now,
+					sCommands[mLastCmdIndex].Command,
+					parameters.Length == 0 ? "<null>" : String.Join(", ", parameters)
+				)
+			);
+		};
+
+		sCommands = new CommandProperties[] {
+			new CommandProperties(
+				IOCard.Commands.CMD_GET_INFO, 0,
+				"Get device information",
+				"Params: N/A",
+				(command, parameters) =>
+				{
+					sCard.QueryGetInfo();
+				}
+			),
+			new CommandProperties(
+				IOCard.Commands.CMD_EJECT_COIN, 2,
+				"Eject N coins.",
+				"Params: <track (byte)>, <coins (byte)>",
+				new string[] {
+					"0xC0, 0x0A // eject 10 coins from track 0xC0 (eject track 1)",
+					"0xC0, 5 // eject 5 coins from track 0xC0 (eject track 1)",
+					"0xC0, 0 // interrupt track 0xC0 (eject track 1)",
+				},
+				(command, parameters) =>
+				{
+					var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
+					var count = _getTfromString<byte>(parameters[1].Trim());
+					sCard.QueryEjectCoin(track, count);
+				}
+			),
+			new CommandProperties(
+				IOCard.Commands.CMD_GET_COIN_COUNTER, 1,
+				"Get coin counter.",
+				"Params: <track (byte)>",
+				new string[] {
+					"0x00 // track 0x00 (insert 1)",
+					"0x80 // track 0x80 (banknote 1)",
+					"0xC0 // track 0xC0 (eject track 1)",
+				},
+				(command, parameters) =>
+				{
+					var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
+					sCard.QueryGetCoinCounter(track);
+				}
+			),
+			new CommandProperties(
+				IOCard.Commands.CMD_GET_KEYS, 0,
+				"Get key states from device",
+				"Params: N/A",
+				(command, parameters) =>
+				{
+					sCard.QueryGetKeys();
+				}
+			),
+			new CommandProperties(
+				IOCard.Commands.CMD_RESET_COIN_COINTER, 1,
+				"Reset coin counter.",
+				"Params: <track (byte)>",
+				new string[] {
+					"0x00 // track 0x00 (insert 1)",
+					"0x80 // track 0x80 (banknote 1)",
+					"0xC0 // track 0xC0 (eject track 1)",
+				},
+				unhandled_send_callback
+			),
+			new CommandProperties(
+				IOCard.Commands.CMD_SET_OUTPUT, 1,
+				"Set 74HC595 output.",
+				"Params: <states (byte[])>",
+				new string[] {
+					"0x12 0x34 0x56 // 3 bytes",
+					"0x34 0x56 0x78 // 3 bytes",
+				},
+				unhandled_send_callback
+			),
+			new CommandProperties(
+				IOCard.Commands.CMD_WRITE_STORAGE, 2,
+				"Write data to the onboard storage.",
+				"Params: <address (UInt16)>, <data (byte[])>",
+				new string[] {
+					"0x100, 0x12 0x34 0x56 0x78 0x90 0xAB 0xCD 0xEF",
+					"0x200, 0xFE 0xDC 0xBA 0x09 0x87 0x65 0x43 0x21",
+				},
+				unhandled_send_callback
+			),
+			new CommandProperties(
+				IOCard.Commands.CMD_READ_STORAGE, 2,
+				"Read data from onboard storage.",
+				"Params: <address (UInt16)>, <length (byte)>",
+				new string[] {
+					"0x100, 8 // read 8 bytes from 0x100",
+					"0x200, 4 // read 4 bytes from 0x200",
+					"0x204, 4 // read 4 bytes from 0x204",
+				},
+				unhandled_send_callback
+			),
+		};
 
 		var cmds = new List<string>(sCommands.Length);
 		foreach (var desc in sCommands)
@@ -372,14 +396,6 @@ public partial class MainWindow : Window
 		parameters_raw = parameters_raw.Trim();
 		var comment_idx = parameters_raw.IndexOf("//", StringComparison.Ordinal);
 		parameters_raw = parameters_raw.Substring(0, comment_idx == -1 ? parameters_raw.Length : comment_idx).Trim();
-
-		textview_received.Buffer.Text = string.Format(
-			"=> {0}: cmd = {1}, params = {2}\r\n{3}",
-			DateTime.Now,
-			sCommands[mLastCmdIndex].Command,
-			parameters_raw.Length == 0 ? "<null>" : parameters_raw,
-			textview_received.Buffer.Text
-		);
 
 		sCommands[mLastCmdIndex].SendCommand(parameters_raw.Split(','));
 	}
