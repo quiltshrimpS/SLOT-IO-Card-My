@@ -62,11 +62,12 @@ Debounce<HIGH, DEBOUNCE_TIMEOUT> debounce_eject(
 		conf.setCoinCount(TRACK_EJECT, conf.getCoinCount(TRACK_EJECT) + 1);
 		pulse_counter_eject.pulse(1);
 		uint8_t to_eject = conf.getCoinsToEject(TRACK_EJECT);
-		conf.setCoinsToEject(TRACK_EJECT, to_eject - 1);
 		if (to_eject < 2) {
 			out.port.ssr1 = false; // pull LOW to stop the motor
 			do_send = true;
 		}
+		if (to_eject > 0)
+			conf.setCoinsToEject(TRACK_EJECT, to_eject - 1);
 	}
 );
 
