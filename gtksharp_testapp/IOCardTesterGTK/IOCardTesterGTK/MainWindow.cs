@@ -158,6 +158,13 @@ public partial class MainWindow : Window
 				textview_received.Buffer.Text = string.Format("<= {0}: Manufacturer = {1}, Product = {2}, Version = {3}, Protocol = {4}\r\n{5}", DateTime.Now, e.Manufacturer, e.Product, e.Version, e.ProtocolVersion, textview_received.Buffer.Text);
 			});
 		};
+		IOCard.Card.OnUnknown += (sender, e) =>
+		{
+			Gtk.Application.Invoke(delegate
+			{
+				textview_received.Buffer.Text = string.Format("<= {0}: Unknown - {1}\r\n{2}", DateTime.Now, e.Command.CommandString(), textview_received.Buffer.Text);
+			});
+		};
 	}
 
 	protected void OnDeleteEvent(object sender, DeleteEventArgs a)
