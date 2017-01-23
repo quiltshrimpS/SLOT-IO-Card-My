@@ -67,7 +67,7 @@ namespace Spark.Slot.IO
 			return false;
 		}
 
-		public bool Connect(string port)
+		public bool Connect(string port, int baudrate)
 		{
 			if (mMessenger != null)
 				return false;
@@ -76,7 +76,7 @@ namespace Spark.Slot.IO
 			{
 				var transport = new SerialTransport()
 				{
-					CurrentSerialSettings = { PortName = port, BaudRate = 115200, DtrEnable = false, },
+					CurrentSerialSettings = { PortName = port, BaudRate = baudrate, DtrEnable = false, },
 				};
 
 				var messenger = new CmdMessenger(transport);
