@@ -68,6 +68,30 @@ namespace Spark.Slot.IO
 		}
 
 		/// <summary>
+		/// queue a EJECT_COIN command
+		/// </summary>
+		/// <returns><c>true</c>, if get info was queued, <c>false</c> otherwise.</returns>
+		/// <param name="track"><c>CoinTrack</c> indicates which track to eject</param>
+		/// <param name="count">number of coins to be ejected.</param>
+		/// <param name="queuePosition">
+		/// position of the command to be placed, either <c>SendQueue.InFrontQueue</c> to place the command in front of
+		/// the queue, or <c>SendQueue.AtEndQueue</c> to place the command at the end of the queue. Defaults to
+		/// <c>SendQueue.InFrontQueue</c>.
+		/// </param>
+		public bool QueryEjectCoin(CoinTrack track, byte count, SendQueue queuePosition = SendQueue.InFrontQueue)
+		{
+			if (IsConnected)
+			{
+				var cmd = new SendCommand((int)Commands.CMD_EJECT_COIN);
+				cmd.AddBinArgument((uint)track);
+				cmd.AddBinArgument((uint)count);
+				mMessenger.SendCommand(cmd, queuePosition);
+				return true;
+			}
+			return false;
+		}
+
+		/// <summary>
 		/// queue a GET_COIN_COUNTER command
 		/// </summary>
 		/// <returns><c>true</c>, if get info was queued, <c>false</c> otherwise.</returns>
