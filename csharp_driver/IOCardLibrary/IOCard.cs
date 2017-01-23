@@ -82,12 +82,13 @@ namespace Spark.Slot.IO
 				var messenger = new CmdMessenger(transport);
 				messenger.Attach((int)Events.EVT_GET_INFO_RESULT, (receivedCommand) =>
 				{
-					Model = receivedCommand.ReadBinStringArg();
+					Manufacturer = receivedCommand.ReadBinStringArg();
+					Product = receivedCommand.ReadBinStringArg();
 					Version = receivedCommand.ReadBinStringArg();
 					ProtocolVersion = receivedCommand.ReadBinUInt32Arg();
 
 					if (OnGetInfoResult != null)
-						OnGetInfoResult(this, new GetInfoResultEventArgs(Model, Version, ProtocolVersion));
+						OnGetInfoResult(this, new GetInfoResultEventArgs(Manufacturer, Product, Version, ProtocolVersion));
 				});
 
 				if (messenger.Connect())
@@ -159,19 +160,22 @@ namespace Spark.Slot.IO
 			EVT_READ_STORAGE_RESULT = 0x78,
 		}
 
-		public String Model { get; private set; }
-		public String Version { get; private set; }
-		public UInt16 ProtocolVersion { get; private set; }
+		public string Manufacturer { get; private set; }
+		public string Product { get; private set; }
+		public string Version { get; private set; }
+		public UInt32 ProtocolVersion { get; private set; }
 
 		public class GetInfoResultEventArgs : EventArgs
 		{
-			public String Model { get; private set; }
-			public String Version { get; private set; }
-			public UInt16 ProtocolVersion { get; private set; }
+			public string Manufacturer { get; private set; }
+			public string Product { get; private set; }
+			public string Version { get; private set; }
+			public UInt32 ProtocolVersion { get; private set; }
 
-			public GetInfoResultEventArgs(String model, String version, UInt16 protoVersion)
+			public GetInfoResultEventArgs(string manufacturer, string product, string version, UInt32 protoVersion)
 			{
-				Model = model;
+				Manufacturer = manufacturer;
+				Product = product;
 				Version = version;
 				ProtocolVersion = protoVersion;
 			}
