@@ -316,6 +316,22 @@ public partial class MainWindow : Window
 							);
 						}
 						break;
+					case IOCard.Errors.ERR_TOO_LONG:
+						{
+							var ev = (IOCard.ErrorTooLongEventArgs)e;
+							var iter = textview_received.Buffer.StartIter;
+							textview_received.Buffer.Insert(
+								ref iter,
+								string.Format(
+									"<= {0}: error = {1}, requested = {2}, desired = {3}\r\n",
+									DateTime.Now,
+									ev.ErrorCode,
+									ev.RequestedLength,
+									ev.DesiredLength
+								)
+							);
+						}
+						break;
 					case IOCard.Errors.ERR_UNKNOWN_COMMAND:
 						{
 							var ev = (IOCard.ErrorUnknownCommandEventArgs)e;
