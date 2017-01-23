@@ -70,6 +70,11 @@ public partial class MainWindow : Window
 				"0x80, 0x0A // eject 10 coins from track 0x80",
 				"0x80, 010 // eject 8 coins from track 0x80",
 				"0x80, 0 // interrupt track 0x80",
+			},
+			(command, parameters) => {
+				var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
+				var count = _getTfromString<byte>(parameters[1].Trim());
+				IOCard.Card.QueryEjectCoin(track, count);
 			}
 		),
 		new CommandProperties(
