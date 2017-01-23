@@ -189,7 +189,7 @@ namespace Spark.Slot.IO
 				});
 				messenger.Attach((int)Events.EVT_COIN_COUNTER_RESULT, (receivedCommand) =>
 				{
-					int track = receivedCommand.ReadBinUInt16Arg();
+					int track = receivedCommand.ReadBinByteArg();
 					UInt32 coins = receivedCommand.ReadBinUInt32Arg();
 
 					if (OnCoinCounterResult != null)
@@ -198,33 +198,27 @@ namespace Spark.Slot.IO
 				messenger.Attach((int)Events.EVT_ERROR, (receivedCommand) =>
 				{
 					ErrorEventArgs e = null;
-					var err = (Errors)receivedCommand.ReadBinUInt16Arg();
+					var err = (Errors)receivedCommand.ReadBinByteArg();
 					switch (err)
 					{
 						case Errors.ERR_EJECT_INTERRUPTED:
 							{
-								var track = (CoinTrack)receivedCommand.ReadBinUInt16Arg();
-								UInt16 coins = receivedCommand.ReadBinUInt16Arg();
+								var track = (CoinTrack)receivedCommand.ReadBinByteArg();
+								var coins = receivedCommand.ReadBinByteArg();
 								e = new ErrorEjectInterruptedEventArgs(err, track, coins);
 							}
 							break;
 						case Errors.ERR_EJECT_TIMEOUT:
-							{
-								UInt16 track = receivedCommand.ReadBinUInt16Arg();
-								e = new ErrorEjectTimeoutEventArgs(err, (CoinTrack)track);
-							}
+							e = new ErrorEjectTimeoutEventArgs(err, (CoinTrack)receivedCommand.ReadBinByteArg());
 							break;
 						case Errors.ERR_NOT_A_TRACK:
-							{
-								UInt16 track = receivedCommand.ReadBinUInt16Arg();
-								e = new ErrorNotATrackEventArgs(err, (CoinTrack)track);
-							}
+							e = new ErrorNotATrackEventArgs(err, (CoinTrack)receivedCommand.ReadBinByteArg());
 							break;
 						case Errors.ERR_UNKNOWN_COMMAND:
-							e = new ErrorUnknownCommandEventArgs(err, receivedCommand.ReadBinUInt16Arg());
+							e = new ErrorUnknownCommandEventArgs(err, receivedCommand.ReadBinByteArg());
 							break;
 						default:
-							e = new ErrorUnknownErrorEventArgs(err, receivedCommand.ReadBinUInt16Arg());
+							e = new ErrorUnknownErrorEventArgs(err, receivedCommand.ReadBinByteArg());
 							break;
 					}
 
@@ -331,8 +325,8 @@ namespace Spark.Slot.IO
 				ProtocolVersion = protoVersion;
 			}
 		}
-        
-        public class CoinCounterResultEventArgs : EventArgs
+
+		public class CoinCounterResultEventArgs : EventArgs
 		{
 			public int Track { get; internal set; }
 			public UInt32 Coins { get; internal set; }
