@@ -63,7 +63,7 @@ namespace Spark.Slot.IO
 			TrackBanknote57 = 0xB8, TrackBanknote58 = 0xB9, TrackBanknote59 = 0xBA, TrackBanknote60 = 0xBB,
 			TrackBanknote61 = 0xBC, TrackBanknote62 = 0xBD, TrackBanknote63 = 0xBE, TrackBanknote64 = 0xBF,
 
-			/* 0xC0 ~ 0xFF are coin eject tracks */
+			/* 0xC0 ~ 0xFE are coin eject tracks */
 			TrackEject1 = 0xC0, TrackEject2 = 0xC1, TrackEject3 = 0xC2, TrackEject4 = 0xC3,
 			TrackEject5 = 0xC4, TrackEject6 = 0xC5, TrackEject7 = 0xC6, TrackEject8 = 0xC7,
 			TrackEject9 = 0xC8, TrackEject10 = 0xC9, TrackEject11 = 0xCA, TrackEject12 = 0xCB,
@@ -79,7 +79,10 @@ namespace Spark.Slot.IO
 			TrackEject49 = 0xF0, TrackEject50 = 0xF1, TrackEject51 = 0xF2, TrackEject52 = 0xF3,
 			TrackEject53 = 0xF4, TrackEject54 = 0xF5, TrackEject55 = 0xF6, TrackEject56 = 0xF7,
 			TrackEject57 = 0xF8, TrackEject58 = 0xF9, TrackEject59 = 0xFA, TrackEject60 = 0xFB,
-			TrackEject61 = 0xFC, TrackEject62 = 0xFD, TrackEject63 = 0xFE, TrackEject64 = 0xFF,
+			TrackEject61 = 0xFC, TrackEject62 = 0xFD, TrackEject63 = 0xFE,
+
+			/* 0xFF for Not A Track */
+			TrackNotATrack = 0xFF,
 		}
 
 		public enum ButtonState
