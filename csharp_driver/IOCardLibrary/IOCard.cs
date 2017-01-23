@@ -271,6 +271,9 @@ namespace Spark.Slot.IO
 						case Errors.ERR_NOT_A_TRACK:
 							e = new ErrorNotATrackEventArgs(err, (CoinTrack)receivedCommand.ReadBinByteArg());
 							break;
+						case Errors.ERR_PROTECTED_STORAGE:
+							e = new ErrorProtectedStorageEventArgs(err, receivedCommand.ReadBinUInt16Arg());
+							break;
 						case Errors.ERR_UNKNOWN_COMMAND:
 							e = new ErrorUnknownCommandEventArgs(err, receivedCommand.ReadBinByteArg());
 							break;
@@ -361,6 +364,7 @@ namespace Spark.Slot.IO
 			ERR_EJECT_INTERRUPTED = 0x01,
 			ERR_EJECT_TIMEOUT = 0x02,
 			ERR_NOT_A_TRACK = 0x03,
+			ERR_PROTECTED_STORAGE = 0x04,
 			ERR_UNKNOWN_COMMAND = 0xFF,
 		}
 
@@ -447,6 +451,17 @@ namespace Spark.Slot.IO
 			public ErrorNotATrackEventArgs(Errors error, CoinTrack track) :
 				base(error, track)
 			{
+			}
+		}
+
+		public class ErrorProtectedStorageEventArgs : ErrorEventArgs
+		{
+			public UInt16 Address { get; internal set; }
+
+			public ErrorProtectedStorageEventArgs(Errors error, UInt16 address) :
+				base(error)
+			{
+				Address = address;
 			}
 		}
 
