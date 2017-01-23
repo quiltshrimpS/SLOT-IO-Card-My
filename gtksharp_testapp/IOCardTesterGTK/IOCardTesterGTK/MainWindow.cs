@@ -14,7 +14,7 @@ public partial class MainWindow : Window
 
 	List<string> mPorts = new List<string>(new string[] { "COM3", "COM1", "COM20" });
 
-	private class CommandProperties
+	private class CommandProperty
 	{
 		public readonly IOCard.Commands Command;
 		public readonly int Params;
@@ -23,22 +23,22 @@ public partial class MainWindow : Window
 		public readonly List<string> HistoryParams;
 		private readonly Action<IOCard.Commands, string[]> SendCommandCallback;
 
-		public CommandProperties(IOCard.Commands cmd, int parameter_count, string cmdDesc, string paramsDesc) :
+		public CommandProperty(IOCard.Commands cmd, int parameter_count, string cmdDesc, string paramsDesc) :
 			this(cmd, parameter_count, cmdDesc, paramsDesc, new string[0], (command, parameters) => { })
 		{
 		}
 
-		public CommandProperties(IOCard.Commands cmd, int parameter_count, string cmdDesc, string paramsDesc, string[] history) :
+		public CommandProperty(IOCard.Commands cmd, int parameter_count, string cmdDesc, string paramsDesc, string[] history) :
 			this(cmd, parameter_count, cmdDesc, paramsDesc, history, (command, parameters) => { })
 		{
 		}
 
-		public CommandProperties(IOCard.Commands cmd, int parameter_count, string cmdDesc, string paramsDesc, Action<IOCard.Commands, string[]> callback) :
+		public CommandProperty(IOCard.Commands cmd, int parameter_count, string cmdDesc, string paramsDesc, Action<IOCard.Commands, string[]> callback) :
 			this(cmd, parameter_count, cmdDesc, paramsDesc, new string[0], callback)
 		{
 		}
 
-		public CommandProperties(IOCard.Commands cmd, int parameter_count, string cmdDesc, string paramsDesc, string[] history, Action<IOCard.Commands, string[]> callback)
+		public CommandProperty(IOCard.Commands cmd, int parameter_count, string cmdDesc, string paramsDesc, string[] history, Action<IOCard.Commands, string[]> callback)
 		{
 			Command = cmd;
 			Params = parameter_count;
@@ -54,7 +54,15 @@ public partial class MainWindow : Window
 		}
 	}
 
-	CommandProperties[] sCommands;
+	CommandProperty mCommandProperty_GetInfo;
+	CommandProperty mCommandProperty_EjectCoin;
+	CommandProperty mCommandProperty_GetCoinCounter;
+	CommandProperty mCommandProperty_ResetCoinCounter;
+	CommandProperty mCommandProperty_GetKeys;
+	CommandProperty mCommandProperty_SetOutputs;
+	CommandProperty mCommandProperty_WriteStorage;
+	CommandProperty mCommandProperty_ReadStorage;
+	CommandProperty[] mCommandProperties;
 
 	public MainWindow() : base(WindowType.Toplevel)
 	{
@@ -68,235 +76,262 @@ public partial class MainWindow : Window
 				string.Format(
 					"=> {0}: unknown cmd = {1}, params = {2}\r\n",
 					DateTime.Now,
-					sCommands[mLastCmdIndex].Command,
+					mCommandProperties[mLastCmdIndex].Command,
 					parameters.Length == 0 ? "<null>" : string.Join(", ", parameters)
 				)
 			);
 		};
 
-		sCommands = new CommandProperties[] {
-			new CommandProperties(
-				IOCard.Commands.CMD_GET_INFO, 0,
-				"Get device information",
-				"Params: N/A",
-				(command, parameters) =>
-				{
-					var iter = textview_received.Buffer.StartIter;
-					textview_received.Buffer.Insert(
-						ref iter,
-						string.Format(
-							"=> {0}: cmd = {1}\r\n",
-							DateTime.Now,
-							sCommands[mLastCmdIndex].Command
-						)
-					);
-					sCard.QueryGetInfo();
-				}
-			),
-			new CommandProperties(
-				IOCard.Commands.CMD_EJECT_COIN, 2,
-				"Eject N coins.",
-				"Params: <track (byte)>, <coins (byte)>",
-				new string[] {
-					"0xC0, 0x0A // eject 10 coins from track 0xC0 (eject track 1)",
-					"0xC0, 5 // eject 5 coins from track 0xC0 (eject track 1)",
-					"0xC0, 0 // interrupt track 0xC0 (eject track 1)"
-				},
-				(command, parameters) =>
-				{
-					var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
-					var count = _getTfromString<byte>(parameters[1].Trim());
+		mCommandProperty_GetInfo = new CommandProperty(
+			IOCard.Commands.CMD_GET_INFO, 0,
+			"Get device information",
+			"Params: N/A",
+			(command, parameters) =>
+			{
+				var iter = textview_received.Buffer.StartIter;
+				textview_received.Buffer.Insert(
+					ref iter,
+					string.Format(
+						"=> {0}: cmd = {1}\r\n",
+						DateTime.Now,
+						mCommandProperties[mLastCmdIndex].Command
+					)
+				);
+				sCard.QueryGetInfo();
+			}
+		);
+		mCommandProperty_EjectCoin = new CommandProperty(
+			IOCard.Commands.CMD_EJECT_COIN, 2,
+			"Eject N coins.",
+			"Params: <track (byte)>, <coins (byte)>",
+			new string[] {
+				"0xC0, 0x0A // eject 10 coins from track 0xC0 (eject track 1)",
+				"0xC0, 5 // eject 5 coins from track 0xC0 (eject track 1)",
+				"0xC0, 0 // interrupt track 0xC0 (eject track 1)"
+			},
+			(command, parameters) =>
+			{
+				var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
+				var count = _getTfromString<byte>(parameters[1].Trim());
 
-					var iter = textview_received.Buffer.StartIter;
-					textview_received.Buffer.Insert(
-						ref iter,
-						string.Format(
-							"=> {0}: cmd = {1}, track = {2}, count = {3}\r\n",
-							DateTime.Now,
-							sCommands[mLastCmdIndex].Command,
-							track,
-							count
-						)
-					);
+				var iter = textview_received.Buffer.StartIter;
+				textview_received.Buffer.Insert(
+					ref iter,
+					string.Format(
+						"=> {0}: cmd = {1}, track = {2}, count = {3}\r\n",
+						DateTime.Now,
+						mCommandProperties[mLastCmdIndex].Command,
+						track,
+						count
+					)
+				);
 
-					sCard.QueryEjectCoin(track, count);
-				}
-			),
-			new CommandProperties(
-				IOCard.Commands.CMD_GET_COIN_COUNTER, 1,
-				"Get coin counter.",
-				"Params: <track (byte)>",
-				new string[] {
-					"0x00 // track 0x00 (insert 1)",
-					"0x80 // track 0x80 (banknote 1)",
-					"0xC0 // track 0xC0 (eject track 1)"
-				},
-				(command, parameters) =>
-				{
-					var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
+				sCard.QueryEjectCoin(track, count);
+			}
+		);
+		mCommandProperty_GetCoinCounter = new CommandProperty(
+			IOCard.Commands.CMD_GET_COIN_COUNTER, 1,
+			"Get coin counter.",
+			"Params: <track (byte)>",
+			new string[] {
+				"0x00 // track 0x00 (insert 1)",
+				"0x80 // track 0x80 (banknote 1)",
+				"0xC0 // track 0xC0 (eject track 1)"
+			},
+			(command, parameters) =>
+			{
+				var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
 
-					var iter = textview_received.Buffer.StartIter;
-					textview_received.Buffer.Insert(
-						ref iter,
-						string.Format(
-							"=> {0}: cmd = {1}, track = {2}\r\n",
-							DateTime.Now,
-							sCommands[mLastCmdIndex].Command,
-							track
-						)
-					);
+				var iter = textview_received.Buffer.StartIter;
+				textview_received.Buffer.Insert(
+					ref iter,
+					string.Format(
+						"=> {0}: cmd = {1}, track = {2}\r\n",
+						DateTime.Now,
+						mCommandProperties[mLastCmdIndex].Command,
+						track
+					)
+				);
 
-					sCard.QueryGetCoinCounter(track);
-				}
-			),
-			new CommandProperties(
-				IOCard.Commands.CMD_RESET_COIN_COINTER, 1,
-				"Reset coin counter.",
-				"Params: <track (byte)>",
-				new string[] {
-					"0x00 // track 0x00 (insert 1)",
-					"0x80 // track 0x80 (banknote 1)",
-					"0xC0 // track 0xC0 (eject track 1)"
-				},
-				(command, parameters) =>
-				{
-					var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
+				sCard.QueryGetCoinCounter(track);
+			}
+		);
+		mCommandProperty_ResetCoinCounter = new CommandProperty(
+			IOCard.Commands.CMD_RESET_COIN_COINTER, 1,
+			"Reset coin counter.",
+			"Params: <track (byte)>",
+			new string[] {
+				"0x00 // track 0x00 (insert 1)",
+				"0x80 // track 0x80 (banknote 1)",
+				"0xC0 // track 0xC0 (eject track 1)"
+			},
+			(command, parameters) =>
+			{
+				var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
 
-					var iter = textview_received.Buffer.StartIter;
-					textview_received.Buffer.Insert(
-						ref iter,
-						string.Format(
-							"=> {0}: cmd = {1}, track = {2}\r\n",
-							DateTime.Now,
-							sCommands[mLastCmdIndex].Command,
-							track
-						)
-					);
+				var iter = textview_received.Buffer.StartIter;
+				textview_received.Buffer.Insert(
+					ref iter,
+					string.Format(
+						"=> {0}: cmd = {1}, track = {2}\r\n",
+						DateTime.Now,
+						mCommandProperties[mLastCmdIndex].Command,
+						track
+					)
+				);
 
-					sCard.QueryResetCoinCounter(track);
-				}
-			),
-			new CommandProperties(
-				IOCard.Commands.CMD_GET_KEYS, 0,
-				"Get key states from device",
-				"Params: N/A",
-				(command, parameters) =>
-				{
-					var iter = textview_received.Buffer.StartIter;
-					textview_received.Buffer.Insert(
-						ref iter,
-						string.Format(
-							"=> {0}: cmd = {1}\r\n",
-							DateTime.Now,
-							sCommands[mLastCmdIndex].Command
-						)
-					);
-					sCard.QueryGetKeys();
-				}
-			),
-			new CommandProperties(
-				IOCard.Commands.CMD_SET_OUTPUT, 1,
-				"Set 74HC595 output.",
-				"Params: <states (byte[])>",
-				new string[] {
-					"0x12 0x34 0x56 // 3 bytes",
-					"0x34 0x56 0x78 // 3 bytes"
-				},
-				unhandled_send_callback
-			),
-			new CommandProperties(
-				IOCard.Commands.CMD_WRITE_STORAGE, 2,
-				"Write data to the onboard storage.",
-				"Params: <address (UInt16)>, <data (byte[])>",
-				new string[] {
-					"0x100, 0x12 0x34 0x56 0x78 0x90 0xAB 0xCD 0xEF",
-					"0x200, 0xFE 0xDC 0xBA 0x09 0x87 0x65 0x43 0x21"
-				},
-				(command, parameters) => {
-					var address = _getTfromString<ushort>(parameters[0].Trim());
-					var data = Regex.Replace(parameters[1].Trim(), @"\s+", " ").Split(' ');
-					var bytes = new byte[data.Length];
-					for (int i = 0;i < data.Length; ++i)
-						bytes[i] = _getTfromString<byte>(data[i]);
+				sCard.QueryResetCoinCounter(track);
+			}
+		);
+		mCommandProperty_GetKeys = new CommandProperty(
+			IOCard.Commands.CMD_GET_KEYS, 0,
+			"Get key states from device",
+			"Params: N/A",
+			(command, parameters) =>
+			{
+				var iter = textview_received.Buffer.StartIter;
+				textview_received.Buffer.Insert(
+					ref iter,
+					string.Format(
+						"=> {0}: cmd = {1}\r\n",
+						DateTime.Now,
+						mCommandProperties[mLastCmdIndex].Command
+					)
+				);
+				sCard.QueryGetKeys();
+			}
+		);
+		mCommandProperty_SetOutputs = new CommandProperty(
+			IOCard.Commands.CMD_SET_OUTPUT, 1,
+			"Set 74HC595 output.",
+			"Params: <states (byte[])>",
+			new string[] {
+				"0x12 0x34 0x56 // 3 bytes",
+				"0x34 0x56 0x78 // 3 bytes"
+			},
+			unhandled_send_callback
+		);
+		mCommandProperty_WriteStorage = new CommandProperty(
+			IOCard.Commands.CMD_WRITE_STORAGE, 2,
+			"Write data to the onboard storage.",
+			"Params: <address (UInt16)>, <data (byte[])>",
+			new string[] {
+				"0x100, 0x12 0x34 0x56 0x78 0x90 0xAB 0xCD 0xEF",
+				"0x200, 0xFE 0xDC 0xBA 0x09 0x87 0x65 0x43 0x21"
+			},
+			(command, parameters) =>
+			{
+				var address = _getTfromString<ushort>(parameters[0].Trim());
+				var data = Regex.Replace(parameters[1].Trim(), @"\s+", " ").Split(' ');
+				var bytes = new byte[data.Length];
+				for (int i = 0; i < data.Length; ++i)
+					bytes[i] = _getTfromString<byte>(data[i]);
 
-					StringBuilder builder = new StringBuilder(bytes.Length * 5);
-					foreach (var b in bytes)
-						builder.AppendFormat(" 0x{0:X2}", b);
+				StringBuilder builder = new StringBuilder(bytes.Length * 5);
+				foreach (var b in bytes)
+					builder.AppendFormat(" 0x{0:X2}", b);
 
-					var iter = textview_received.Buffer.StartIter;
-					textview_received.Buffer.Insert(
-						ref iter,
-						string.Format(
-							"=> {0}: cmd = {1}, address = 0x{2:X4}, length = {3}, data ={4}\r\n",
-							DateTime.Now,
-							sCommands[mLastCmdIndex].Command,
-							address,
-							data.Length,
-							builder
-						)
-					);
+				var iter = textview_received.Buffer.StartIter;
+				textview_received.Buffer.Insert(
+					ref iter,
+					string.Format(
+						"=> {0}: cmd = {1}, address = 0x{2:X4}, length = {3}, data ={4}\r\n",
+						DateTime.Now,
+						mCommandProperties[mLastCmdIndex].Command,
+						address,
+						data.Length,
+						builder
+					)
+				);
 
-					sCard.QueryWriteStorage(address, bytes);
-				}
-			),
-			new CommandProperties(
-				IOCard.Commands.CMD_READ_STORAGE, 2,
-				"Read data from onboard storage.",
-				"Params: <address (UInt16)>, <length (byte)>",
-				new string[] {
-					//"0x000, 64 // read 64 bytes from 0x000",
-					//"0x100, 8 // read 8 bytes from 0x100",
-					//"0x200, 16 // read 16 bytes from 0x200",
-					//"0x204, 4 // read 4 bytes from 0x204"
-					"0x080, 64",
-					"0x180, 64",
-					"0x280, 64",
-					"0x380, 64",
-					"0x480, 64",
-					"0x580, 64",
-					"0x680, 64",
-					"0x780, 64",
-					"0x880, 64",
-					"0x980, 64",
-					"0xa80, 64",
-					"0xb80, 64",
-					"0xc80, 64",
-				},
-				(command, parameters) => {
-					var address = _getTfromString<ushort>(parameters[0].Trim());
-					var length = _getTfromString<byte>(parameters[1].Trim());
+				sCard.QueryWriteStorage(address, bytes);
+			}
+		);
+		mCommandProperty_ReadStorage = new CommandProperty(
+			IOCard.Commands.CMD_READ_STORAGE, 2,
+			"Read data from onboard storage.",
+			"Params: <address (UInt16)>, <length (byte)>",
+			new string[] {
+				//"0x000, 64 // read 64 bytes from 0x000",
+				//"0x100, 8 // read 8 bytes from 0x100",
+				//"0x200, 16 // read 16 bytes from 0x200",
+				//"0x204, 4 // read 4 bytes from 0x204"
+				"0x080, 64",
+				"0x180, 64",
+				"0x280, 64",
+				"0x380, 64",
+				"0x480, 64",
+				"0x580, 64",
+				"0x680, 64",
+				"0x780, 64",
+				"0x880, 64",
+				"0x980, 64",
+				"0xa80, 64",
+				"0xb80, 64",
+				"0xc80, 64",
+			},
+			(command, parameters) =>
+			{
+				var address = _getTfromString<ushort>(parameters[0].Trim());
+				var length = _getTfromString<byte>(parameters[1].Trim());
 
-					var iter = textview_received.Buffer.StartIter;
-					textview_received.Buffer.Insert(
-						ref iter,
-						string.Format(
-							"=> {0}: cmd = {1}, address = 0x{2:X4}, length = {3}\r\n",
-							DateTime.Now,
-							sCommands[mLastCmdIndex].Command,
-							address,
-							length
-						)
-					);
+				var iter = textview_received.Buffer.StartIter;
+				textview_received.Buffer.Insert(
+					ref iter,
+					string.Format(
+						"=> {0}: cmd = {1}, address = 0x{2:X4}, length = {3}\r\n",
+						DateTime.Now,
+						mCommandProperties[mLastCmdIndex].Command,
+						address,
+						length
+					)
+				);
 
-					sCard.QueryReadStorage(address, length);
-				}
-			)
+				sCard.QueryReadStorage(address, length);
+			}
+		);
+
+		mCommandProperties = new CommandProperty[] {
+			mCommandProperty_GetInfo,
+			mCommandProperty_EjectCoin,
+			mCommandProperty_GetCoinCounter,
+			mCommandProperty_ResetCoinCounter,
+			mCommandProperty_GetKeys,
+			mCommandProperty_SetOutputs,
+			mCommandProperty_WriteStorage,
+			mCommandProperty_ReadStorage
 		};
 
-		var cmds = new List<string>(sCommands.Length);
-		foreach (var desc in sCommands)
+		var cmds = new List<string>(mCommandProperties.Length);
+		foreach (var desc in mCommandProperties)
 			cmds.Add(string.Format("0x{0:X2} ({1})", (uint)desc.Command, desc.Command.ToString().Replace("CMD_", "")));
 		_populateComboBox(combobox_cmd, cmds);
 		mLastCmdIndex = combobox_cmd.Active;
-		label_cmd_desc.Text = sCommands[mLastCmdIndex].CommandDescription;
-		label_params_desc.Text = sCommands[mLastCmdIndex].ParamsDescription;
+		label_cmd_desc.Text = mCommandProperties[mLastCmdIndex].CommandDescription;
+		label_params_desc.Text = mCommandProperties[mLastCmdIndex].ParamsDescription;
 
-		_populateComboBoxEntry(comboboxentry_params, sCommands[mLastCmdIndex].HistoryParams);
-		comboboxentry_params.Sensitive = sCommands[mLastCmdIndex].Params != 0;
+		_populateComboBoxEntry(comboboxentry_params, mCommandProperties[mLastCmdIndex].HistoryParams);
+		comboboxentry_params.Sensitive = mCommandProperties[mLastCmdIndex].Params != 0;
 		_populateComboBoxEntry(comboboxentry_port, mPorts);
 
 		sCard.OnConnected += (sender, e) =>
 		{
+			mCommandProperties[0].SendCommand(new string[0]);
+			mCommandProperties[0].SendCommand(new string[0]);
+			sCard.QueryGetInfo();
+			sCard.QueryGetKeys();
+			sCard.QueryGetCoinCounter(IOCard.CoinTrack.TrackInsert1);
+			sCard.QueryGetCoinCounter(IOCard.CoinTrack.TrackInsert2);
+			sCard.QueryGetCoinCounter(IOCard.CoinTrack.TrackInsert3);
+			sCard.QueryGetCoinCounter(IOCard.CoinTrack.TrackBanknote1);
+			sCard.QueryGetCoinCounter(IOCard.CoinTrack.TrackEject1);
+			sCard.QueryReadStorage(0x080, 64);
+			sCard.QueryReadStorage(0x180, 64);
+			sCard.QueryReadStorage(0x280, 64);
+			sCard.QueryReadStorage(0x380, 64);
+			sCard.QueryReadStorage(0x480, 64);
+			sCard.QueryReadStorage(0x580, 64);
+
 			Application.Invoke(delegate
 			{
 				button_send.Sensitive = true;
@@ -548,10 +583,10 @@ public partial class MainWindow : Window
 			return;
 		mLastCmdIndex = cb.Active;
 
-		_populateComboBoxEntry(comboboxentry_params, sCommands[mLastCmdIndex].HistoryParams);
-		comboboxentry_params.Sensitive = sCommands[mLastCmdIndex].Params != 0;
-		label_cmd_desc.Text = sCommands[mLastCmdIndex].CommandDescription;
-		label_params_desc.Text = sCommands[mLastCmdIndex].ParamsDescription;
+		_populateComboBoxEntry(comboboxentry_params, mCommandProperties[mLastCmdIndex].HistoryParams);
+		comboboxentry_params.Sensitive = mCommandProperties[mLastCmdIndex].Params != 0;
+		label_cmd_desc.Text = mCommandProperties[mLastCmdIndex].CommandDescription;
+		label_params_desc.Text = mCommandProperties[mLastCmdIndex].ParamsDescription;
 	}
 
 	protected void OnComboBoxEntryPort_Changed(object sender, EventArgs e)
@@ -572,9 +607,9 @@ public partial class MainWindow : Window
 		if (cbe.Active > 0)
 		{
 			var parameters = cbe.ActiveText;
-			sCommands[mLastCmdIndex].HistoryParams.Remove(parameters);
-			sCommands[mLastCmdIndex].HistoryParams.Insert(0, parameters);
-			_populateComboBoxEntry(comboboxentry_params, sCommands[mLastCmdIndex].HistoryParams);
+			mCommandProperties[mLastCmdIndex].HistoryParams.Remove(parameters);
+			mCommandProperties[mLastCmdIndex].HistoryParams.Insert(0, parameters);
+			_populateComboBoxEntry(comboboxentry_params, mCommandProperties[mLastCmdIndex].HistoryParams);
 		}
 	}
 
@@ -602,16 +637,16 @@ public partial class MainWindow : Window
 		var parameters_raw = comboboxentry_params.ActiveText;
 		if (comboboxentry_params.Active != 0)
 		{
-			sCommands[mLastCmdIndex].HistoryParams.Remove(parameters_raw);
-			sCommands[mLastCmdIndex].HistoryParams.Insert(0, parameters_raw);
-			_populateComboBoxEntry(comboboxentry_params, sCommands[mLastCmdIndex].HistoryParams);
+			mCommandProperties[mLastCmdIndex].HistoryParams.Remove(parameters_raw);
+			mCommandProperties[mLastCmdIndex].HistoryParams.Insert(0, parameters_raw);
+			_populateComboBoxEntry(comboboxentry_params, mCommandProperties[mLastCmdIndex].HistoryParams);
 		}
 
 		parameters_raw = parameters_raw.Trim();
 		var comment_idx = parameters_raw.IndexOf("//", StringComparison.Ordinal);
 		parameters_raw = parameters_raw.Substring(0, comment_idx == -1 ? parameters_raw.Length : comment_idx).Trim();
 
-		sCommands[mLastCmdIndex].SendCommand(parameters_raw.Split(','));
+		mCommandProperties[mLastCmdIndex].SendCommand(parameters_raw.Split(','));
 	}
 
 	void _populateComboBox(ComboBox cb, List<string> contents)
