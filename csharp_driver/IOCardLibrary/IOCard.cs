@@ -185,6 +185,28 @@ namespace Spark.Slot.IO
 		}
 
 		/// <summary>
+		/// queue a RESET_COIN_COUNTER command
+		/// </summary>
+		/// <returns><c>true</c>, if reset coin counter was queryed, <c>false</c> otherwise.</returns>
+		/// <param name="track"><c>CoinTrack</c> indicates which track to reset</param>
+		/// <param name="queuePosition">
+		/// position of the command to be placed, either <c>SendQueue.InFrontQueue</c> to place the command in front of
+		/// the queue, or <c>SendQueue.AtEndQueue</c> to place the command at the end of the queue. Defaults to
+		/// <c>SendQueue.InFrontQueue</c>.
+		/// </param>
+		public bool QueryResetCoinCounter(CoinTrack track, SendQueue queuePosition = SendQueue.InFrontQueue)
+		{
+			if (IsConnected)
+			{
+				var cmd = new SendCommand((int)Commands.CMD_RESET_COIN_COINTER);
+				cmd.AddBinArgument((uint)track);
+				mMessenger.SendCommand(cmd, queuePosition);
+				return true;
+			}
+			return false;
+		}
+
+		/// <summary>
 		/// Connect the specified port and baudrate.
 		/// </summary>
 		/// <param name="port">Port.</param>
