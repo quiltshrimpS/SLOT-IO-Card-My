@@ -493,11 +493,14 @@ public partial class MainWindow : Window
 		{
 			Application.Invoke(delegate
 			{
-				textview_received.Buffer.Text = string.Format(
-					"<= {0}: Unknown - {1}\r\n{2}",
-					DateTime.Now,
-					e.Command.CommandString(),
-					textview_received.Buffer.Text
+				var iter = textview_received.Buffer.StartIter;
+				textview_received.Buffer.Insert(
+					ref iter,
+					string.Format(
+						"<= {0}: Unknown = {1}\r\n",
+						DateTime.Now,
+						e.Command.CommandString()
+					)
 				);
 			});
 		};
