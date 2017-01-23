@@ -6,9 +6,7 @@
 #include <utility/twi.h>
 #include <FRAM_MB85RC_I2C.h>
 
-#define CONF_OFFSET_SEQ					(0x0000)
-#define CONF_SIZE_SEQ					(1)
-#define CONF_OFFSET_COIN_TRACK_LEVEL	(CONF_OFFSET_SEQ + CONF_SIZE_SEQ)
+#define CONF_OFFSET_COIN_TRACK_LEVEL	(0x0000)
 #define CONF_SIZE_COIN_TRACK_LEVEL		(1)
 #define CONF_OFFSET_COINS_TO_EJECT		(CONF_OFFSET_COIN_TRACK_LEVEL + CONF_SIZE_COIN_TRACK_LEVEL)
 #define CONF_SIZE_COINS_TO_EJECT		(8 * sizeof(uint8_t))
@@ -44,8 +42,7 @@ public:
 		// there are 2 banks of memories inside the fram:
 		//   - CONF_ADDR_BANK_0 (256 bytes): [ CONF_SIZE_ALL ] [ RESERVED ]
 		//   - CONF_ADDR_BANK_1 (256 bytes): [ CONF_SIZE_ALL ] [ RESERVED ]
-		// the first byte of the bank is the `seq`, and last byte is the `checksum`.
-		//   - seq: 0x00 -> 0x01 -> 0x02 -> ... -> 0xFE -> 0xFF -> 0x00, and starts over
+		// the last byte of the bank is the `checksum`.
 		//   - checksum: every byte (including `seq`) except the `checksum`
 		//               byte XOR-ed togeter with `0x87` (0x87 is choosen because
 		//               that's how `42` is choosen...)
@@ -56,7 +53,6 @@ public:
 		readBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
 		uint8_t checksum_0 = _getChecksum();
 		bool bank0_checksum_good = checksum_0 == _data.configs.checksum;
-		uint8_t bank0_seq = _data.configs.seq + 1;
 
 		dumpBuffer("bank0", _data.bytes, CONF_SIZE_ALL);
 		#if defined(DEBUG_SERIAL)
@@ -81,20 +77,10 @@ public:
 
 		// decide which bank to use
 		if (bank0_checksum_good && bank1_checksum_good) {
-			// both checksum good, compare seq
-			if (bank0_seq == _data.configs.seq) {
-				#if defined(DEBUG_SERIAL)
-				DEBUG_SERIAL.println("Configuration: both good, using bank 1");
-				#endif
-				// bank0.seq + 1 == bank1.seq, bank1 is newer
-				// nothing to be done, _data is already bank1.
-			} else {
-				#if defined(DEBUG_SERIAL)
-				DEBUG_SERIAL.println("Configuration: both good, using bank 0");
-				#endif
-				// bank0 is newer, read them back from fram
-				readBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
-			}
+			// both checksum good, does nothing.
+			#if defined(DEBUG_SERIAL)
+			DEBUG_SERIAL.println(F("Configuration: both good, use bank 1."));
+			#endif
 		} else if (!bank0_checksum_good && !bank1_checksum_good) {
 			#if defined(DEBUG_SERIAL)
 			DEBUG_SERIAL.println("Configuration: both bad, initialize bank 0 and use it.");
@@ -152,13 +138,10 @@ public:
 		else
 			return false;
 
-		++_data.configs.seq;
 		_data.configs.checksum = _getChecksum();
 		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_COIN_TRACK_LEVEL, _data.bytes[CONF_OFFSET_COIN_TRACK_LEVEL]);
-		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_SEQ, _data.configs.seq);
 		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
 		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_COIN_TRACK_LEVEL, _data.bytes[CONF_OFFSET_COIN_TRACK_LEVEL]);
-		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_SEQ, _data.configs.seq);
 		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
 		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
 		return true;
@@ -180,13 +163,10 @@ public:
 			return false;
 
 		_data.configs.coins_to_eject[track_idx] = coins;
-		++_data.configs.seq;
 		_data.configs.checksum = _getChecksum();
 		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_COINS_TO_EJECT + track_idx, coins);
-		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_SEQ, _data.configs.seq);
 		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
 		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_COINS_TO_EJECT + track_idx, coins);
-		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_SEQ, _data.configs.seq);
 		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
 
 		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
@@ -226,13 +206,10 @@ public:
 		 	return false;
 
 		_data.configs.coin_count[track_idx] = count;
-		++_data.configs.seq;
 		_data.configs.checksum = _getChecksum();
 		_fram.writeLong(CONF_ADDR_BANK_0 + CONF_OFFSET_COIN_COUNT + track_idx * sizeof(uint32_t), count);
-		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_SEQ, _data.configs.seq);
 		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
 		_fram.writeLong(CONF_ADDR_BANK_1 + CONF_OFFSET_COIN_COUNT + track_idx * sizeof(uint32_t), count);
-		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_SEQ, _data.configs.seq);
 		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
 
 		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
@@ -293,8 +270,6 @@ private:
 	union {
 		uint8_t bytes[CONF_SIZE_ALL];
 		struct {
-			uint8_t seq;
-
 			uint8_t track_level_0:1;
 			uint8_t track_level_1:1;
 			uint8_t track_level_2:1;
