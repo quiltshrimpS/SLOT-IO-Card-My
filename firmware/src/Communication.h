@@ -35,58 +35,58 @@ public:
 		_messenger.sendCmdArg(F("Spark"));
 		_messenger.sendCmdArg(F("SLOT-IO-Card"));
 		_messenger.sendCmdArg(F("v0.0.1"));
-		_messenger.sendCmdBinArg(20170123L);
+		_messenger.sendCmdBinArg<uint32_t>(20170123L);
 		_messenger.sendCmdEnd();
 	}
 
 	void dispatchCoinCounterResult(uint8_t const track, uint32_t const coins) {
 		_messenger.sendCmdStart(EVT_COIN_COUNTER_RESULT);
-		_messenger.sendCmdBinArg((uint16_t)track);
-		_messenger.sendCmdBinArg(coins);
+		_messenger.sendCmdBinArg<uint8_t>(track);
+		_messenger.sendCmdBinArg<uint8_t>(coins);
 		_messenger.sendCmdEnd();
 	}
 
 	void dispatchKey(uint8_t const length, uint8_t const * const keys) {
 		_messenger.sendCmdStart(EVT_KEYS);
-		_messenger.sendCmdBinArg(length);
+		_messenger.sendCmdBinArg<uint8_t>(length);
 		for (uint8_t i = 0;i < length;++i)
-			_messenger.sendCmdBinArg(keys[i]);
+			_messenger.sendCmdBinArg<uint8_t>(keys[i]);
 		_messenger.sendCmdEnd();
 	}
 
 	void dispatchErrorEjectInterrupted(uint8_t const track, uint8_t const count) {
 		_messenger.sendCmdStart(EVT_ERROR);
-		_messenger.sendCmdBinArg(ERR_EJECT_INTERRUPTED);
-		_messenger.sendCmdBinArg(track);
-		_messenger.sendCmdBinArg(count);
+		_messenger.sendCmdBinArg<uint8_t>(ERR_EJECT_INTERRUPTED);
+		_messenger.sendCmdBinArg<uint8_t>(track);
+		_messenger.sendCmdBinArg<uint8_t>(count);
 		_messenger.sendCmdEnd();
 	}
 
 	void dispatchErrorEjectTimeout(uint8_t const track) {
 		_messenger.sendCmdStart(EVT_ERROR);
-		_messenger.sendCmdBinArg(ERR_EJECT_TIMEOUT);
-		_messenger.sendCmdBinArg(track);
+		_messenger.sendCmdBinArg<uint8_t>(ERR_EJECT_TIMEOUT);
+		_messenger.sendCmdBinArg<uint8_t>(track);
 		_messenger.sendCmdEnd();
 	}
 
 	void dispatchErrorNotATrack(uint8_t const track) {
 		_messenger.sendCmdStart(EVT_ERROR);
-		_messenger.sendCmdBinArg(ERR_NOT_A_TRACK);
-		_messenger.sendCmdBinArg(track);
+		_messenger.sendCmdBinArg<uint8_t>(ERR_NOT_A_TRACK);
+		_messenger.sendCmdBinArg<uint8_t>(track);
 		_messenger.sendCmdEnd();
 	}
 
 	void dispatchErrorProtectedStorage(uint16_t const address) {
 		_messenger.sendCmdStart(EVT_ERROR);
-		_messenger.sendCmdBinArg(ERR_PROTECTED_STORAGE);
-		_messenger.sendCmdBinArg(address);
+		_messenger.sendCmdBinArg<uint8_t>(ERR_PROTECTED_STORAGE);
+		_messenger.sendCmdBinArg<uint16_t>(address);
 		_messenger.sendCmdEnd();
 	}
 
 	void dispatchErrorUnknownCommand(uint8_t const command) {
 		_messenger.sendCmdStart(EVT_ERROR);
-		_messenger.sendCmdBinArg(ERR_UNKNOWN_COMMAND);
-		_messenger.sendCmdBinArg(command);
+		_messenger.sendCmdBinArg<uint8_t>(ERR_UNKNOWN_COMMAND);
+		_messenger.sendCmdBinArg<uint8_t>(command);
 		_messenger.sendCmdEnd();
 	}
 
