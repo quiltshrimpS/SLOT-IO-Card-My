@@ -90,7 +90,14 @@ namespace Spark.Slot.IO
 					if (OnGetInfoResult != null)
 						OnGetInfoResult(this, new GetInfoResultEventArgs(Manufacturer, Product, Version, ProtocolVersion));
 				});
+				messenger.Attach((int)Events.EVT_ERROR, (receivedCommand) =>
+				{
+					UInt16 err = receivedCommand.ReadUInt16Arg();
+					string message = receivedCommand.ReadBinStringArg();
 
+					if (OnError != null)
+						OnError(this, new ErrorEventArgs(err, message));
+				});
 				messenger.Attach((receivedCommand) =>
 				{
 					if (OnUnknown != null)
@@ -133,6 +140,7 @@ namespace Spark.Slot.IO
 		public event EventHandler OnConnected;
 		public event EventHandler OnDisconnected;
 		public event EventHandler<GetInfoResultEventArgs> OnGetInfoResult;
+		public event EventHandler<ErrorEventArgs> OnError;
 		public event EventHandler<UnknownEventArgs> OnUnknown;
 
 		#region "implementations"
@@ -165,6 +173,7 @@ namespace Spark.Slot.IO
 			EVT_KEY = 0x4B,
 			EVT_WRITE_STORAGE_RESULT = 0x69,
 			EVT_READ_STORAGE_RESULT = 0x78,
+			EVT_ERROR = 0xFF,
 		}
 
 		public string Manufacturer { get; private set; }
@@ -185,6 +194,18 @@ namespace Spark.Slot.IO
 				Product = product;
 				Version = version;
 				ProtocolVersion = protoVersion;
+			}
+		}
+
+		public class ErrorEventArgs : EventArgs
+		{
+			public UInt16 Error { get; internal set; }
+			public string Message { get; internal set; }
+
+			public ErrorEventArgs(UInt16 error, string message)
+			{
+				Error = error;
+				Message = message;
 			}
 		}
 
