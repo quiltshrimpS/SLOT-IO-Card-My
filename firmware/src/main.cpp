@@ -20,6 +20,7 @@
 
 #include <CmdMessenger.h>
 
+#include "Communication.h"
 #include "WreckedSPI.h"
 #include "Ports.h"
 #include "Debounce.h"
@@ -30,6 +31,7 @@ FRAM_MB85RC_I2C fram(MB85RC_ADDRESS_A000, true, /* WP */ A7, 16 /* kb */);
 WreckedSPI< /* MISO */ 7, /* MOSI */ 2, /* SCLK_MISO */ 8, /* SCLK_MOSI */ 3, /* MODE_MISO */ 2, /* MODE_MOSI */ 0 > spi;
 Configuration conf(fram);
 
+CmdMessenger messenger(Serial);
 union {
     uint8_t bytes[3];
     struct OutPort port;
@@ -183,6 +185,10 @@ void loop() {
 		previous_in.bytes[1] = masked[1];
 		previous_in.bytes[2] = masked[2];
 	}
+
+	// feed the serial data before we send, because messenger might want to
+	// modify stuff.
+	messenger.feedinSerialData();
 
     if (do_send) {
 		do_send = false;
