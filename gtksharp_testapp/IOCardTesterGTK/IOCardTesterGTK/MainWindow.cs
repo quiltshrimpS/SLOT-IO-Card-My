@@ -76,7 +76,7 @@ public partial class MainWindow : Window
 				string.Format(
 					"=> {0}: unknown cmd = {1}, params = {2}\r\n",
 					DateTime.Now,
-					mCommandProperties[mLastCmdIndex].Command,
+					command,
 					parameters.Length == 0 ? "<null>" : string.Join(", ", parameters)
 				)
 			);
@@ -94,7 +94,7 @@ public partial class MainWindow : Window
 					string.Format(
 						"=> {0}: cmd = {1}\r\n",
 						DateTime.Now,
-						mCommandProperties[mLastCmdIndex].Command
+						command
 					)
 				);
 				sCard.QueryGetInfo();
@@ -120,7 +120,7 @@ public partial class MainWindow : Window
 					string.Format(
 						"=> {0}: cmd = {1}, track = {2}, count = {3}\r\n",
 						DateTime.Now,
-						mCommandProperties[mLastCmdIndex].Command,
+						command,
 						track,
 						count
 					)
@@ -148,7 +148,7 @@ public partial class MainWindow : Window
 					string.Format(
 						"=> {0}: cmd = {1}, track = {2}\r\n",
 						DateTime.Now,
-						mCommandProperties[mLastCmdIndex].Command,
+						command,
 						track
 					)
 				);
@@ -175,7 +175,7 @@ public partial class MainWindow : Window
 					string.Format(
 						"=> {0}: cmd = {1}, track = {2}\r\n",
 						DateTime.Now,
-						mCommandProperties[mLastCmdIndex].Command,
+						command,
 						track
 					)
 				);
@@ -195,7 +195,7 @@ public partial class MainWindow : Window
 					string.Format(
 						"=> {0}: cmd = {1}\r\n",
 						DateTime.Now,
-						mCommandProperties[mLastCmdIndex].Command
+						command
 					)
 				);
 				sCard.QueryGetKeys();
@@ -237,7 +237,7 @@ public partial class MainWindow : Window
 					string.Format(
 						"=> {0}: cmd = {1}, address = 0x{2:X4}, length = {3}, data ={4}\r\n",
 						DateTime.Now,
-						mCommandProperties[mLastCmdIndex].Command,
+						command,
 						address,
 						data.Length,
 						builder
@@ -281,7 +281,7 @@ public partial class MainWindow : Window
 					string.Format(
 						"=> {0}: cmd = {1}, address = 0x{2:X4}, length = {3}\r\n",
 						DateTime.Now,
-						mCommandProperties[mLastCmdIndex].Command,
+						command,
 						address,
 						length
 					)
@@ -316,21 +316,21 @@ public partial class MainWindow : Window
 
 		sCard.OnConnected += (sender, e) =>
 		{
-			mCommandProperties[0].SendCommand(new string[0]);
-			mCommandProperties[0].SendCommand(new string[0]);
-			sCard.QueryGetInfo();
-			sCard.QueryGetKeys();
-			sCard.QueryGetCoinCounter(IOCard.CoinTrack.TrackInsert1);
-			sCard.QueryGetCoinCounter(IOCard.CoinTrack.TrackInsert2);
-			sCard.QueryGetCoinCounter(IOCard.CoinTrack.TrackInsert3);
-			sCard.QueryGetCoinCounter(IOCard.CoinTrack.TrackBanknote1);
-			sCard.QueryGetCoinCounter(IOCard.CoinTrack.TrackEject1);
-			sCard.QueryReadStorage(0x080, 64);
-			sCard.QueryReadStorage(0x180, 64);
-			sCard.QueryReadStorage(0x280, 64);
-			sCard.QueryReadStorage(0x380, 64);
-			sCard.QueryReadStorage(0x480, 64);
-			sCard.QueryReadStorage(0x580, 64);
+			mCommandProperty_GetInfo.SendCommand(null);
+			mCommandProperty_GetKeys.SendCommand(null);
+			mCommandProperty_GetCoinCounter.SendCommand(new string[] { ((int)(IOCard.CoinTrack.TrackInsert1)).ToString() });
+			mCommandProperty_GetCoinCounter.SendCommand(new string[] { ((int)(IOCard.CoinTrack.TrackInsert2)).ToString() });
+			mCommandProperty_GetCoinCounter.SendCommand(new string[] { ((int)(IOCard.CoinTrack.TrackInsert3)).ToString() });
+			mCommandProperty_GetCoinCounter.SendCommand(new string[] { ((int)(IOCard.CoinTrack.TrackBanknote1)).ToString() });
+			mCommandProperty_GetCoinCounter.SendCommand(new string[] { ((int)(IOCard.CoinTrack.TrackEject1)).ToString() });
+			mCommandProperty_ReadStorage.SendCommand(new string[] { "0x080", "64" });
+			mCommandProperty_ReadStorage.SendCommand(new string[] { "0x180", "64" });
+			mCommandProperty_ReadStorage.SendCommand(new string[] { "0x280", "64" });
+			mCommandProperty_ReadStorage.SendCommand(new string[] { "0x380", "64" });
+			mCommandProperty_ReadStorage.SendCommand(new string[] { "0x480", "64" });
+			mCommandProperty_ReadStorage.SendCommand(new string[] { "0x580", "64" });
+			mCommandProperty_ReadStorage.SendCommand(new string[] { "0x680", "64" });
+			mCommandProperty_ReadStorage.SendCommand(new string[] { "0x780", "64" });
 
 			Application.Invoke(delegate
 			{
