@@ -162,9 +162,9 @@ void setup() {
 					// block newer command if there are still coins left to be ejected
 					uint8_t const coins = conf.getCoinsToEject(TRACK_EJECT);
 					if (count != 0 && coins != 0) {
-						communicator.dispatchError(coins, F("Previous ejection interrupted."));
+						communicator.dispatchErrorEjectInterrupted(track, coins);
 					} else if (!conf.setCoinsToEject(track, count)) {
-						communicator.dispatchError(track, F("Ejection failed"));
+						communicator.dispatchErrorNotATrack(track);
 					} else if (count != 0) {
 						out.port.ssr1 = true;
 						do_send = true;
@@ -178,7 +178,7 @@ void setup() {
 				}
 				break;
 			default:
-				communicator.dispatchError(messenger.commandID(), F("Unknown command"));
+				communicator.dispatchErrorUnknownCommand(messenger.commandID());
 		}
 	});
 }

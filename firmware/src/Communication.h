@@ -9,12 +9,17 @@
 #define CMD_EJECT_COIN				(0xE1)
 #define CMD_GET_INFO				(0xF0)
 
-#define EVT_ERROR					(0xFF)
 #define EVT_GET_INFO_RESULT			(0x0F)
 #define EVT_COIN_COUNTER_RESULT		(0x2D)
 #define EVT_KEY 					(0x4B)
 #define EVT_WRITE_STORAGE_RESULT	(0x69)
 #define EVT_READ_STORAGE_RESULT		(0x78)
+#define EVT_ERROR					(0xFF)
+
+#define ERR_EJECT_INTERRUPTED		(0x01)
+#define ERR_EJECT_TIMEOUT			(0x02)
+#define ERR_NOT_A_TRACK				(0x03)
+#define ERR_UNKNOWN_COMMAND			(0xFF)
 
 class Communicator {
 public:
@@ -47,11 +52,32 @@ public:
 		_messenger.sendCmdEnd();
 	}
 
-	template < typename T >
-	void dispatchError(uint8_t id, T msg) {
+	void dispatchErrorEjectInterrupted(uint8_t const track, uint8_t const count) {
 		_messenger.sendCmdStart(EVT_ERROR);
-		_messenger.sendCmdArg(id);
-		_messenger.sendCmdArg(msg);
+		_messenger.sendCmdBinArg(ERR_EJECT_INTERRUPTED);
+		_messenger.sendCmdBinArg(track);
+		_messenger.sendCmdBinArg(count);
+		_messenger.sendCmdEnd();
+	}
+
+	void dispatchErrorEjectTimeout(uint8_t const track) {
+		_messenger.sendCmdStart(EVT_ERROR);
+		_messenger.sendCmdBinArg(ERR_EJECT_TIMEOUT);
+		_messenger.sendCmdBinArg(track);
+		_messenger.sendCmdEnd();
+	}
+
+	void dispatchErrorNotATrack(uint8_t const track) {
+		_messenger.sendCmdStart(EVT_ERROR);
+		_messenger.sendCmdBinArg(ERR_NOT_A_TRACK);
+		_messenger.sendCmdBinArg(track);
+		_messenger.sendCmdEnd();
+	}
+
+	void dispatchErrorUnknownCommand(uint8_t const command) {
+		_messenger.sendCmdStart(EVT_ERROR);
+		_messenger.sendCmdBinArg(ERR_UNKNOWN_COMMAND);
+		_messenger.sendCmdBinArg(command);
 		_messenger.sendCmdEnd();
 	}
 
