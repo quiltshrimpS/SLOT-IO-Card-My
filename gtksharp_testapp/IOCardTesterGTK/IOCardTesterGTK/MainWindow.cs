@@ -219,7 +219,7 @@ public partial class MainWindow : Window
 				mPorts.Insert(0, port);
 				_populateComboBoxEntry(comboboxentry_port, mPorts);
 			}
-			var status = IOCard.Card.Connect(port);
+			var status = IOCard.Card.Connect(port, 250000);
 		}
 	}
 
