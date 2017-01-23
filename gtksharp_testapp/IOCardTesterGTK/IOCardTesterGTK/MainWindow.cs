@@ -151,6 +151,13 @@ public partial class MainWindow : Window
 				button_connect.Label = "_Connect";
 			});
 		};
+		IOCard.Card.OnError += (sender, e) =>
+		{
+			Gtk.Application.Invoke(delegate
+			{
+				textview_received.Buffer.Text = string.Format("<= {0}: {1} - {2}\r\n{3}", DateTime.Now, e.Error, e.Message, textview_received.Buffer.Text);
+			});
+		};
 		IOCard.Card.OnGetInfoResult += (sender, e) =>
 		{
 			Gtk.Application.Invoke(delegate 
