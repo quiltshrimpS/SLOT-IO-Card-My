@@ -30,6 +30,8 @@
 #define TRACK_EJECT			(0xC0)
 #define TRACK_NOT_A_TRACK	(0xFF)
 
+#define MAX_BYTES_LENGTH	(64)
+
 class Configuration {
 public:
 	Configuration(FRAM_MB85RC_I2C &fram):

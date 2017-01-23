@@ -1,6 +1,8 @@
 #ifndef __COMMUNICATION_H__
 #define __COMMUNICATION_H__
 
+#include "Configuration.h"
+
 #define CMD_GET_KEYS				(0xA5)
 #define CMD_READ_STORAGE			(0x87)
 #define CMD_WRITE_STORAGE			(0x96)
@@ -21,6 +23,7 @@
 #define ERR_EJECT_TIMEOUT			(0x02)
 #define ERR_NOT_A_TRACK				(0x03)
 #define ERR_PROTECTED_STORAGE		(0x04)
+#define ERR_TOO_LONG				(0x05)
 #define ERR_UNKNOWN_COMMAND			(0xFF)
 
 class Communicator {
@@ -80,6 +83,14 @@ public:
 		_messenger.sendCmdStart(EVT_ERROR);
 		_messenger.sendCmdBinArg<uint8_t>(ERR_PROTECTED_STORAGE);
 		_messenger.sendCmdBinArg<uint16_t>(address);
+		_messenger.sendCmdEnd();
+	}
+
+	void dispatchErrorTooLong(uint8_t length) {
+		_messenger.sendCmdStart(EVT_ERROR);
+		_messenger.sendCmdBinArg<uint8_t>(ERR_TOO_LONG);
+		_messenger.sendCmdBinArg<uint8_t>(MAX_BYTES_LENGTH);
+		_messenger.sendCmdBinArg<uint8_t>(length);
 		_messenger.sendCmdEnd();
 	}
 
