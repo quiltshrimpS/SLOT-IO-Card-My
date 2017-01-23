@@ -12,7 +12,7 @@
 
 #define EVT_GET_INFO_RESULT			(0x0F)
 #define EVT_COIN_COUNTER_RESULT		(0x2D)
-#define EVT_KEY 					(0x4B)
+#define EVT_KEYS 					(0x4B)
 #define EVT_WRITE_STORAGE_RESULT	(0x69)
 #define EVT_READ_STORAGE_RESULT		(0x78)
 #define EVT_ERROR					(0xFF)
@@ -46,7 +46,7 @@ public:
 	}
 
 	void dispatchKey(uint8_t const length, uint8_t const * const keys) {
-		_messenger.sendCmdStart(EVT_KEY);
+		_messenger.sendCmdStart(EVT_KEYS);
 		_messenger.sendCmdBinArg(length);
 		for (uint8_t i = 0;i < length;++i)
 			_messenger.sendCmdBinArg(keys[i]);
