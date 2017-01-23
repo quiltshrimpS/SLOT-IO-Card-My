@@ -198,7 +198,7 @@ void setup() {
 					} else {
 						uint8_t buffer[length];
 						conf.readBytes(address, length, buffer);
-						communicator.dispatchReadStorage(address, length, buffer);
+						communicator.dispatchReadStorageResult(address, length, buffer);
 					}
 				}
 				break;

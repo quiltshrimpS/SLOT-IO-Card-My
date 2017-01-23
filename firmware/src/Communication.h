@@ -57,7 +57,7 @@ public:
 		_messenger.sendCmdEnd();
 	}
 
-	void dispatchReadStorage(uint16_t const address, uint8_t const length, uint8_t const * const buffer) {
+	void dispatchReadStorageResult(uint16_t const address, uint8_t const length, uint8_t const * const buffer) {
 		_messenger.sendCmdStart(EVT_READ_STORAGE_RESULT);
 		_messenger.sendCmdBinArg<uint16_t>(address);
 		_messenger.sendCmdBinArg<uint8_t>(length);
