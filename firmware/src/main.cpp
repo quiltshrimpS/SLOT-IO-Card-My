@@ -261,9 +261,9 @@ void loop() {
 	// rest of the keys are not debounced, we just send them to the PC if
 	// anything changed.
 	uint8_t masked[] = {
-		in.bytes[0] & IN_MASK_0,
-		in.bytes[1] & IN_MASK_1,
-		in.bytes[2] & IN_MASK_2,
+		static_cast<uint8_t>(in.bytes[0] & IN_MASK_0),
+		static_cast<uint8_t>(in.bytes[1] & IN_MASK_1),
+		static_cast<uint8_t>(in.bytes[2] & IN_MASK_2),
 	};
 	if (masked[0] != previous_in.bytes[0] ||
 		masked[1] != previous_in.bytes[1] ||
