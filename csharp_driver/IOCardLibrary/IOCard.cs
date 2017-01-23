@@ -187,6 +187,19 @@ namespace Spark.Slot.IO
 			return false;
 		}
 
+		public bool QueryReadStorage(UInt16 address, byte length, SendQueue queuePosition = SendQueue.AtEndQueue)
+		{
+			if (IsConnected)
+			{
+				var cmd = new SendCommand((int)Commands.CMD_READ_STORAGE);
+				cmd.AddBinArgument(address);
+				cmd.AddBinArgument(length);
+				mMessenger.SendCommand(cmd, queuePosition);
+				return true;
+			}
+			return false;
+		}
+
 		/// <summary>
 		/// queue a RESET_COIN_COUNTER command
 		/// </summary>
@@ -254,6 +267,17 @@ namespace Spark.Slot.IO
 
 					if (OnKey != null)
 						OnKey(this, new KeyEventArgs(keys));
+				});
+				messenger.Attach((int)Events.EVT_READ_STORAGE_RESULT, (receivedCommand) =>
+				{
+					var address = receivedCommand.ReadBinUInt16Arg();
+					var length = receivedCommand.ReadBinByteArg();
+					var data = new byte[length];
+					for (int i = 0; i < length; ++i)
+						data[i] = receivedCommand.ReadBinByteArg();
+
+					if (OnReadStorageResult != null)
+						OnReadStorageResult(this, new ReadStorageResultEventArgs(address, data));
 				});
 				messenger.Attach((int)Events.EVT_ERROR, (receivedCommand) =>
 				{
@@ -339,6 +363,7 @@ namespace Spark.Slot.IO
 		public event EventHandler<GetInfoResultEventArgs> OnGetInfoResult;
 		public event EventHandler<CoinCounterResultEventArgs> OnCoinCounterResult;
 		public event EventHandler<KeyEventArgs> OnKey;
+		public event EventHandler<ReadStorageResultEventArgs> OnReadStorageResult;
 		public event EventHandler<ErrorEventArgs> OnError;
 		public event EventHandler<UnknownEventArgs> OnUnknown;
 
@@ -414,6 +439,18 @@ namespace Spark.Slot.IO
 			public KeyEventArgs(byte[] keys)
 			{
 				Keys = keys;
+			}
+		}
+
+		public class ReadStorageResultEventArgs : EventArgs
+		{
+			public UInt16 Address { get; internal set; }
+			public byte[] Data { get; internal set; }
+
+			public ReadStorageResultEventArgs(UInt16 address, byte[] data)
+			{
+				Address = address;
+				Data = data;
 			}
 		}
 
