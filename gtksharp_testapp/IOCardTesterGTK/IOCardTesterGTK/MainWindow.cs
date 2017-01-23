@@ -11,11 +11,7 @@ public partial class MainWindow : Window
 
 	int mLastCmdIndex;
 
-	List<string> mPorts = new List<string>(new string[] {
-		"COM3",
-		"COM1",
-		"COM20",
-	});
+	List<string> mPorts = new List<string>(new string[] { "COM3", "COM1", "COM20" });
 
 	private class CommandProperties
 	{
@@ -103,7 +99,7 @@ public partial class MainWindow : Window
 				new string[] {
 					"0xC0, 0x0A // eject 10 coins from track 0xC0 (eject track 1)",
 					"0xC0, 5 // eject 5 coins from track 0xC0 (eject track 1)",
-					"0xC0, 0 // interrupt track 0xC0 (eject track 1)",
+					"0xC0, 0 // interrupt track 0xC0 (eject track 1)"
 				},
 				(command, parameters) =>
 				{
@@ -132,7 +128,7 @@ public partial class MainWindow : Window
 				new string[] {
 					"0x00 // track 0x00 (insert 1)",
 					"0x80 // track 0x80 (banknote 1)",
-					"0xC0 // track 0xC0 (eject track 1)",
+					"0xC0 // track 0xC0 (eject track 1)"
 				},
 				(command, parameters) =>
 				{
@@ -177,7 +173,7 @@ public partial class MainWindow : Window
 				new string[] {
 					"0x00 // track 0x00 (insert 1)",
 					"0x80 // track 0x80 (banknote 1)",
-					"0xC0 // track 0xC0 (eject track 1)",
+					"0xC0 // track 0xC0 (eject track 1)"
 				},
 				(command, parameters) =>
 				{
@@ -203,7 +199,7 @@ public partial class MainWindow : Window
 				"Params: <states (byte[])>",
 				new string[] {
 					"0x12 0x34 0x56 // 3 bytes",
-					"0x34 0x56 0x78 // 3 bytes",
+					"0x34 0x56 0x78 // 3 bytes"
 				},
 				unhandled_send_callback
 			),
@@ -213,7 +209,7 @@ public partial class MainWindow : Window
 				"Params: <address (UInt16)>, <data (byte[])>",
 				new string[] {
 					"0x100, 0x12 0x34 0x56 0x78 0x90 0xAB 0xCD 0xEF",
-					"0x200, 0xFE 0xDC 0xBA 0x09 0x87 0x65 0x43 0x21",
+					"0x200, 0xFE 0xDC 0xBA 0x09 0x87 0x65 0x43 0x21"
 				},
 				unhandled_send_callback
 			),
@@ -225,7 +221,7 @@ public partial class MainWindow : Window
 					"0x000, 64 // read 64 bytes from 0x000",
 					"0x100, 8 // read 8 bytes from 0x100",
 					"0x200, 16 // read 16 bytes from 0x200",
-					"0x204, 4 // read 4 bytes from 0x204",
+					"0x204, 4 // read 4 bytes from 0x204"
 				},
 				(command, parameters) => {
 					var address = _getTfromString<ushort>(parameters[0].Trim());
@@ -235,7 +231,7 @@ public partial class MainWindow : Window
 					textview_received.Buffer.Insert(
 						ref iter,
 						string.Format(
-							"=> {0}: cmd = {1}, address = 0x{2:X}, length = {3}\r\n",
+							"=> {0}: cmd = {1}, address = 0x{2:X4}, length = {3}\r\n",
 							DateTime.Now,
 							sCommands[mLastCmdIndex].Command,
 							address,
@@ -245,17 +241,12 @@ public partial class MainWindow : Window
 
 					sCard.QueryReadStorage(address, length);
 				}
-			),
+			)
 		};
 
 		var cmds = new List<string>(sCommands.Length);
 		foreach (var desc in sCommands)
-			cmds.Add(string.Format(
-				"{0} ({1})",
-				// FIXME: because Mono doesn't read {0:X2}, so we had do it this way.
-				string.Format("0x{0:x}", desc.Command).Replace("0x000000", "0x"),
-				desc.Command.ToString().Replace("CMD_", "")
-			));
+			cmds.Add(string.Format("0x{0:X2} ({1})", (uint)desc.Command, desc.Command.ToString().Replace("CMD_", "")));
 		_populateComboBox(combobox_cmd, cmds);
 		mLastCmdIndex = combobox_cmd.Active;
 		label_cmd_desc.Text = sCommands[mLastCmdIndex].CommandDescription;
@@ -448,7 +439,7 @@ public partial class MainWindow : Window
 				textview_received.Buffer.Insert(
 					ref iter,
 					string.Format(
-						"<= {0}: Address = 0x{1:X4}, Data:{2}\r\n",
+						"<= {0}: Address = 0x{1:X4}, Data ={2}\r\n",
 						DateTime.Now,
 						e.Address,
 						builder
