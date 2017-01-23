@@ -45,7 +45,7 @@ public:
 	void dispatchCoinCounterResult(uint8_t const track, uint32_t const coins) {
 		_messenger.sendCmdStart(EVT_COIN_COUNTER_RESULT);
 		_messenger.sendCmdBinArg<uint8_t>(track);
-		_messenger.sendCmdBinArg<uint8_t>(coins);
+		_messenger.sendCmdBinArg<uint32_t>(coins);
 		_messenger.sendCmdEnd();
 	}
 
