@@ -195,6 +195,16 @@ namespace Spark.Slot.IO
 					if (OnCoinCounterResult != null)
 						OnCoinCounterResult(this, new CoinCounterResultEventArgs(track, coins));
 				});
+				messenger.Attach((int)Events.EVT_KEY, (receivedCommand) =>
+				{
+					var count = receivedCommand.ReadBinByteArg();
+					var keys = new byte[count];
+					for (int i = 0; i < count; ++i)
+						keys[i] = receivedCommand.ReadBinByteArg();
+
+					if (OnKey != null)
+						OnKey(this, new KeyEventArgs(keys));
+				});
 				messenger.Attach((int)Events.EVT_ERROR, (receivedCommand) =>
 				{
 					ErrorEventArgs e = null;
@@ -268,6 +278,7 @@ namespace Spark.Slot.IO
 		public event EventHandler OnDisconnected;
 		public event EventHandler<GetInfoResultEventArgs> OnGetInfoResult;
 		public event EventHandler<CoinCounterResultEventArgs> OnCoinCounterResult;
+		public event EventHandler<KeyEventArgs> OnKey;
 		public event EventHandler<ErrorEventArgs> OnError;
 		public event EventHandler<UnknownEventArgs> OnUnknown;
 
@@ -335,6 +346,16 @@ namespace Spark.Slot.IO
 			{
 				Track = track;
 				Coins = coins;
+			}
+		}
+
+		public class KeyEventArgs : EventArgs
+		{
+			public byte[] Keys { get; internal set; }
+
+			public KeyEventArgs(byte[] keys)
+			{
+				Keys = keys;
 			}
 		}
 
