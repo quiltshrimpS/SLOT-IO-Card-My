@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using Gtk;
 using Spark.Slot.IO;
 
@@ -245,5 +246,11 @@ public partial class MainWindow : Window
 		_populateComboBox(cbe, contents);
 		if (contents.Count == 0)
 			cbe.Entry.Text = "";
+	}
+
+	private static T _getTfromString<T>(string mystring)
+	{
+		var foo = TypeDescriptor.GetConverter(typeof(T));
+		return (T)(foo.ConvertFromInvariantString(mystring));
 	}
 }
