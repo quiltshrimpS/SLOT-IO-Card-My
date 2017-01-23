@@ -20,6 +20,7 @@
 #define ERR_EJECT_INTERRUPTED		(0x01)
 #define ERR_EJECT_TIMEOUT			(0x02)
 #define ERR_NOT_A_TRACK				(0x03)
+#define ERR_PROTECTED_STORAGE		(0x04)
 #define ERR_UNKNOWN_COMMAND			(0xFF)
 
 class Communicator {
@@ -72,6 +73,13 @@ public:
 		_messenger.sendCmdStart(EVT_ERROR);
 		_messenger.sendCmdBinArg(ERR_NOT_A_TRACK);
 		_messenger.sendCmdBinArg(track);
+		_messenger.sendCmdEnd();
+	}
+
+	void dispatchErrorProtectedStorage(uint16_t const address) {
+		_messenger.sendCmdStart(EVT_ERROR);
+		_messenger.sendCmdBinArg(ERR_PROTECTED_STORAGE);
+		_messenger.sendCmdBinArg(address);
 		_messenger.sendCmdEnd();
 	}
 
