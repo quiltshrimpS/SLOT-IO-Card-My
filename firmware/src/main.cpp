@@ -172,10 +172,13 @@ void setup() {
 				}
 				break;
 			case CMD_GET_COIN_COUNTER:
-			 	{
+				{
 					uint8_t const track = messenger.readBinArg<uint8_t>();
 					communicator.dispatchCoinCounterResult(track, conf.getCoinCount(track));
 				}
+				break;
+			case CMD_GET_KEYS:
+				communicator.dispatchKey(3, previous_in.bytes);
 				break;
 			default:
 				communicator.dispatchErrorUnknownCommand(messenger.commandID());

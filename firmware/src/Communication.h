@@ -1,6 +1,7 @@
 #ifndef __COMMUNICATION_H__
 #define __COMMUNICATION_H__
 
+#define CMD_GET_KEYS				(0xA5)
 #define CMD_READ_STORAGE			(0x87)
 #define CMD_WRITE_STORAGE			(0x96)
 #define CMD_SET_OUTPUT				(0xB4)
