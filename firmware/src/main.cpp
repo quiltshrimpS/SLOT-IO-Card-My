@@ -187,6 +187,23 @@ void setup() {
 			case CMD_GET_KEYS:
 				communicator.dispatchKey(3, previous_in.bytes);
 				break;
+			case CMD_WRITE_STORAGE:
+				{
+					uint16_t const address = messenger.readBinArg<uint16_t>();
+					uint8_t const length = messenger.readBinArg<uint8_t>();
+					if (address < 0x200) {
+						communicator.dispatchErrorProtectedStorage(address);
+					} else if (length > MAX_BYTES_LENGTH) {
+						communicator.dispatchErrorTooLong(length);
+					} else {
+						uint8_t buffer[length];
+						for (uint8_t i = 0; i < length; ++i)
+							buffer[i] = messenger.readBinArg<uint8_t>();
+						conf.writeBytes(address, length, buffer);
+						communicator.dispatchWriteStorageResult(address, length);
+					}
+				}
+				break;
 			case CMD_READ_STORAGE:
 				{
 					uint16_t const address = messenger.readBinArg<uint16_t>();
