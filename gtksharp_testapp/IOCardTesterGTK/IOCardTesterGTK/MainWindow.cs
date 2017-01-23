@@ -7,11 +7,11 @@ using Spark.Slot.IO;
 
 public partial class MainWindow : Window
 {
-	private static IOCard sCard = new IOCard();
+	static IOCard sCard = new IOCard();
 
-	private int mLastCmdIndex = 0;
+	int mLastCmdIndex;
 
-	private List<string> mPorts = new List<string>(new string[] {
+	List<string> mPorts = new List<string>(new string[] {
 		"COM3",
 		"COM1",
 		"COM20",
@@ -57,7 +57,7 @@ public partial class MainWindow : Window
 		}
 	}
 
-	private CommandProperties[] sCommands = null;
+	CommandProperties[] sCommands;
 
 	public MainWindow() : base(WindowType.Toplevel)
 	{
@@ -72,7 +72,7 @@ public partial class MainWindow : Window
 					"=> {0}: unknown cmd = {1}, params = {2}\r\n",
 					DateTime.Now,
 					sCommands[mLastCmdIndex].Command,
-					parameters.Length == 0 ? "<null>" : String.Join(", ", parameters)
+					parameters.Length == 0 ? "<null>" : string.Join(", ", parameters)
 				)
 			);
 		};
@@ -249,7 +249,7 @@ public partial class MainWindow : Window
 
 		sCard.OnConnected += (sender, e) =>
 		{
-			Gtk.Application.Invoke(delegate
+			Application.Invoke(delegate
 			{
 				button_send.Sensitive = true;
 				button_connect.Label = "_Disconnect";
@@ -257,7 +257,7 @@ public partial class MainWindow : Window
 		};
 		sCard.OnDisconnected += (sender, e) =>
 		{
-			Gtk.Application.Invoke(delegate
+			Application.Invoke(delegate
 			{
 				button_send.Sensitive = false;
 				button_connect.Label = "_Connect";
@@ -265,7 +265,7 @@ public partial class MainWindow : Window
 		};
 		sCard.OnError += (sender, e) =>
 		{
-			Gtk.Application.Invoke(delegate
+			Application.Invoke(delegate
 			{
 				switch (e.ErrorCode)
 				{
@@ -276,7 +276,7 @@ public partial class MainWindow : Window
 							textview_received.Buffer.Insert(
 								ref iter,
 								string.Format(
-									"<= {0}: error = {1}, Track = 0x{2:X}, Coins Failed = {3}\r\n",
+									"<= {0}: error = {1}, Track = 0x{2:X2}, Coins Failed = {3}\r\n",
 									DateTime.Now,
 									ev.ErrorCode,
 									ev.Track,
@@ -293,7 +293,7 @@ public partial class MainWindow : Window
 							textview_received.Buffer.Insert(
 								ref iter,
 								string.Format(
-									"<= {0}: error = {1}, Track = 0x{2:X}\r\n",
+									"<= {0}: error = {1}, Track = 0x{2:X2}\r\n",
 									DateTime.Now,
 									ev.ErrorCode,
 									ev.Track
@@ -308,7 +308,7 @@ public partial class MainWindow : Window
 							textview_received.Buffer.Insert(
 								ref iter,
 								string.Format(
-									"<= {0}: error = {1}, address = 0x{2:X}\r\n",
+									"<= {0}: error = {1}, address = 0x{2:X4}\r\n",
 									DateTime.Now,
 									ev.ErrorCode,
 									ev.Address
@@ -339,7 +339,7 @@ public partial class MainWindow : Window
 							textview_received.Buffer.Insert(
 								ref iter,
 								string.Format(
-									"<= {0}: error = {1}, cmd = 0x{2:X}\r\n",
+									"<= {0}: error = {1}, cmd = 0x{2:X2}\r\n",
 									DateTime.Now,
 									ev.ErrorCode,
 									ev.Command
@@ -354,7 +354,7 @@ public partial class MainWindow : Window
 							textview_received.Buffer.Insert(
 								ref iter,
 								string.Format(
-									"<= {0}: error = {1}, unknown error = 0x{2:X}\r\n",
+									"<= {0}: error = {1}, unknown error = 0x{2:X2}\r\n",
 									DateTime.Now,
 									ev.ErrorCode,
 									ev.UnknownErrorCode
@@ -367,50 +367,60 @@ public partial class MainWindow : Window
 		};
 		sCard.OnGetInfoResult += (sender, e) =>
 		{
-			Gtk.Application.Invoke(delegate
+			Application.Invoke(delegate
 			{
-				textview_received.Buffer.Text = string.Format(
-					"<= {0}: Manufacturer = {1}, Product = {2}, Version = {3}, Protocol = {4}\r\n{5}",
-					DateTime.Now,
-					e.Manufacturer,
-					e.Product,
-					e.Version,
-					e.ProtocolVersion,
-					textview_received.Buffer.Text
+				var iter = textview_received.Buffer.StartIter;
+				textview_received.Buffer.Insert(
+					ref iter,
+					string.Format(
+						"<= {0}: Manufacturer = {1}, Product = {2}, Version = {3}, Protocol = {4}\r\n",
+						DateTime.Now,
+						e.Manufacturer,
+						e.Product,
+						e.Version,
+						e.ProtocolVersion
+					)
 				);
 			});
 		};
 		sCard.OnCoinCounterResult += (sender, e) =>
 		{
-			Gtk.Application.Invoke(delegate
+			Application.Invoke(delegate
 			{
-				textview_received.Buffer.Text = string.Format(
-					"<= {0}: Track = {1}, Coins = {2}\r\n{3}",
-					DateTime.Now,
-					e.Track,
-					e.Coins,
-					textview_received.Buffer.Text
+				var iter = textview_received.Buffer.StartIter;
+				textview_received.Buffer.Insert(
+					ref iter,
+					string.Format(
+						"<= {0}: Track = {1}, Coins = {2}\r\n",
+						DateTime.Now,
+						e.Track,
+						e.Coins
+					)
 				);
 			});
 		};
 		sCard.OnKey += (sender, e) =>
 		{
-			Gtk.Application.Invoke(delegate
+			Application.Invoke(delegate
 			{
 				var builder = new StringBuilder(e.Keys.Length * 5);
 				foreach (var key in e.Keys)
-					builder.Append(" 0x").AppendFormat("{0:X}", key);
-				textview_received.Buffer.Text = string.Format(
-					"<= {0}: Keys:{1}\r\n{2}",
-					DateTime.Now,
-					builder,
-					textview_received.Buffer.Text
+					builder.Append(string.Format(" 0x{0:X2}", key));
+
+				var iter = textview_received.Buffer.StartIter;
+				textview_received.Buffer.Insert(
+					ref iter,
+					string.Format(
+						"<= {0}: Keys:{1}\r\n",
+						DateTime.Now,
+						builder
+					)
 				);
 			});
 		};
 		sCard.OnUnknown += (sender, e) =>
 		{
-			Gtk.Application.Invoke(delegate
+			Application.Invoke(delegate
 			{
 				textview_received.Buffer.Text = string.Format(
 					"<= {0}: Unknown - {1}\r\n{2}",
@@ -502,7 +512,7 @@ public partial class MainWindow : Window
 		sCommands[mLastCmdIndex].SendCommand(parameters_raw.Split(','));
 	}
 
-	private void _populateComboBox(ComboBox cb, List<string> contents)
+	void _populateComboBox(ComboBox cb, List<string> contents)
 	{
 		var store = (ListStore)cb.Model;
 		store.Clear();
@@ -511,14 +521,14 @@ public partial class MainWindow : Window
 		cb.Active = contents.Count == 0 ? -1 : 0;
 	}
 
-	private void _populateComboBoxEntry(ComboBoxEntry cbe, List<string> contents)
+	void _populateComboBoxEntry(ComboBoxEntry cbe, List<string> contents)
 	{
 		_populateComboBox(cbe, contents);
 		if (contents.Count == 0)
 			cbe.Entry.Text = "";
 	}
 
-	private static T _getTfromString<T>(string mystring)
+	static T _getTfromString<T>(string mystring)
 	{
 		var foo = TypeDescriptor.GetConverter(typeof(T));
 		return (T)(foo.ConvertFromInvariantString(mystring));
