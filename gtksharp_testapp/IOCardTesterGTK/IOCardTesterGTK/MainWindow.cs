@@ -153,6 +153,7 @@ public partial class MainWindow : Window
 
 	protected void OnDeleteEvent(object sender, DeleteEventArgs a)
 	{
+		IOCard.Card.Disconnect();
 		Application.Quit();
 		a.RetVal = true;
 	}
