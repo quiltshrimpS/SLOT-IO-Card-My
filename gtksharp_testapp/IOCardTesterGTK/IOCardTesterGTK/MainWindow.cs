@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Text;
 using Gtk;
 using Spark.Slot.IO;
 
@@ -247,6 +248,21 @@ public partial class MainWindow : Window
 					DateTime.Now,
 					e.Track,
 					e.Coins,
+					textview_received.Buffer.Text
+				);
+			});
+		};
+		IOCard.Card.OnKey += (sender, e) =>
+		{
+			Gtk.Application.Invoke(delegate
+			{
+				var builder = new StringBuilder(e.Keys.Length * 5);
+				foreach (var key in e.Keys)
+					builder.Append(" 0x").AppendFormat("{0:X}", key);
+				textview_received.Buffer.Text = string.Format(
+					"<= {0}: Keys:{1}\r\n{2}",
+					DateTime.Now,
+					builder,
 					textview_received.Buffer.Text
 				);
 			});
