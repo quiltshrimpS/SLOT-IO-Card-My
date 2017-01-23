@@ -48,7 +48,7 @@ public:
 		_messenger.sendCmdStart(EVT_KEY);
 		_messenger.sendCmdBinArg(length);
 		for (uint8_t i = 0;i < length;++i)
-			_messenger.sendCmdArg(keys[i]);
+			_messenger.sendCmdBinArg(keys[i]);
 		_messenger.sendCmdEnd();
 	}
 
