@@ -80,7 +80,7 @@ public partial class MainWindow : Window
 		),
 		new CommandProperties(
 			IOCard.Commands.CMD_RESET_COIN_COINTER, 1,
-			"Reset coin counter.", 
+			"Reset coin counter.",
 			"Params: <track (byte)>",
 			new string[] { "0x80 // track 0x80" }
 		),
@@ -88,7 +88,7 @@ public partial class MainWindow : Window
 			IOCard.Commands.CMD_SET_OUTPUT, 1,
 			"Set 74HC595 output.",
 			"Params: <states (byte[])>",
-			new string[] { 
+			new string[] {
 				"0x12 0x34 0x56 // 3 bytes",
 				"0x34 0x56 0x78 // 3 bytes",
 			}
