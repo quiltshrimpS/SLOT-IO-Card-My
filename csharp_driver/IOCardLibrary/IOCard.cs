@@ -103,7 +103,7 @@ namespace Spark.Slot.IO
 		/// <summary>
 		/// queue a GET_INFO command
 		/// </summary>
-		/// <returns><c>true</c>, if get info was queued, <c>false</c> otherwise.</returns>
+		/// <returns><c>true</c>, if GET_INFO was queued, <c>false</c> otherwise.</returns>
 		/// <param name="queuePosition">
 		/// position of the command to be placed, either <c>SendQueue.InFrontQueue</c> to place the command in front of
 		/// the queue, or <c>SendQueue.AtEndQueue</c> to place the command at the end of the queue. Defaults to
@@ -122,7 +122,7 @@ namespace Spark.Slot.IO
 		/// <summary>
 		/// queue a EJECT_COIN command
 		/// </summary>
-		/// <returns><c>true</c>, if get info was queued, <c>false</c> otherwise.</returns>
+		/// <returns><c>true</c>, if EJECT_COIN was queued, <c>false</c> otherwise.</returns>
 		/// <param name="track"><c>CoinTrack</c> indicates which track to eject</param>
 		/// <param name="count">number of coins to be ejected.</param>
 		/// <param name="queuePosition">
@@ -146,8 +146,8 @@ namespace Spark.Slot.IO
 		/// <summary>
 		/// queue a GET_COIN_COUNTER command
 		/// </summary>
-		/// <returns><c>true</c>, if get info was queued, <c>false</c> otherwise.</returns>
-		/// <param name="track"><c>CoinTrack</c> indicates which track to eject</param>
+		/// <returns><c>true</c>, if GET_COIN_COUNTER was queued, <c>false</c> otherwise.</returns>
+		/// <param name="track"><c>CoinTrack</c> indicates which track to get</param>
 		/// <param name="queuePosition">
 		/// position of the command to be placed, either <c>SendQueue.InFrontQueue</c> to place the command in front of
 		/// the queue, or <c>SendQueue.AtEndQueue</c> to place the command at the end of the queue. Defaults to
@@ -168,7 +168,7 @@ namespace Spark.Slot.IO
 		/// <summary>
 		/// queue a GET_KEYS command
 		/// </summary>
-		/// <returns><c>true</c>, if get info was queued, <c>false</c> otherwise.</returns>
+		/// <returns><c>true</c>, if GET_KEYS was queued, <c>false</c> otherwise.</returns>
 		/// <param name="queuePosition">
 		/// position of the command to be placed, either <c>SendQueue.InFrontQueue</c> to place the command in front of
 		/// the queue, or <c>SendQueue.AtEndQueue</c> to place the command at the end of the queue. Defaults to
@@ -184,6 +184,11 @@ namespace Spark.Slot.IO
 			return false;
 		}
 
+		/// <summary>
+		/// Connect the specified port and baudrate.
+		/// </summary>
+		/// <param name="port">Port.</param>
+		/// <param name="baudrate">Baudrate.</param>
 		public bool Connect(string port, int baudrate)
 		{
 			if (mMessenger != null)
