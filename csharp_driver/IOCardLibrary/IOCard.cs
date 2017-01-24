@@ -194,6 +194,19 @@ namespace Spark.Slot.IO
 			return false;
 		}
 
+		public bool QuerySetOutput(byte[] outputs, SendQueue queuePosition = SendQueue.AtEndQueue)
+		{
+			if (IsConnected)
+			{
+				var cmd = new SendCommand((int)Commands.CMD_SET_OUTPUT);
+				cmd.AddBinArgument((byte)outputs.Length);
+				foreach (var b in outputs)
+					cmd.AddBinArgument(b);
+				mMessenger.SendCommand(cmd, queuePosition);
+			}
+			return false;
+		}
+
 		public bool QueryWriteStorage(ushort address, byte[] data, SendQueue queuePosition = SendQueue.InFrontQueue)
 		{
 			if (IsConnected)
