@@ -78,6 +78,10 @@ public partial class MainWindow : Window
 	{
 		Build();
 
+		var font = Pango.FontDescription.FromString("Monospace 8");
+
+		textview_received.ModifyFont(font);
+
 		Action<IOCard.Commands, int, int> wrong_params_callback = (command, got, required) =>
 		{
 			var iter = textview_received.Buffer.StartIter;
