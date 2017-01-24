@@ -792,7 +792,22 @@ public partial class MainWindow : Window
 				mPorts.Insert(0, port);
 				_populateComboBoxEntry(comboboxentry_port, mPorts);
 			}
-			var status = sCard.Connect(port, 250000);
+			try
+			{
+				sCard.Connect(port, 250000);
+			}
+			catch (InvalidOperationException ex)
+			{
+				var iter = textview_received.Buffer.StartIter;
+				textview_received.Buffer.Insert(
+					ref iter,
+					string.Format(
+						"** {0}: Connection failed, reason = {1}\r\n",
+						DateTime.Now,
+						ex.Message
+					)
+				);
+			}
 		}
 	}
 
