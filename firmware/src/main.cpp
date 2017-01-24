@@ -17,7 +17,6 @@
 #include <DigitalIO.h>
 #include <Wire.h>
 #include <FRAM_MB85RC_I2C.h>
-
 #include <CmdMessenger.h>
 
 #include "Communication.h"
@@ -158,6 +157,10 @@ void setup() {
 	debounce_insert_3.begin(in.port.sw14, now);
 
 	messenger.attach([]() {
+		#if defined(DEBUG_SERIAL)
+		uint32_t t1, t2;
+		t1 = micros();
+		#endif
 		switch (messenger.commandID()) {
 			case CMD_GET_INFO:
 				communicator.dispatchGetInfoResult();
@@ -261,10 +264,21 @@ void setup() {
 			default:
 				communicator.dispatchErrorUnknownCommand(messenger.commandID());
 		}
+		#if defined(DEBUG_SERIAL)
+		t2 = micros();
+		DEBUG_SERIAL.print(F("90,cmd handler took "));
+		DEBUG_SERIAL.print(t2 - t1);
+		DEBUG_SERIAL.print("us;");
+		#endif
 	});
 }
 
 void loop() {
+	#if defined(DEBUG_SERIAL)
+	static uint32_t last_millis = millis();
+	uint32_t t1, t2;
+	t1 = micros();
+	#endif
     fastDigitalWrite(PIN_LATCH_IN, HIGH);
     in.bytes[0] = spi.receive();
     in.bytes[1] = spi.receive();
@@ -292,21 +306,33 @@ void loop() {
 	if (pulse_counter_score.update(now))
 	{
 		out.port.counter1 = pulse_counter_score.get();
+		#if defined(DEBUG_SERIAL)
+		DEBUG_SERIAL.print(F("90,pulsing counter1;"));
+		#endif
 		do_send = true;
 	}
 	if (pulse_counter_wash.update(now))
 	{
 		out.port.counter2 = pulse_counter_wash.get();
+		#if defined(DEBUG_SERIAL)
+		DEBUG_SERIAL.print(F("90,pulsing counter2;"));
+		#endif
 		do_send = true;
 	}
 	if (pulse_counter_insert.update(now))
 	{
 		out.port.counter3 = pulse_counter_insert.get();
+		#if defined(DEBUG_SERIAL)
+		DEBUG_SERIAL.print(F("90,pulsing counter3;"));
+		#endif
 		do_send = true;
 	}
 	if (pulse_counter_eject.update(now))
 	{
 		out.port.counter4 = pulse_counter_eject.get();
+		#if defined(DEBUG_SERIAL)
+		DEBUG_SERIAL.print(F("90,pulsing counter4;"));
+		#endif
 		do_send = true;
 	}
 
@@ -340,4 +366,14 @@ void loop() {
         spi.send(out.bytes[2]);
         fastDigitalWrite(PIN_LATCH_OUT, HIGH);
     }
+
+	#if defined(DEBUG_SERIAL)
+	t2 = micros();
+	if (millis() - last_millis > 1000) {
+		last_millis = millis();
+		DEBUG_SERIAL.print(F("90,loop() took "));
+		DEBUG_SERIAL.print(t2 - t1);
+		DEBUG_SERIAL.print("us;");
+	}
+	#endif
 }
