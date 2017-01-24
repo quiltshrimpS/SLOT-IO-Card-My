@@ -12,7 +12,9 @@
 #define CONF_SIZE_COINS_TO_EJECT		(8 * sizeof(uint8_t))
 #define CONF_OFFSET_COIN_COUNT			(CONF_OFFSET_COINS_TO_EJECT + CONF_SIZE_COINS_TO_EJECT)
 #define CONF_SIZE_COIN_COUNT			(8 * sizeof(uint32_t))
-#define CONF_OFFSET_CHECKSUM			(CONF_OFFSET_COIN_COUNT + CONF_SIZE_COIN_COUNT)
+#define CONF_OFFSET_EJECT_TIMEOUT		(CONF_OFFSET_COIN_COUNT + CONF_SIZE_COIN_COUNT)
+#define CONF_SIZE_EJECT_TIMEOUT			(4 * sizeof(uint32_t))
+#define CONF_OFFSET_CHECKSUM			(CONF_OFFSET_EJECT_TIMEOUT + CONF_SIZE_EJECT_TIMEOUT)
 #define CONF_SIZE_CHECKSUM				(1)
 #define CONF_OFFSET_END					(CONF_OFFSET_CHECKSUM + CONF_SIZE_CHECKSUM)
 #define CONF_SIZE_ALL					(CONF_OFFSET_END)
@@ -245,6 +247,33 @@ public:
 	}
 
 	__attribute__((always_inline)) inline
+	bool setEjectTimeout(uint8_t const track, uint32_t timeout) {
+		uint8_t track_idx = TRACK_NOT_A_TRACK;
+		if (track == TRACK_EJECT)
+			track_idx = 0;
+		else
+			return false;
+
+		_data.configs.eject_timeout[track_idx] = timeout;
+		_data.configs.checksum = _getChecksum();
+		_fram.writeLong(CONF_ADDR_BANK_0 + CONF_OFFSET_EJECT_TIMEOUT + track_idx * sizeof(uint32_t), timeout);
+		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
+		_fram.writeLong(CONF_ADDR_BANK_1 + CONF_OFFSET_EJECT_TIMEOUT + track_idx * sizeof(uint32_t), timeout);
+		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
+
+		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
+
+		return true;
+	}
+
+	__attribute__((always_inline)) inline
+	uint32_t getEjectTimeout(uint8_t const track) {
+		if (track == TRACK_EJECT)
+			return _data.configs.eject_timeout[0];
+		return 0;
+	}
+
+	__attribute__((always_inline)) inline
 	void dumpBuffer(char const * const tag, uint8_t const * const buffer, size_t const size) {
 		#if defined(DEBUG_SERIAL)
 		DEBUG_SERIAL.print(F("Configuration"));
@@ -301,6 +330,7 @@ private:
 
 			uint8_t coins_to_eject[8];
 			uint32_t coin_count[8];
+			uint32_t eject_timeout[4];
 
 			uint8_t checksum;
 		} configs;
