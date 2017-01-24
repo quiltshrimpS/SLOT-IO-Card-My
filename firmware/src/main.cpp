@@ -212,7 +212,8 @@ void setup() {
 				{
 					uint8_t const track = messenger.readBinArg<uint8_t>();
 					uint8_t const level = messenger.readBinArg<bool>();
-					conf.setTrackLevel(track, level);
+					if (!conf.setTrackLevel(track, level))
+						communicator.dispatchErrorNotATrack(track);
 				}
 				break;
 			case CMD_SET_EJECT_TIMEOUT:
