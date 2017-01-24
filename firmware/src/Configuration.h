@@ -170,6 +170,11 @@ public:
 	}
 
 	__attribute__((always_inline)) inline
+	union TrackLevelsT & getTrackLevels() {
+		return _data.configs.track_levels;
+	}
+
+	__attribute__((always_inline)) inline
 	uint8_t getCoinsToEject(uint8_t const track) {
 		if (track == TRACK_EJECT)
 			return _data.configs.coins_to_eject[4];
