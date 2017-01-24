@@ -52,7 +52,7 @@ public partial class MainWindow : Window
 
 		public void SendCommand(string[] parameters)
 		{
-			if (parameters.Length != Params && WrongParamsCallback != null)
+			if (Params != 0 && parameters.Length != Params && WrongParamsCallback != null)
 			{
 				WrongParamsCallback.Invoke(Command, parameters.Length, Params);
 				return;
