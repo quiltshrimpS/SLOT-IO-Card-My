@@ -131,7 +131,7 @@ public:
 	}
 
 	__attribute__((always_inline)) inline
-	uint8_t getTrackLevel(uint8_t track) {
+	uint8_t getTrackLevel(uint8_t const track) {
 		if (track == TRACK_EJECT) // eject track
 			return _data.configs.track_levels.bits.track_level_4;
 		if (track == TRACK_INSERT_1) // coin track 1
@@ -146,7 +146,7 @@ public:
 	}
 
 	__attribute__((always_inline)) inline
-	bool setTrackLevel(uint8_t track, bool level) {
+	bool setTrackLevel(uint8_t const track, bool const level) {
 		if (track == TRACK_EJECT) // eject track
 			_data.configs.track_levels.bits.track_level_4 = level;
 		else if (track == TRACK_INSERT_1) // coin track 1
@@ -170,15 +170,15 @@ public:
 	}
 
 	__attribute__((always_inline)) inline
-	uint8_t getCoinsToEject(uint8_t track) {
+	uint8_t getCoinsToEject(uint8_t const track) {
 		if (track == TRACK_EJECT)
 			return _data.configs.coins_to_eject[4];
 		return 0;
 	}
 
 	__attribute__((always_inline)) inline
-	bool setCoinsToEject(uint8_t track, uint8_t coins) {
-		uint8_t track_idx = 0xFF;
+	bool setCoinsToEject(uint8_t const track, uint8_t coins) {
+		uint8_t track_idx = TRACK_NOT_A_TRACK;
 		if (track == TRACK_EJECT)
 			track_idx = 4;
 		else
@@ -197,7 +197,7 @@ public:
 	}
 
 	__attribute__((always_inline)) inline
-	uint32_t getCoinCount(uint8_t track) {
+	uint32_t getCoinCount(uint8_t const track) {
 		if (track == TRACK_EJECT)
 			return _data.configs.coin_count[4];
 		else if (track == TRACK_INSERT_1)
@@ -212,8 +212,8 @@ public:
 	}
 
 	__attribute__((always_inline)) inline
-	bool setCoinCount(uint8_t track, uint32_t count) {
-		uint8_t track_idx = 0xFF;
+	bool setCoinCount(uint8_t const track, uint32_t count) {
+		uint8_t track_idx = TRACK_NOT_A_TRACK;
 		if (track == TRACK_EJECT)
 			track_idx = 4;
 		else if (track == TRACK_INSERT_1)
