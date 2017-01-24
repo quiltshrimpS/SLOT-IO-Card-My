@@ -234,6 +234,25 @@ void setup() {
 					}
 				}
 				break;
+			case CMD_TICK_COUNTER:
+				{
+					uint8_t const counter = messenger.readBinArg<uint8_t>();
+					uint8_t const ticks = messenger.readBinArg<uint8_t>();
+					if (counter == 1) {
+						pulse_counter_score.pulse(ticks);
+					} else if (counter == 2) {
+						pulse_counter_wash.pulse(ticks);
+				#if defined(DEBUG_SERIAL)
+					} else if (counter == 3) {
+						pulse_counter_insert.pulse(ticks);
+					} else if (counter == 4) {
+						pulse_counter_eject.pulse(ticks);
+				#endif
+					} else {
+						communicator.dispatchErrorNotACounter(counter);
+					}
+				}
+				break;
 			case CMD_SET_TRACK_LEVEL:
 				{
 					uint8_t const track = messenger.readBinArg<uint8_t>();

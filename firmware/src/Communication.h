@@ -5,6 +5,7 @@
 
 #define CMD_READ_STORAGE			(0x87)
 #define CMD_WRITE_STORAGE			(0x96)
+#define CMD_TICK_COUNTER			(0x99)
 #define CMD_GET_KEYS				(0xA5)
 #define CMD_SET_EJECT_TIMEOUT		(0xB0)
 #define CMD_SET_OUTPUT				(0xB4)
@@ -27,6 +28,7 @@
 #define ERR_NOT_A_TRACK				(0x03)
 #define ERR_PROTECTED_STORAGE		(0x04)
 #define ERR_TOO_LONG				(0x05)
+#define ERR_NOT_A_COUNTER			(0x06)
 #define ERR_UNKNOWN_COMMAND			(0xFF)
 
 class Communicator {
@@ -96,6 +98,13 @@ public:
 		_messenger.sendCmdStart(EVT_ERROR);
 		_messenger.sendCmdBinArg<uint8_t>(ERR_NOT_A_TRACK);
 		_messenger.sendCmdBinArg<uint8_t>(track);
+		_messenger.sendCmdEnd();
+	}
+
+	void dispatchErrorNotACounter(uint8_t const counter) {
+		_messenger.sendCmdStart(EVT_ERROR);
+		_messenger.sendCmdBinArg<uint8_t>(ERR_NOT_A_COUNTER);
+		_messenger.sendCmdBinArg<uint8_t>(counter);
 		_messenger.sendCmdEnd();
 	}
 
