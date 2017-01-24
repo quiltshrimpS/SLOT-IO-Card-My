@@ -82,10 +82,11 @@ public:
 		_messenger.sendCmdEnd();
 	}
 
-	void dispatchErrorEjectTimeout(uint8_t const track) {
+	void dispatchErrorEjectTimeout(uint8_t const track, uint8_t const coins) {
 		_messenger.sendCmdStart(EVT_ERROR);
 		_messenger.sendCmdBinArg<uint8_t>(ERR_EJECT_TIMEOUT);
 		_messenger.sendCmdBinArg<uint8_t>(track);
+		_messenger.sendCmdBinArg<uint8_t>(coins);
 		_messenger.sendCmdEnd();
 	}
 
