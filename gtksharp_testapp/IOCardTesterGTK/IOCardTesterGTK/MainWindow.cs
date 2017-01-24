@@ -238,7 +238,31 @@ public partial class MainWindow : Window
 				"0x12 0x34 0x56 // 3 bytes",
 				"0x34 0x56 0x78 // 3 bytes"
 			},
-			unhandled_send_callback
+			(command, parameters) =>
+			{
+				var data = Regex.Replace(parameters[0].Trim(), @"\s+", " ").Split(' ');
+				var bytes = new byte[data.Length];
+				for (int i = 0; i < data.Length; ++i)
+					bytes[i] = _getTfromString<byte>(data[i]);
+
+				var builder = new StringBuilder(bytes.Length * 5);
+				foreach (var b in bytes)
+					builder.AppendFormat(" 0x{0:X2}", b);
+
+				var iter = textview_received.Buffer.StartIter;
+				textview_received.Buffer.Insert(
+					ref iter,
+					string.Format(
+						"=> {0}: cmd = {1}, length = {2}, data ={3}\r\n",
+						DateTime.Now,
+						command,
+						data.Length,
+						builder
+					)
+				);
+
+				sCard.QuerySetOutput(bytes);
+			}
 		);
 		mCommandProperty_WriteStorage = new CommandProperty(
 			IOCard.Commands.CMD_WRITE_STORAGE, 2,
