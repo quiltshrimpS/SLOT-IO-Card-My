@@ -280,7 +280,7 @@ public partial class MainWindow : Window
 				for (int i = 0; i < data.Length; ++i)
 					bytes[i] = _getTfromString<byte>(data[i]);
 
-				StringBuilder builder = new StringBuilder(bytes.Length * 5);
+				var builder = new StringBuilder(bytes.Length * 5);
 				foreach (var b in bytes)
 					builder.AppendFormat(" 0x{0:X2}", b);
 
