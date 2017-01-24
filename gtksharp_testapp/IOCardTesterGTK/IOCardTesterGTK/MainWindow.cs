@@ -41,6 +41,7 @@ public partial class MainWindow : Window
 
 		public CommandProperty(Action<IOCard.Commands, int, int> paramsCallback, IOCard.Commands cmd, int parameter_count, string cmdDesc, string paramsDesc, string[] history, Action<IOCard.Commands, string[]> callback)
 		{
+			WrongParamsCallback = paramsCallback;
 			Command = cmd;
 			Params = parameter_count;
 			CommandDescription = cmdDesc;
