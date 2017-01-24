@@ -29,6 +29,11 @@ public:
 	__attribute__((always_inline)) inline
 	bool trigger(uint32_t const now = micros()) {
 		if (_check && now - _start_us > _timeout_us) {
+			#if defined(DEBUG_SERIAL)
+			DEBUG_SERIAL.print(F("90,timedout after "));
+			DEBUG_SERIAL.print(now - _start_us);
+			DEBUG_SERIAL.print(F("us;"));
+			#endif
 			_check = false;
 			return true;
 		}
