@@ -329,6 +329,10 @@ namespace Spark.Slot.IO
 				});
 				messenger.Attach((int)Events.EVT_COIN_COUNTER_RESULT, (receivedCommand) =>
 				{
+					// ACK this event so ejection don't get interruptted.
+					if (IsConnected)
+						mMessenger.SendCommand(new SendCommand((int)Commands.CMD_ACK), SendQueue.InFrontQueue);
+
 					int track = receivedCommand.ReadBinByteArg();
 					uint coins = receivedCommand.ReadBinUInt32Arg();
 
@@ -479,6 +483,7 @@ namespace Spark.Slot.IO
 			CMD_SET_EJECT_TIMEOUT = 0xB0,
 			CMD_SET_OUTPUT = 0xB4,
 			CMD_RESET_COIN_COINTER = 0xC3,
+			CMD_ACK = 0xC5,
 			CMD_GET_COIN_COUNTER = 0xD2,
 			CMD_EJECT_COIN = 0xE1,
 			CMD_SET_TRACK_LEVEL = 0xEA,
