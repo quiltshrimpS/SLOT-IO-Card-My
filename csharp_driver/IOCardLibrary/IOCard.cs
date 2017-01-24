@@ -132,7 +132,7 @@ namespace Spark.Slot.IO
 			if (IsConnected)
 			{
 				var cmd = new SendCommand((int)Commands.CMD_EJECT_COIN);
-				cmd.AddBinArgument((uint)track);
+				cmd.AddBinArgument((byte)track);
 				cmd.AddBinArgument((uint)count);
 				mMessenger.SendCommand(cmd, queuePosition);
 				return true;
@@ -155,7 +155,7 @@ namespace Spark.Slot.IO
 			if (IsConnected)
 			{
 				var cmd = new SendCommand((int)Commands.CMD_GET_COIN_COUNTER);
-				cmd.AddBinArgument((uint)track);
+				cmd.AddBinArgument((byte)track);
 				mMessenger.SendCommand(cmd, queuePosition);
 				return true;
 			}
@@ -237,7 +237,7 @@ namespace Spark.Slot.IO
 			if (IsConnected)
 			{
 				var cmd = new SendCommand((int)Commands.CMD_RESET_COIN_COINTER);
-				cmd.AddBinArgument((uint)track);
+				cmd.AddBinArgument((byte)track);
 				mMessenger.SendCommand(cmd, queuePosition);
 				return true;
 			}
