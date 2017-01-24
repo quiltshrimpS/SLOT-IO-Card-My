@@ -17,7 +17,6 @@ public:
 	{
 	}
 
-	__attribute__((always_inline)) inline
 	void begin(bool const initial_state, uint32_t const now = micros())
 	{
 		_old_output = initial_state;
