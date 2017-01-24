@@ -329,141 +329,136 @@ namespace Spark.Slot.IO
 		/// </summary>
 		/// <param name="port">Port.</param>
 		/// <param name="baudrate">Baudrate.</param>
-		public bool Connect(string port, int baudrate)
+		/// <exception cref="InvalidOperationException">Thrown on connection fails (already connected, port busy, etc.)</exception>
+		public void Connect(string port, int baudrate)
 		{
 			if (mMessenger != null)
-				return false;
+				throw new InvalidOperationException("Already connected.");
 
-			try
+			var transport = new SerialTransport
 			{
-				var transport = new SerialTransport
-				{
-					CurrentSerialSettings = { PortName = port, BaudRate = baudrate, DtrEnable = false }
-				};
+				CurrentSerialSettings = { PortName = port, BaudRate = baudrate, DtrEnable = false }
+			};
 
-				var messenger = new CmdMessenger(transport, 512);
-				messenger.Attach((int)Events.EVT_GET_INFO_RESULT, (receivedCommand) =>
-				{
-					string manufacturer = receivedCommand.ReadBinStringArg();
-					string product = receivedCommand.ReadBinStringArg();
-					string version = receivedCommand.ReadBinStringArg();
-					uint protocol = receivedCommand.ReadBinUInt32Arg();
+			var messenger = new CmdMessenger(transport, 512);
+			messenger.Attach((int)Events.EVT_GET_INFO_RESULT, (receivedCommand) =>
+			{
+				string manufacturer = receivedCommand.ReadBinStringArg();
+				string product = receivedCommand.ReadBinStringArg();
+				string version = receivedCommand.ReadBinStringArg();
+				uint protocol = receivedCommand.ReadBinUInt32Arg();
 
-					if (OnGetInfoResult != null)
-						OnGetInfoResult(this, new GetInfoResultEventArgs(manufacturer, product, version, protocol));
-				});
-				messenger.Attach((int)Events.EVT_COIN_COUNTER_RESULT, (receivedCommand) =>
-				{
-					// ACK this event so ejection don't get interruptted.
-					if (IsConnected)
-						mMessenger.SendCommand(new SendCommand((int)Commands.CMD_ACK), SendQueue.InFrontQueue);
+				if (OnGetInfoResult != null)
+					OnGetInfoResult(this, new GetInfoResultEventArgs(manufacturer, product, version, protocol));
+			});
+			messenger.Attach((int)Events.EVT_COIN_COUNTER_RESULT, (receivedCommand) =>
+			{
+				// ACK this event so ejection don't get interruptted.
+				if (IsConnected)
+					mMessenger.SendCommand(new SendCommand((int)Commands.CMD_ACK), SendQueue.InFrontQueue);
 
-					int track = receivedCommand.ReadBinByteArg();
-					uint coins = receivedCommand.ReadBinUInt32Arg();
+				int track = receivedCommand.ReadBinByteArg();
+				uint coins = receivedCommand.ReadBinUInt32Arg();
 
-					if (OnCoinCounterResult != null)
-						OnCoinCounterResult(this, new CoinCounterResultEventArgs(track, coins));
-				});
-				messenger.Attach((int)Events.EVT_KEY, (receivedCommand) =>
-				{
-					var count = receivedCommand.ReadBinByteArg();
-					var keys = new byte[count];
-					for (int i = 0; i < count; ++i)
-						keys[i] = receivedCommand.ReadBinByteArg();
+				if (OnCoinCounterResult != null)
+					OnCoinCounterResult(this, new CoinCounterResultEventArgs(track, coins));
+			});
+			messenger.Attach((int)Events.EVT_KEY, (receivedCommand) =>
+			{
+				var count = receivedCommand.ReadBinByteArg();
+				var keys = new byte[count];
+				for (int i = 0; i < count; ++i)
+					keys[i] = receivedCommand.ReadBinByteArg();
 
-					if (OnKey != null)
-						OnKey(this, new KeyEventArgs(keys));
-				});
-				messenger.Attach((int)Events.EVT_WRITE_STORAGE_RESULT, (receivedCommand) =>
-				{
-					var address = receivedCommand.ReadBinUInt16Arg();
-					var length = receivedCommand.ReadBinByteArg();
+				if (OnKey != null)
+					OnKey(this, new KeyEventArgs(keys));
+			});
+			messenger.Attach((int)Events.EVT_WRITE_STORAGE_RESULT, (receivedCommand) =>
+			{
+				var address = receivedCommand.ReadBinUInt16Arg();
+				var length = receivedCommand.ReadBinByteArg();
 
-					if (OnWriteStorageResult != null)
-						OnWriteStorageResult(this, new WriteStorageResultEventArgs(address, (byte)length));
-				});
-				messenger.Attach((int)Events.EVT_READ_STORAGE_RESULT, (receivedCommand) =>
-				{
-					var address = receivedCommand.ReadBinUInt16Arg();
-					var length = receivedCommand.ReadBinByteArg();
-					var data = new byte[length];
-					for (int i = 0; i < length; ++i)
-						data[i] = receivedCommand.ReadBinByteArg();
+				if (OnWriteStorageResult != null)
+					OnWriteStorageResult(this, new WriteStorageResultEventArgs(address, (byte)length));
+			});
+			messenger.Attach((int)Events.EVT_READ_STORAGE_RESULT, (receivedCommand) =>
+			{
+				var address = receivedCommand.ReadBinUInt16Arg();
+				var length = receivedCommand.ReadBinByteArg();
+				var data = new byte[length];
+				for (int i = 0; i < length; ++i)
+					data[i] = receivedCommand.ReadBinByteArg();
 
-					if (OnReadStorageResult != null)
-						OnReadStorageResult(this, new ReadStorageResultEventArgs(address, data));
-				});
-				messenger.Attach((int)Events.EVT_ERROR, (receivedCommand) =>
+				if (OnReadStorageResult != null)
+					OnReadStorageResult(this, new ReadStorageResultEventArgs(address, data));
+			});
+			messenger.Attach((int)Events.EVT_ERROR, (receivedCommand) =>
+			{
+				ErrorEventArgs e = null;
+				var err = (Errors)receivedCommand.ReadBinByteArg();
+				switch (err)
 				{
-					ErrorEventArgs e = null;
-					var err = (Errors)receivedCommand.ReadBinByteArg();
-					switch (err)
-					{
-						case Errors.ERR_EJECT_INTERRUPTED:
-							{
-								var track = (CoinTrack)receivedCommand.ReadBinByteArg();
-								var coins = receivedCommand.ReadBinByteArg();
-								e = new ErrorEjectInterruptedEventArgs(err, track, coins);
-							}
-							break;
-						case Errors.ERR_EJECT_TIMEOUT:
-							{
-								var track = (CoinTrack)receivedCommand.ReadBinByteArg();
-								var coins = receivedCommand.ReadBinByteArg();
-								e = new ErrorEjectTimeoutEventArgs(err, track, coins);
-							}
-							break;
-						case Errors.ERR_NOT_A_TRACK:
-							e = new ErrorNotATrackEventArgs(err, (CoinTrack)receivedCommand.ReadBinByteArg());
-							break;
-						case Errors.ERR_NOT_A_COUNTER:
-							e = new ErrorNotACounterEventArgs(err, receivedCommand.ReadBinByteArg());
-							break;
-						case Errors.ERR_PROTECTED_STORAGE:
-							e = new ErrorProtectedStorageEventArgs(err, receivedCommand.ReadBinUInt16Arg());
-							break;
-						case Errors.ERR_TOO_LONG:
-							{
-								var desired = receivedCommand.ReadBinByteArg();
-								var requested = receivedCommand.ReadBinByteArg();
-								e = new ErrorTooLongEventArgs(err, desired, requested);
-							}
-							break;
-						case Errors.ERR_UNKNOWN_COMMAND:
-							e = new ErrorUnknownCommandEventArgs(err, receivedCommand.ReadBinByteArg());
-							break;
-						default:
-							e = new ErrorUnknownErrorEventArgs(err, receivedCommand.ReadBinByteArg());
-							break;
-					}
-
-					if (OnError != null)
-						OnError(this, e);
-				});
-				messenger.Attach((int)Events.EVT_DEBUG, (receivedCommand) =>
-				{
-					if (OnDebug != null)
-						OnDebug(this, new DebugEventArgs(receivedCommand.ReadBinStringArg()));
-				});
-				messenger.Attach((receivedCommand) =>
-				{
-					if (OnUnknown != null)
-						OnUnknown(this, new UnknownEventArgs(receivedCommand));
-				});
-
-				if (messenger.Connect())
-				{
-					mMessenger = messenger;
-					if (OnConnected != null)
-						OnConnected(this, EventArgs.Empty);
-					return true;
+					case Errors.ERR_EJECT_INTERRUPTED:
+						{
+							var track = (CoinTrack)receivedCommand.ReadBinByteArg();
+							var coins = receivedCommand.ReadBinByteArg();
+							e = new ErrorEjectInterruptedEventArgs(err, track, coins);
+						}
+						break;
+					case Errors.ERR_EJECT_TIMEOUT:
+						{
+							var track = (CoinTrack)receivedCommand.ReadBinByteArg();
+							var coins = receivedCommand.ReadBinByteArg();
+							e = new ErrorEjectTimeoutEventArgs(err, track, coins);
+						}
+						break;
+					case Errors.ERR_NOT_A_TRACK:
+						e = new ErrorNotATrackEventArgs(err, (CoinTrack)receivedCommand.ReadBinByteArg());
+						break;
+					case Errors.ERR_NOT_A_COUNTER:
+						e = new ErrorNotACounterEventArgs(err, receivedCommand.ReadBinByteArg());
+						break;
+					case Errors.ERR_PROTECTED_STORAGE:
+						e = new ErrorProtectedStorageEventArgs(err, receivedCommand.ReadBinUInt16Arg());
+						break;
+					case Errors.ERR_TOO_LONG:
+						{
+							var desired = receivedCommand.ReadBinByteArg();
+							var requested = receivedCommand.ReadBinByteArg();
+							e = new ErrorTooLongEventArgs(err, desired, requested);
+						}
+						break;
+					case Errors.ERR_UNKNOWN_COMMAND:
+						e = new ErrorUnknownCommandEventArgs(err, receivedCommand.ReadBinByteArg());
+						break;
+					default:
+						e = new ErrorUnknownErrorEventArgs(err, receivedCommand.ReadBinByteArg());
+						break;
 				}
-			}
-			catch (InvalidOperationException ex)
+
+				if (OnError != null)
+					OnError(this, e);
+			});
+			messenger.Attach((int)Events.EVT_DEBUG, (receivedCommand) =>
 			{
-				Console.WriteLine("IOCard.Connect(): connection failed, " + ex.Message);
+				if (OnDebug != null)
+					OnDebug(this, new DebugEventArgs(receivedCommand.ReadBinStringArg()));
+			});
+			messenger.Attach((receivedCommand) =>
+			{
+				if (OnUnknown != null)
+					OnUnknown(this, new UnknownEventArgs(receivedCommand));
+			});
+
+			if (messenger.Connect())
+			{
+				mMessenger = messenger;
+				if (OnConnected != null)
+					OnConnected(this, EventArgs.Empty);
+				return;
 			}
-			return false;
+
+			throw new InvalidOperationException("Connecting failed for unknown reason.");
 		}
 
 		public bool Disconnect()
