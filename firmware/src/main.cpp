@@ -45,6 +45,9 @@ union {
     struct InPort port;
 } in, previous_in;
 
+// put these here so we can iterate through it...
+static const uint8_t OUTPUT_MASK[3] = { OUT_MASK_0, OUT_MASK_1, OUT_MASK_2 };
+
 bool do_send = false;
 
 EjectTimeoutTracker tracker_eject;
@@ -192,6 +195,18 @@ void setup() {
 				break;
 			case CMD_GET_KEYS:
 				communicator.dispatchKey(3, previous_in.bytes);
+				break;
+			case CMD_SET_OUTPUT:
+				{
+					uint8_t const length = messenger.readBinArg<uint8_t>();
+					if (length != 0) {
+						for (int i = 0;i < length && i < 3;++i)
+							out.bytes[i] =
+								(out.bytes[i] & ~OUTPUT_MASK[i]) |
+								(messenger.readBinArg<uint8_t>() & OUTPUT_MASK[i]);
+						do_send = true;
+					}
+				}
 				break;
 			case CMD_SET_EJECT_TIMEOUT:
 				{
