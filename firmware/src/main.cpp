@@ -58,18 +58,27 @@ Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_wash;
 Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_insert;
 Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_eject;
 
-Debounce<LOW, DEBOUNCE_TIMEOUT> debounce_banknote(
-	nullptr,
-	[] () {
+class EmptyFunctorT {
+public:
+	__attribute__((always_inline)) inline
+	void operator () () { }
+};
+
+class DebounceBanknoteFallFunctorT {
+public:
+	__attribute__((always_inline)) inline
+	void operator () () {
 		uint32_t coins = conf.getCoinCount(TRACK_BANKNOTE) + 1;
 		conf.setCoinCount(TRACK_BANKNOTE, coins);
 		communicator.dispatchCoinCounterResult(TRACK_BANKNOTE, coins);
 	}
-);
+};
+Debounce<LOW, DEBOUNCE_TIMEOUT, EmptyFunctorT, DebounceBanknoteFallFunctorT> debounce_banknote;
 
-Debounce<HIGH, DEBOUNCE_TIMEOUT> debounce_eject(
-	nullptr,
-	[] () {
+class DebounceEjectFallFunctorT {
+public:
+	__attribute__((always_inline)) inline
+	void operator () () {
 		uint32_t coins = conf.getCoinCount(TRACK_EJECT) + 1;
 		conf.setCoinCount(TRACK_EJECT, coins);
 		pulse_counter_eject.pulse(1);
@@ -85,37 +94,44 @@ Debounce<HIGH, DEBOUNCE_TIMEOUT> debounce_eject(
 		}
 		communicator.dispatchCoinCounterResult(TRACK_EJECT, coins);
 	}
-);
+};
+Debounce<LOW, DEBOUNCE_TIMEOUT, EmptyFunctorT, DebounceEjectFallFunctorT> debounce_eject;
 
-Debounce<LOW, DEBOUNCE_TIMEOUT> debounce_insert_1(
-	nullptr,
-	[] () {
+class DebounceInsert1FallFunctorT {
+public:
+	__attribute__((always_inline)) inline
+	void operator () () {
 		uint32_t coins = conf.getCoinCount(TRACK_INSERT_1) + 1;
 		conf.setCoinCount(TRACK_INSERT_1, coins);
 		communicator.dispatchCoinCounterResult(TRACK_INSERT_1, coins);
 		pulse_counter_insert.pulse(1);
 	}
-);
+};
+Debounce<LOW, DEBOUNCE_TIMEOUT, EmptyFunctorT, DebounceInsert1FallFunctorT> debounce_insert_1;
 
-Debounce<LOW, DEBOUNCE_TIMEOUT> debounce_insert_2(
-	nullptr,
-	[] () {
+class DebounceInsert2FallFunctorT {
+public:
+	__attribute__((always_inline)) inline
+	void operator () () {
 		uint32_t coins = conf.getCoinCount(TRACK_INSERT_2) + 1;
 		conf.setCoinCount(TRACK_INSERT_2, coins);
 		communicator.dispatchCoinCounterResult(TRACK_INSERT_2, coins);
 		pulse_counter_insert.pulse(1);
 	}
-);
+};
+Debounce<LOW, DEBOUNCE_TIMEOUT, EmptyFunctorT, DebounceInsert2FallFunctorT> debounce_insert_2;
 
-Debounce<LOW, DEBOUNCE_TIMEOUT> debounce_insert_3(
-	nullptr,
-	[] () {
+class DebounceInsert3FallFunctorT {
+public:
+	__attribute__((always_inline)) inline
+	void operator () () {
 		uint32_t coins = conf.getCoinCount(TRACK_INSERT_3) + 1;
 		conf.setCoinCount(TRACK_INSERT_3, coins);
 		communicator.dispatchCoinCounterResult(TRACK_INSERT_3, coins);
 		pulse_counter_insert.pulse(1);
 	}
-);
+};
+Debounce<LOW, DEBOUNCE_TIMEOUT, EmptyFunctorT, DebounceInsert3FallFunctorT> debounce_insert_3;
 
 static uint8_t const PIN_LATCH_OUT = 4; // for 74HC595
 static uint8_t const PIN_LATCH_IN = 9;  // for 74HC165

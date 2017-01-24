@@ -3,20 +3,17 @@
 
 #include <Arduino.h>
 
-template <bool ACTIVE_LEVEL, int32_t DEBOUNCE_TIMEOUT_US>
+template <bool ACTIVE_LEVEL, int32_t DEBOUNCE_TIMEOUT_US, typename OnRaiseHandlerT, typename OnFallHandlerT>
 class Debounce {
 public:
-	typedef void (*OnChangeHandlerT)();
-
-	Debounce(const OnChangeHandlerT raise, const OnChangeHandlerT fall):
+	Debounce():
 		_old_output(false),
 		_energy(0),
-		_feed_micros(0),
-		_raise(raise),
-		_fall(fall)
+		_feed_micros(0)
 	{
 	}
 
+	__attribute__((always_inline)) inline
 	void begin(bool const initial_state, uint32_t const now = micros())
 	{
 		_old_output = initial_state;
@@ -41,15 +38,13 @@ public:
 			_energy = DEBOUNCE_TIMEOUT_US;
 			if (_old_output != true) {
 				_old_output = true;
-				if (_raise)
-					_raise();
+				OnRaiseHandlerT()();
 			}
 		} else if (_energy < -DEBOUNCE_TIMEOUT_US) {
 			_energy = -DEBOUNCE_TIMEOUT_US;
 			if (_old_output != false) {
 				_old_output = false;
-				if (_fall)
-					_fall();
+				OnFallHandlerT()();
 			}
 		}
 	}
@@ -58,8 +53,6 @@ private:
 	bool _old_output;
 	int32_t _energy;
 	uint32_t _feed_micros;
-	OnChangeHandlerT _raise;
-	OnChangeHandlerT _fall;
 };
 
 #endif
