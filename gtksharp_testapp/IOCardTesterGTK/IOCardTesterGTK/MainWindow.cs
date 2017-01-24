@@ -494,7 +494,7 @@ public partial class MainWindow : Window
 								ref iter,
 								string.Format(
 									"<=  {0}: error = {1}, Track = {2}, Coins Failed = {3}\r\n",
-									DateTime.Now,
+									ev.DateTime,
 									ev.ErrorCode,
 									ev.Track,
 									ev.CoinsFailed
@@ -510,7 +510,7 @@ public partial class MainWindow : Window
 								ref iter,
 								string.Format(
 									"<=  {0}: error = {1}, Track = {2}, Coins Failed = {3}\r\n",
-									DateTime.Now,
+									ev.DateTime,
 									ev.ErrorCode,
 									ev.Track,
 									ev.CoinsFailed
@@ -526,7 +526,7 @@ public partial class MainWindow : Window
 								ref iter,
 								string.Format(
 									"<=  {0}: error = {1}, Track = {2}\r\n",
-									DateTime.Now,
+									ev.DateTime,
 									ev.ErrorCode,
 									ev.Track
 								)
@@ -541,7 +541,7 @@ public partial class MainWindow : Window
 								ref iter,
 								string.Format(
 									"<=  {0}: error = {1}, Counter = 0x{2:X2}\r\n",
-									DateTime.Now,
+									ev.DateTime,
 									ev.ErrorCode,
 									ev.AuditCounter
 								)
@@ -556,7 +556,7 @@ public partial class MainWindow : Window
 								ref iter,
 								string.Format(
 									"<=  {0}: error = {1}, address = 0x{2:X4}\r\n",
-									DateTime.Now,
+									ev.DateTime,
 									ev.ErrorCode,
 									ev.Address
 								)
@@ -571,7 +571,7 @@ public partial class MainWindow : Window
 								ref iter,
 								string.Format(
 									"<=  {0}: error = {1}, requested = {2}, desired = {3}\r\n",
-									DateTime.Now,
+									ev.DateTime,
 									ev.ErrorCode,
 									ev.RequestedLength,
 									ev.DesiredLength
@@ -587,7 +587,7 @@ public partial class MainWindow : Window
 								ref iter,
 								string.Format(
 									"<=  {0}: error = {1}, cmd = 0x{2:X2}\r\n",
-									DateTime.Now,
+									ev.DateTime,
 									ev.ErrorCode,
 									ev.Command
 								)
@@ -602,7 +602,7 @@ public partial class MainWindow : Window
 								ref iter,
 								string.Format(
 									"<=  {0}: error = {1}, unknown error = 0x{2:X2}\r\n",
-									DateTime.Now,
+									ev.DateTime,
 									ev.ErrorCode,
 									ev.UnknownErrorCode
 								)
@@ -621,7 +621,7 @@ public partial class MainWindow : Window
 					ref iter,
 					string.Format(
 						"<=  {0}: Manufacturer = {1}, Product = {2}, Version = {3}, Protocol = {4}\r\n",
-						DateTime.Now,
+						e.DateTime,
 						e.Manufacturer,
 						e.Product,
 						e.Version,
@@ -639,7 +639,7 @@ public partial class MainWindow : Window
 					ref iter,
 					string.Format(
 						"<=  {0}: Track = {1}, Coins = {2}\r\n",
-						DateTime.Now,
+						e.DateTime,
 						e.Track,
 						e.Coins
 					)
@@ -659,7 +659,7 @@ public partial class MainWindow : Window
 					ref iter,
 					string.Format(
 						"<=  {0}: Keys:{1}\r\n",
-						DateTime.Now,
+						e.DateTime,
 						builder
 					)
 				);
@@ -674,7 +674,7 @@ public partial class MainWindow : Window
 					ref iter,
 					string.Format(
 						"<=  {0}: Address = 0x{1:X4}, Length = {2}\r\n",
-						DateTime.Now,
+						e.DateTime,
 						e.Address,
 						e.Length
 					)
@@ -694,7 +694,7 @@ public partial class MainWindow : Window
 					ref iter,
 					string.Format(
 						"<=  {0}: Address = 0x{1:X4}, Data ={2}\r\n",
-						DateTime.Now,
+						e.DateTime,
 						e.Address,
 						builder
 					)
@@ -710,7 +710,7 @@ public partial class MainWindow : Window
 					ref iter,
 					string.Format(
 						"<=  {0}: Debug = {1}\r\n",
-						DateTime.Now,
+						e.DateTime,
 						e.Message
 					)
 				);
@@ -725,7 +725,7 @@ public partial class MainWindow : Window
 					ref iter,
 					string.Format(
 						"<=  {0}: Unknown = {1}\r\n",
-						DateTime.Now,
+						e.DateTime,
 						e.Command.CommandString()
 					)
 				);
