@@ -19,6 +19,8 @@
 #include <FRAM_MB85RC_I2C.h>
 #include <CmdMessenger.h>
 
+#include <avr/power.h>
+
 #include "Communication.h"
 #include "WreckedSPI.h"
 #include "Ports.h"
@@ -137,6 +139,11 @@ void setup() {
     fastDigitalWrite(PIN_LATCH_IN, LOW);
 
 	uint32_t now = micros(); // record the time early, for better accuracy
+
+	power_adc_disable(); // we're not using the ADC module
+	power_spi_disable(); // we're not using the SPI module
+	power_timer1_disable(); // we're not using timer1
+	power_timer2_disable(); // we're not using timer2
 
 	// do the rest of the thing after we switch off the motor
     Serial.begin(UART_BAUDRATE);
