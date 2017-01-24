@@ -1,6 +1,4 @@
-﻿using System;
-
-using CommandMessenger;
+﻿using CommandMessenger;
 using CommandMessenger.Transport.Serial;
 
 namespace Spark.Slot.IO
@@ -329,11 +327,11 @@ namespace Spark.Slot.IO
 		/// </summary>
 		/// <param name="port">Port.</param>
 		/// <param name="baudrate">Baudrate.</param>
-		/// <exception cref="InvalidOperationException">Thrown on connection fails (already connected, port busy, etc.)</exception>
+		/// <exception cref="System.InvalidOperationException">Thrown on connection fails (already connected, port busy, etc.)</exception>
 		public void Connect(string port, int baudrate)
 		{
 			if (mMessenger != null)
-				throw new InvalidOperationException("Already connected.");
+				throw new System.InvalidOperationException("Already connected.");
 
 			var transport = new SerialTransport
 			{
@@ -349,7 +347,7 @@ namespace Spark.Slot.IO
 				uint protocol = receivedCommand.ReadBinUInt32Arg();
 
 				if (OnGetInfoResult != null)
-					OnGetInfoResult(this, new GetInfoResultEventArgs(manufacturer, product, version, protocol));
+					OnGetInfoResult(this, new GetInfoResultEventArgs(receivedCommand.TimeStamp, manufacturer, product, version, protocol));
 			});
 			messenger.Attach((int)Events.EVT_COIN_COUNTER_RESULT, (receivedCommand) =>
 			{
@@ -361,7 +359,7 @@ namespace Spark.Slot.IO
 				uint coins = receivedCommand.ReadBinUInt32Arg();
 
 				if (OnCoinCounterResult != null)
-					OnCoinCounterResult(this, new CoinCounterResultEventArgs(track, coins));
+					OnCoinCounterResult(this, new CoinCounterResultEventArgs(receivedCommand.TimeStamp, track, coins));
 			});
 			messenger.Attach((int)Events.EVT_KEY, (receivedCommand) =>
 			{
@@ -371,7 +369,7 @@ namespace Spark.Slot.IO
 					keys[i] = receivedCommand.ReadBinByteArg();
 
 				if (OnKey != null)
-					OnKey(this, new KeyEventArgs(keys));
+					OnKey(this, new KeyEventArgs(receivedCommand.TimeStamp, keys));
 			});
 			messenger.Attach((int)Events.EVT_WRITE_STORAGE_RESULT, (receivedCommand) =>
 			{
@@ -379,7 +377,7 @@ namespace Spark.Slot.IO
 				var length = receivedCommand.ReadBinByteArg();
 
 				if (OnWriteStorageResult != null)
-					OnWriteStorageResult(this, new WriteStorageResultEventArgs(address, (byte)length));
+					OnWriteStorageResult(this, new WriteStorageResultEventArgs(receivedCommand.TimeStamp, address, length));
 			});
 			messenger.Attach((int)Events.EVT_READ_STORAGE_RESULT, (receivedCommand) =>
 			{
@@ -390,7 +388,7 @@ namespace Spark.Slot.IO
 					data[i] = receivedCommand.ReadBinByteArg();
 
 				if (OnReadStorageResult != null)
-					OnReadStorageResult(this, new ReadStorageResultEventArgs(address, data));
+					OnReadStorageResult(this, new ReadStorageResultEventArgs(receivedCommand.TimeStamp, address, data));
 			});
 			messenger.Attach((int)Events.EVT_ERROR, (receivedCommand) =>
 			{
@@ -402,37 +400,37 @@ namespace Spark.Slot.IO
 						{
 							var track = (CoinTrack)receivedCommand.ReadBinByteArg();
 							var coins = receivedCommand.ReadBinByteArg();
-							e = new ErrorEjectInterruptedEventArgs(err, track, coins);
+							e = new ErrorEjectInterruptedEventArgs(receivedCommand.TimeStamp, err, track, coins);
 						}
 						break;
 					case Errors.ERR_EJECT_TIMEOUT:
 						{
 							var track = (CoinTrack)receivedCommand.ReadBinByteArg();
 							var coins = receivedCommand.ReadBinByteArg();
-							e = new ErrorEjectTimeoutEventArgs(err, track, coins);
+							e = new ErrorEjectTimeoutEventArgs(receivedCommand.TimeStamp, err, track, coins);
 						}
 						break;
 					case Errors.ERR_NOT_A_TRACK:
-						e = new ErrorNotATrackEventArgs(err, (CoinTrack)receivedCommand.ReadBinByteArg());
+						e = new ErrorNotATrackEventArgs(receivedCommand.TimeStamp, err, (CoinTrack)receivedCommand.ReadBinByteArg());
 						break;
 					case Errors.ERR_NOT_A_COUNTER:
-						e = new ErrorNotACounterEventArgs(err, receivedCommand.ReadBinByteArg());
+						e = new ErrorNotACounterEventArgs(receivedCommand.TimeStamp, err, receivedCommand.ReadBinByteArg());
 						break;
 					case Errors.ERR_PROTECTED_STORAGE:
-						e = new ErrorProtectedStorageEventArgs(err, receivedCommand.ReadBinUInt16Arg());
+						e = new ErrorProtectedStorageEventArgs(receivedCommand.TimeStamp, err, receivedCommand.ReadBinUInt16Arg());
 						break;
 					case Errors.ERR_TOO_LONG:
 						{
 							var desired = receivedCommand.ReadBinByteArg();
 							var requested = receivedCommand.ReadBinByteArg();
-							e = new ErrorTooLongEventArgs(err, desired, requested);
+							e = new ErrorTooLongEventArgs(receivedCommand.TimeStamp, err, desired, requested);
 						}
 						break;
 					case Errors.ERR_UNKNOWN_COMMAND:
-						e = new ErrorUnknownCommandEventArgs(err, receivedCommand.ReadBinByteArg());
+						e = new ErrorUnknownCommandEventArgs(receivedCommand.TimeStamp, err, receivedCommand.ReadBinByteArg());
 						break;
 					default:
-						e = new ErrorUnknownErrorEventArgs(err, receivedCommand.ReadBinByteArg());
+						e = new ErrorUnknownErrorEventArgs(receivedCommand.TimeStamp, err, receivedCommand.ReadBinByteArg());
 						break;
 				}
 
@@ -442,23 +440,23 @@ namespace Spark.Slot.IO
 			messenger.Attach((int)Events.EVT_DEBUG, (receivedCommand) =>
 			{
 				if (OnDebug != null)
-					OnDebug(this, new DebugEventArgs(receivedCommand.ReadBinStringArg()));
+					OnDebug(this, new DebugEventArgs(receivedCommand.TimeStamp, receivedCommand.ReadBinStringArg()));
 			});
 			messenger.Attach((receivedCommand) =>
 			{
 				if (OnUnknown != null)
-					OnUnknown(this, new UnknownEventArgs(receivedCommand));
+					OnUnknown(this, new UnknownEventArgs(receivedCommand.TimeStamp, receivedCommand));
 			});
 
 			if (messenger.Connect())
 			{
 				mMessenger = messenger;
 				if (OnConnected != null)
-					OnConnected(this, EventArgs.Empty);
+					OnConnected(this, System.EventArgs.Empty);
 				return;
 			}
 
-			throw new InvalidOperationException("Connecting failed for unknown reason.");
+			throw new System.InvalidOperationException("Connecting failed for unknown reason.");
 		}
 
 		public bool Disconnect()
@@ -470,7 +468,7 @@ namespace Spark.Slot.IO
 				{
 					mMessenger = null;
 					if (OnDisconnected != null)
-						OnDisconnected(this, EventArgs.Empty);
+						OnDisconnected(this, System.EventArgs.Empty);
 				}
 				return status;
 			}
@@ -479,20 +477,44 @@ namespace Spark.Slot.IO
 
 		public bool IsConnected { get { return mMessenger != null; } }
 
-		public event EventHandler OnConnected;
-		public event EventHandler OnDisconnected;
-		public event EventHandler<GetInfoResultEventArgs> OnGetInfoResult;
-		public event EventHandler<CoinCounterResultEventArgs> OnCoinCounterResult;
-		public event EventHandler<KeyEventArgs> OnKey;
-		public event EventHandler<WriteStorageResultEventArgs> OnWriteStorageResult;
-		public event EventHandler<ReadStorageResultEventArgs> OnReadStorageResult;
-		public event EventHandler<ErrorEventArgs> OnError;
-		public event EventHandler<UnknownEventArgs> OnUnknown;
-		public event EventHandler<DebugEventArgs> OnDebug;
+		public event System.EventHandler OnConnected;
+		public event System.EventHandler OnDisconnected;
+		public event System.EventHandler<GetInfoResultEventArgs> OnGetInfoResult;
+		public event System.EventHandler<CoinCounterResultEventArgs> OnCoinCounterResult;
+		public event System.EventHandler<KeyEventArgs> OnKey;
+		public event System.EventHandler<WriteStorageResultEventArgs> OnWriteStorageResult;
+		public event System.EventHandler<ReadStorageResultEventArgs> OnReadStorageResult;
+		public event System.EventHandler<ErrorEventArgs> OnError;
+		public event System.EventHandler<UnknownEventArgs> OnUnknown;
+		public event System.EventHandler<DebugEventArgs> OnDebug;
 
 		CmdMessenger mMessenger;
 
 		#region "EventArgs"
+
+		public class EventArgs : System.EventArgs
+		{
+			System.DateTime? mDateTime;
+
+			public long TimeStamp { get; internal set; }
+			public System.DateTime DateTime
+			{
+				get
+				{
+					if (!mDateTime.HasValue)
+						mDateTime = new System
+							.DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc)
+							.AddMilliseconds(TimeStamp)
+							.ToLocalTime();
+					return mDateTime.Value;
+				}
+			}
+
+			public EventArgs(long timestamp)
+			{
+				TimeStamp = timestamp;
+			}
+		}
 
 		public class GetInfoResultEventArgs : EventArgs
 		{
@@ -501,7 +523,8 @@ namespace Spark.Slot.IO
 			public string Version { get; private set; }
 			public uint ProtocolVersion { get; private set; }
 
-			public GetInfoResultEventArgs(string manufacturer, string product, string version, uint protoVersion)
+			public GetInfoResultEventArgs(long timestamp, string manufacturer, string product, string version, uint protoVersion) :
+				base(timestamp)
 			{
 				Manufacturer = manufacturer;
 				Product = product;
@@ -515,7 +538,8 @@ namespace Spark.Slot.IO
 			public int Track { get; internal set; }
 			public uint Coins { get; internal set; }
 
-			public CoinCounterResultEventArgs(int track, uint coins)
+			public CoinCounterResultEventArgs(long timestamp, int track, uint coins) :
+				base(timestamp)
 			{
 				Track = track;
 				Coins = coins;
@@ -526,7 +550,8 @@ namespace Spark.Slot.IO
 		{
 			public byte[] Keys { get; internal set; }
 
-			public KeyEventArgs(byte[] keys)
+			public KeyEventArgs(long timestamp, byte[] keys) :
+				base(timestamp)
 			{
 				Keys = keys;
 			}
@@ -537,7 +562,8 @@ namespace Spark.Slot.IO
 			public ushort Address { get; internal set; }
 			public byte Length { get; internal set; }
 
-			public WriteStorageResultEventArgs(ushort address, byte length)
+			public WriteStorageResultEventArgs(long timestamp, ushort address, byte length) :
+				base(timestamp)
 			{
 				Address = address;
 				Length = length;
@@ -549,7 +575,8 @@ namespace Spark.Slot.IO
 			public ushort Address { get; internal set; }
 			public byte[] Data { get; internal set; }
 
-			public ReadStorageResultEventArgs(ushort address, byte[] data)
+			public ReadStorageResultEventArgs(long timestamp, ushort address, byte[] data) :
+				base(timestamp)
 			{
 				Address = address;
 				Data = data;
@@ -560,7 +587,8 @@ namespace Spark.Slot.IO
 		{
 			public Errors ErrorCode { get; internal set; }
 
-			public ErrorEventArgs(Errors error)
+			public ErrorEventArgs(long timestamp, Errors error) :
+				base(timestamp)
 			{
 				ErrorCode = error;
 			}
@@ -570,8 +598,8 @@ namespace Spark.Slot.IO
 		{
 			public CoinTrack Track { get; internal set; }
 
-			public ErrorTrackEventArgs(Errors error, CoinTrack track) :
-				base(error)
+			public ErrorTrackEventArgs(long timestamp, Errors error, CoinTrack track) :
+				base(timestamp, error)
 			{
 				Track = track;
 			}
@@ -581,8 +609,8 @@ namespace Spark.Slot.IO
 		{
 			public byte CoinsFailed { get; internal set; }
 
-			public ErrorEjectInterruptedEventArgs(Errors error, CoinTrack track, byte coins) :
-				base(error, track)
+			public ErrorEjectInterruptedEventArgs(long timestamp, Errors error, CoinTrack track, byte coins) :
+				base(timestamp, error, track)
 			{
 				CoinsFailed = coins;
 			}
@@ -592,8 +620,8 @@ namespace Spark.Slot.IO
 		{
 			public byte CoinsFailed { get; internal set; }
 
-			public ErrorEjectTimeoutEventArgs(Errors error, CoinTrack track, byte coins) :
-				base(error, track)
+			public ErrorEjectTimeoutEventArgs(long timestamp, Errors error, CoinTrack track, byte coins) :
+				base(timestamp, error, track)
 			{
 				CoinsFailed = coins;
 			}
@@ -601,8 +629,8 @@ namespace Spark.Slot.IO
 
 		public class ErrorNotATrackEventArgs : ErrorTrackEventArgs
 		{
-			public ErrorNotATrackEventArgs(Errors error, CoinTrack track) :
-				base(error, track)
+			public ErrorNotATrackEventArgs(long timestamp, Errors error, CoinTrack track) :
+				base(timestamp, error, track)
 			{
 			}
 		}
@@ -611,8 +639,8 @@ namespace Spark.Slot.IO
 		{
 			public byte AuditCounter { get; internal set; }
 
-			public ErrorNotACounterEventArgs(Errors error, byte counter) :
-				base(error)
+			public ErrorNotACounterEventArgs(long timestamp, Errors error, byte counter) :
+				base(timestamp, error)
 			{
 				AuditCounter = counter;
 			}
@@ -622,8 +650,8 @@ namespace Spark.Slot.IO
 		{
 			public ushort Address { get; internal set; }
 
-			public ErrorProtectedStorageEventArgs(Errors error, ushort address) :
-				base(error)
+			public ErrorProtectedStorageEventArgs(long timestamp, Errors error, ushort address) :
+				base(timestamp, error)
 			{
 				Address = address;
 			}
@@ -634,8 +662,8 @@ namespace Spark.Slot.IO
 			public byte DesiredLength { get; internal set; }
 			public byte RequestedLength { get; internal set; }
 
-			public ErrorTooLongEventArgs(Errors error, byte desired, byte requested) :
-				base(error)
+			public ErrorTooLongEventArgs(long timestamp, Errors error, byte desired, byte requested) :
+				base(timestamp, error)
 			{
 				DesiredLength = desired;
 				RequestedLength = requested;
@@ -646,8 +674,8 @@ namespace Spark.Slot.IO
 		{
 			public ushort Command { get; internal set; }
 
-			public ErrorUnknownCommandEventArgs(Errors error, ushort command) :
-				base(error)
+			public ErrorUnknownCommandEventArgs(long timestamp, Errors error, ushort command) :
+				base(timestamp, error)
 			{
 				Command = command;
 			}
@@ -657,8 +685,8 @@ namespace Spark.Slot.IO
 		{
 			public ushort UnknownErrorCode { get; internal set; }
 
-			public ErrorUnknownErrorEventArgs(Errors error, ushort errorCode) :
-				base(error)
+			public ErrorUnknownErrorEventArgs(long timestamp, Errors error, ushort errorCode) :
+				base(timestamp, error)
 			{
 				UnknownErrorCode = errorCode;
 			}
@@ -668,7 +696,8 @@ namespace Spark.Slot.IO
 		{
 			public string Message { get; internal set; }
 
-			public DebugEventArgs(string message)
+			public DebugEventArgs(long timestamp, string message) :
+				base(timestamp)
 			{
 				Message = message;
 			}
@@ -678,7 +707,8 @@ namespace Spark.Slot.IO
 		{
 			public ReceivedCommand Command { get; internal set; }
 
-			public UnknownEventArgs(ReceivedCommand command)
+			public UnknownEventArgs(long timestamp, ReceivedCommand command) :
+				base(timestamp)
 			{
 				Command = command;
 			}
