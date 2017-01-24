@@ -193,6 +193,16 @@ void setup() {
 			case CMD_GET_KEYS:
 				communicator.dispatchKey(3, previous_in.bytes);
 				break;
+			case CMD_SET_EJECT_TIMEOUT:
+				{
+					uint8_t const track = messenger.readBinArg<uint8_t>();
+					uint32_t const timeout = messenger.readBinArg<uint32_t>();
+					if (!conf.setEjectTimeout(track, timeout))
+						communicator.dispatchErrorNotATrack(track);
+					else
+						tracker_eject.begin(timeout);
+				}
+				break;
 			case CMD_WRITE_STORAGE:
 				{
 					uint16_t const address = messenger.readBinArg<uint16_t>();
