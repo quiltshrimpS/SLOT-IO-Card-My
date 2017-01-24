@@ -6,6 +6,8 @@
 #include <utility/twi.h>
 #include <FRAM_MB85RC_I2C.h>
 
+#include <util/crc16.h>
+
 #define CONF_OFFSET_COIN_TRACK_LEVEL	(0x0000)
 #define CONF_SIZE_COIN_TRACK_LEVEL		(1)
 #define CONF_OFFSET_COINS_TO_EJECT		(CONF_OFFSET_COIN_TRACK_LEVEL + CONF_SIZE_COIN_TRACK_LEVEL)
@@ -61,37 +63,36 @@ public:
 		// there are 2 banks of memories inside the fram:
 		//   - CONF_ADDR_BANK_0 (256 bytes): [ CONF_SIZE_ALL ] [ RESERVED ]
 		//   - CONF_ADDR_BANK_1 (256 bytes): [ CONF_SIZE_ALL ] [ RESERVED ]
-		// the last byte of the bank is the `checksum`.
-		//   - checksum: every byte (including `seq`) except the `checksum`
-		//               byte XOR-ed togeter with `0x87` (0x87 is choosen because
-		//               that's how `42` is choosen...)
+		// the last byte of the bank is the `crc`.
+		//   - crc: crc8_ccitt of all data bytes with seed `0x87` (0x87 is
+		//          choosen because that's how `42` is choosen...)
 		//
-		// this class will try to use the one with good `checksum` and newer `seq`
+		// this class will try to use the one with good `crc`
 
 		// read the data from bank 0
 		readBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
-		uint8_t checksum_0 = _getChecksum();
-		bool bank0_checksum_good = checksum_0 == _data.configs.checksum;
+		uint8_t crc0 = _getChecksum();
+		bool bank0_checksum_good = crc0 == _data.configs.crc;
 
 		dumpBuffer("bank0", _data.bytes, CONF_SIZE_ALL);
 		#if defined(DEBUG_SERIAL)
-		DEBUG_SERIAL.print(F("Configuration bank0: checksum = "));
-		if (checksum_0 < 0x10)
+		DEBUG_SERIAL.print(F("Configuration bank0: crc = "));
+		if (crc0 < 0x10)
 			DEBUG_SERIAL.print('0');
-		DEBUG_SERIAL.println((int)checksum_0, HEX);
+		DEBUG_SERIAL.println((int)crc0, HEX);
 		#endif
 
 		// read the data from bank 1
 		readBytes(CONF_ADDR_BANK_1, CONF_SIZE_ALL, _data.bytes);
-		uint8_t checksum_1 = _getChecksum();
-		bool bank1_checksum_good = checksum_1 == _data.configs.checksum;
+		uint8_t crc1 = _getChecksum();
+		bool bank1_checksum_good = crc1 == _data.configs.crc;
 
 		dumpBuffer("bank1", _data.bytes, CONF_SIZE_ALL);
 		#if defined(DEBUG_SERIAL)
-		DEBUG_SERIAL.print(F("Configuration bank1: checksum = "));
-		if (checksum_1 < 0x10)
+		DEBUG_SERIAL.print(F("Configuration bank1: crc = "));
+		if (crc1 < 0x10)
 			DEBUG_SERIAL.print('0');
-		DEBUG_SERIAL.println((int)checksum_1, HEX);
+		DEBUG_SERIAL.println((int)crc1, HEX);
 		#endif
 
 		// decide which bank to use
@@ -111,7 +112,7 @@ public:
 			_data.configs.eject_timeout[1] = EJECT_TIMEOUT_DEFAULT;
 			_data.configs.eject_timeout[2] = EJECT_TIMEOUT_DEFAULT;
 			_data.configs.eject_timeout[3] = EJECT_TIMEOUT_DEFAULT;
-			_data.configs.checksum = _getChecksum();
+			_data.configs.crc = _getChecksum();
 			writeBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
 			writeBytes(CONF_ADDR_BANK_1, CONF_SIZE_ALL, _data.bytes);
 		} else {
@@ -162,11 +163,11 @@ public:
 		else
 			return false;
 
-		_data.configs.checksum = _getChecksum();
+		_data.configs.crc = _getChecksum();
 		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_COIN_TRACK_LEVEL, _data.bytes[CONF_OFFSET_COIN_TRACK_LEVEL]);
-		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
+		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
 		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_COIN_TRACK_LEVEL, _data.bytes[CONF_OFFSET_COIN_TRACK_LEVEL]);
-		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
+		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
 		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
 		return true;
 	}
@@ -192,11 +193,11 @@ public:
 			return false;
 
 		_data.configs.coins_to_eject[track_idx] = coins;
-		_data.configs.checksum = _getChecksum();
+		_data.configs.crc = _getChecksum();
 		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_COINS_TO_EJECT + track_idx, coins);
-		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
+		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
 		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_COINS_TO_EJECT + track_idx, coins);
-		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
+		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
 
 		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
 
@@ -235,11 +236,11 @@ public:
 		 	return false;
 
 		_data.configs.coin_count[track_idx] = count;
-		_data.configs.checksum = _getChecksum();
+		_data.configs.crc = _getChecksum();
 		_fram.writeLong(CONF_ADDR_BANK_0 + CONF_OFFSET_COIN_COUNT + track_idx * sizeof(uint32_t), count);
-		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
+		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
 		_fram.writeLong(CONF_ADDR_BANK_1 + CONF_OFFSET_COIN_COUNT + track_idx * sizeof(uint32_t), count);
-		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
+		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
 
 		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
 
@@ -255,11 +256,11 @@ public:
 			return false;
 
 		_data.configs.eject_timeout[track_idx] = timeout;
-		_data.configs.checksum = _getChecksum();
+		_data.configs.crc = _getChecksum();
 		_fram.writeLong(CONF_ADDR_BANK_0 + CONF_OFFSET_EJECT_TIMEOUT + track_idx * sizeof(uint32_t), timeout);
-		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
+		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
 		_fram.writeLong(CONF_ADDR_BANK_1 + CONF_OFFSET_EJECT_TIMEOUT + track_idx * sizeof(uint32_t), timeout);
-		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.checksum);
+		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
 
 		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
 
@@ -317,10 +318,10 @@ public:
 private:
 	__attribute__((always_inline)) inline
 	uint8_t _getChecksum() {
-		uint8_t checksum = 0x87; // randomly picked seed...
+		uint8_t crc = 0x87; // randomly picked seed...
 		for (uint8_t i = 0;i < CONF_SIZE_ALL - 1;++i)
-			checksum ^= _data.bytes[i];
-		return checksum;
+			crc = _crc8_ccitt_update(crc, _data.bytes[i]);
+		return crc;
 	}
 
 	union {
@@ -332,7 +333,7 @@ private:
 			uint32_t coin_count[8];
 			uint32_t eject_timeout[4];
 
-			uint8_t checksum;
+			uint8_t crc;
 		} configs;
 	} _data;
 	FRAM_MB85RC_I2C & _fram;
