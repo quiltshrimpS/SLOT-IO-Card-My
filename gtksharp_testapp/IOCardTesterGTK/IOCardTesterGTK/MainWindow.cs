@@ -21,24 +21,25 @@ public partial class MainWindow : Window
 		public readonly string CommandDescription;
 		public readonly string ParamsDescription;
 		public readonly List<string> HistoryParams;
+		private readonly Action<IOCard.Commands, int, int> WrongParamsCallback;
 		private readonly Action<IOCard.Commands, string[]> SendCommandCallback;
 
-		public CommandProperty(IOCard.Commands cmd, int parameter_count, string cmdDesc, string paramsDesc) :
-			this(cmd, parameter_count, cmdDesc, paramsDesc, new string[0], (command, parameters) => { })
+		public CommandProperty(Action<IOCard.Commands, int, int> paramsCallback, IOCard.Commands cmd, int parameter_count, string cmdDesc, string paramsDesc) :
+			this(paramsCallback, cmd, parameter_count, cmdDesc, paramsDesc, new string[0], (command, parameters) => { })
 		{
 		}
 
-		public CommandProperty(IOCard.Commands cmd, int parameter_count, string cmdDesc, string paramsDesc, string[] history) :
-			this(cmd, parameter_count, cmdDesc, paramsDesc, history, (command, parameters) => { })
+		public CommandProperty(Action<IOCard.Commands, int, int> paramsCallback, IOCard.Commands cmd, int parameter_count, string cmdDesc, string paramsDesc, string[] history) :
+			this(paramsCallback, cmd, parameter_count, cmdDesc, paramsDesc, history, (command, parameters) => { })
 		{
 		}
 
-		public CommandProperty(IOCard.Commands cmd, int parameter_count, string cmdDesc, string paramsDesc, Action<IOCard.Commands, string[]> callback) :
-			this(cmd, parameter_count, cmdDesc, paramsDesc, new string[0], callback)
+		public CommandProperty(Action<IOCard.Commands, int, int> paramsCallback, IOCard.Commands cmd, int parameter_count, string cmdDesc, string paramsDesc, Action<IOCard.Commands, string[]> callback) :
+			this(paramsCallback, cmd, parameter_count, cmdDesc, paramsDesc, new string[0], callback)
 		{
 		}
 
-		public CommandProperty(IOCard.Commands cmd, int parameter_count, string cmdDesc, string paramsDesc, string[] history, Action<IOCard.Commands, string[]> callback)
+		public CommandProperty(Action<IOCard.Commands, int, int> paramsCallback, IOCard.Commands cmd, int parameter_count, string cmdDesc, string paramsDesc, string[] history, Action<IOCard.Commands, string[]> callback)
 		{
 			Command = cmd;
 			Params = parameter_count;
@@ -50,6 +51,11 @@ public partial class MainWindow : Window
 
 		public void SendCommand(string[] parameters)
 		{
+			if (parameters.Length != Params && WrongParamsCallback != null)
+			{
+				WrongParamsCallback.Invoke(Command, parameters.Length, Params);
+				return;
+			}
 			SendCommandCallback.Invoke(Command, parameters);
 		}
 	}
@@ -70,21 +76,23 @@ public partial class MainWindow : Window
 	{
 		Build();
 
-		Action<IOCard.Commands, string[]> unhandled_send_callback = (command, parameters) =>
+		Action<IOCard.Commands, int, int> wrong_params_callback = (command, got, required) =>
 		{
 			var iter = textview_received.Buffer.StartIter;
 			textview_received.Buffer.Insert(
 				ref iter,
 				string.Format(
-					"=> {0}: unknown cmd = {1}, params = {2}\r\n",
+					"=> {0}: cmd {1} wants {2} parameters, got {3}\r\n",
 					DateTime.Now,
 					command,
-					parameters.Length == 0 ? "<null>" : string.Join(", ", parameters)
+					required,
+					got
 				)
 			);
 		};
 
 		mCommandProperty_GetInfo = new CommandProperty(
+			wrong_params_callback,
 			IOCard.Commands.CMD_GET_INFO, 0,
 			"Get device information",
 			"Params: N/A",
@@ -103,6 +111,7 @@ public partial class MainWindow : Window
 			}
 		);
 		mCommandProperty_EjectCoin = new CommandProperty(
+			wrong_params_callback,
 			IOCard.Commands.CMD_EJECT_COIN, 2,
 			"Eject N coins.",
 			"Params: <track (byte)>, <coins (byte)>",
@@ -132,6 +141,7 @@ public partial class MainWindow : Window
 			}
 		);
 		mCommandProperty_GetCoinCounter = new CommandProperty(
+			wrong_params_callback,
 			IOCard.Commands.CMD_GET_COIN_COUNTER, 1,
 			"Get coin counter.",
 			"Params: <track (byte)>",
@@ -159,6 +169,7 @@ public partial class MainWindow : Window
 			}
 		);
 		mCommandProperty_ResetCoinCounter = new CommandProperty(
+			wrong_params_callback,
 			IOCard.Commands.CMD_RESET_COIN_COINTER, 1,
 			"Reset coin counter.",
 			"Params: <track (byte)>",
@@ -186,6 +197,7 @@ public partial class MainWindow : Window
 			}
 		);
 		mCommandProperty_SetEjectTimeout = new CommandProperty(
+			wrong_params_callback,
 			IOCard.Commands.CMD_SET_EJECT_TIMEOUT, 2,
 			"Sets the Timeout on Eject tracks (in us)",
 			"Params: <track (byte)>, <timeout_us (uint32_t)>",
@@ -214,12 +226,13 @@ public partial class MainWindow : Window
 			}
 		);
 		mCommandProperty_SetTrackLevel = new CommandProperty(
+			wrong_params_callback,
 			IOCard.Commands.CMD_SET_TRACK_LEVEL, 2,
 			"Sets the ActiveLevel on a track",
 			"Params: <track (byte)>, <level (byte)>",
 			new string[] {
 				"0xC0, 0 // make track 0xC0 (eject track 1) active LOW",
-				"0xC0, 1 // make track 0xC0 (eject track 1) active HIGH",
+				"0xC0, 1 // make track 0xC0 (eject track 1) active HIGH"
 			},
 			(command, parameters) =>
 			{
@@ -242,6 +255,7 @@ public partial class MainWindow : Window
 			}
 		);
 		mCommandProperty_GetKeys = new CommandProperty(
+			wrong_params_callback,
 			IOCard.Commands.CMD_GET_KEYS, 0,
 			"Get key states from device",
 			"Params: N/A",
@@ -260,6 +274,7 @@ public partial class MainWindow : Window
 			}
 		);
 		mCommandProperty_SetOutputs = new CommandProperty(
+			wrong_params_callback,
 			IOCard.Commands.CMD_SET_OUTPUT, 1,
 			"Set 74HC595 output.",
 			"Params: <states (byte[])>",
@@ -294,6 +309,7 @@ public partial class MainWindow : Window
 			}
 		);
 		mCommandProperty_WriteStorage = new CommandProperty(
+			wrong_params_callback,
 			IOCard.Commands.CMD_WRITE_STORAGE, 2,
 			"Write data to the onboard storage.",
 			"Params: <address (UInt16)>, <data (byte[])>",
@@ -330,6 +346,7 @@ public partial class MainWindow : Window
 			}
 		);
 		mCommandProperty_ReadStorage = new CommandProperty(
+			wrong_params_callback,
 			IOCard.Commands.CMD_READ_STORAGE, 2,
 			"Read data from onboard storage.",
 			"Params: <address (UInt16)>, <length (byte)>",
@@ -399,8 +416,8 @@ public partial class MainWindow : Window
 
 		sCard.OnConnected += (sender, e) =>
 		{
-			mCommandProperty_GetInfo.SendCommand(null);
-			mCommandProperty_GetKeys.SendCommand(null);
+			mCommandProperty_GetInfo.SendCommand(new string[] { });
+			mCommandProperty_GetKeys.SendCommand(new string[] { });
 			mCommandProperty_GetCoinCounter.SendCommand(new string[] { ((int)(IOCard.CoinTrack.TrackInsert1)).ToString() });
 			mCommandProperty_GetCoinCounter.SendCommand(new string[] { ((int)(IOCard.CoinTrack.TrackInsert2)).ToString() });
 			mCommandProperty_GetCoinCounter.SendCommand(new string[] { ((int)(IOCard.CoinTrack.TrackInsert3)).ToString() });
