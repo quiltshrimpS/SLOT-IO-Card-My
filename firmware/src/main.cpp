@@ -333,7 +333,12 @@ void loop() {
 	// might trigger tracker.start() when a coin is confirmed.
 	if (tracker_eject.trigger(now))
 	{
-		communicator.dispatchErrorEjectTimeout(TRACK_EJECT, conf.getCoinsToEject(TRACK_EJECT));
+		uint8_t const coins = conf.getCoinsToEject(TRACK_EJECT);
+		if (coins) {
+			communicator.dispatchErrorEjectTimeout(TRACK_EJECT, coins);
+			out.port.ssr1 = false;
+			do_send = true;
+		}
 		out.port.ssr1 = false;
 		do_send = true;
 	}
