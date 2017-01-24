@@ -27,7 +27,7 @@
 #include "Debounce.h"
 #include "Pulse.h"
 #include "Configuration.h"
-#include "EjectTimeoutTracker.h"
+#include "TimeoutTracker.h"
 
 FRAM_MB85RC_I2C fram(MB85RC_DEFAULT_ADDRESS, true, /* WP */ A7, 16 /* kb */);
 WreckedSPI< /* MISO */ 7, /* MOSI */ 2, /* SCLK_MISO */ 8, /* SCLK_MOSI */ 3, /* MODE_MISO */ 2, /* MODE_MOSI */ 0 > spi;
@@ -51,7 +51,7 @@ static const uint8_t OUTPUT_MASK[3] = { OUT_MASK_0, OUT_MASK_1, OUT_MASK_2 };
 
 bool do_send = false;
 
-EjectTimeoutTracker tracker_eject;
+TimeoutTracker tracker_eject;
 
 Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_score;
 Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_wash;

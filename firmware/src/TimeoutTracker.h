@@ -3,9 +3,9 @@
 
 #include <Arduino.h>
 
-class EjectTimeoutTracker {
+class TimeoutTracker {
 public:
-	EjectTimeoutTracker():
+	TimeoutTracker():
 		_check(false)
 	{
 	}
