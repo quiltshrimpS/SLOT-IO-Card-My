@@ -59,6 +59,7 @@ public partial class MainWindow : Window
 	CommandProperty mCommandProperty_GetCoinCounter;
 	CommandProperty mCommandProperty_ResetCoinCounter;
 	CommandProperty mCommandProperty_GetKeys;
+	CommandProperty mCommandProperty_SetEjectTimeout;
 	CommandProperty mCommandProperty_SetOutputs;
 	CommandProperty mCommandProperty_WriteStorage;
 	CommandProperty mCommandProperty_ReadStorage;
@@ -183,6 +184,34 @@ public partial class MainWindow : Window
 				sCard.QueryResetCoinCounter(track);
 			}
 		);
+		mCommandProperty_SetEjectTimeout = new CommandProperty(
+			IOCard.Commands.CMD_SET_EJECT_TIMEOUT, 2,
+			"Sets the Timeout on Eject tracks (in us)",
+			"Params: <track (byte)>, <timeout_us (uint32_t)>",
+			new string[] {
+				"0xC0, 5000000 // track 0xC0 (eject track 1) times out in 5 sec",
+				"0xC0, 10000000 // track 0xC0 (eject track 1) times out in 10 sec"
+			},
+			(command, parameters) =>
+			{
+				var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
+				var timeout = _getTfromString<uint>(parameters[1].Trim());
+
+				var iter = textview_received.Buffer.StartIter;
+				textview_received.Buffer.Insert(
+					ref iter,
+					string.Format(
+						"=> {0}: cmd = {1}, track = {2}, timeout = {3}us\r\n",
+						DateTime.Now,
+						command,
+						track,
+						timeout
+					)
+				);
+
+				sCard.QuerySetEjectTimeout(track, timeout);
+			}
+		);
 		mCommandProperty_GetKeys = new CommandProperty(
 			IOCard.Commands.CMD_GET_KEYS, 0,
 			"Get key states from device",
@@ -298,6 +327,7 @@ public partial class MainWindow : Window
 			mCommandProperty_ResetCoinCounter,
 			mCommandProperty_GetKeys,
 			mCommandProperty_SetOutputs,
+			mCommandProperty_SetEjectTimeout,
 			mCommandProperty_WriteStorage,
 			mCommandProperty_ReadStorage
 		};
