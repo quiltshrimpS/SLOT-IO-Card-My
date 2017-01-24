@@ -359,7 +359,7 @@ public partial class MainWindow : Window
 							textview_received.Buffer.Insert(
 								ref iter,
 								string.Format(
-									"<= {0}: error = {1}, Track = 0x{2:X2}, Coins Failed = {3}\r\n",
+									"<= {0}: error = {1}, Track = {2}, Coins Failed = {3}\r\n",
 									DateTime.Now,
 									ev.ErrorCode,
 									ev.Track,
@@ -391,7 +391,7 @@ public partial class MainWindow : Window
 							textview_received.Buffer.Insert(
 								ref iter,
 								string.Format(
-									"<= {0}: error = {1}, Track = 0x{2:X2}\r\n",
+									"<= {0}: error = {1}, Track = {2}\r\n",
 									DateTime.Now,
 									ev.ErrorCode,
 									ev.Track
