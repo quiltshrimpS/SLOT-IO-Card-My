@@ -61,6 +61,7 @@ public partial class MainWindow : Window
 	CommandProperty mCommandProperty_GetKeys;
 	CommandProperty mCommandProperty_SetEjectTimeout;
 	CommandProperty mCommandProperty_SetOutputs;
+	CommandProperty mCommandProperty_SetTrackLevel;
 	CommandProperty mCommandProperty_WriteStorage;
 	CommandProperty mCommandProperty_ReadStorage;
 	CommandProperty[] mCommandProperties;
@@ -210,6 +211,34 @@ public partial class MainWindow : Window
 				);
 
 				sCard.QuerySetEjectTimeout(track, timeout);
+			}
+		);
+		mCommandProperty_SetTrackLevel = new CommandProperty(
+			IOCard.Commands.CMD_SET_TRACK_LEVEL, 2,
+			"Sets the ActiveLevel on a track",
+			"Params: <track (byte)>, <level (byte)>",
+			new string[] {
+				"0xC0, 0 // make track 0xC0 (eject track 1) active LOW",
+				"0xC0, 1 // make track 0xC0 (eject track 1) active HIGH",
+			},
+			(command, parameters) =>
+			{
+				var track = (IOCard.CoinTrack)_getTfromString<byte>(parameters[0].Trim());
+				var level = (IOCard.ActiveLevel)_getTfromString<byte>(parameters[1].Trim());
+
+				var iter = textview_received.Buffer.StartIter;
+				textview_received.Buffer.Insert(
+					ref iter,
+					string.Format(
+						"=> {0}: cmd = {1}, track = {2}, level = {3}us\r\n",
+						DateTime.Now,
+						command,
+						track,
+						level
+					)
+				);
+
+				sCard.QuerySetTrackLevel(track, level);
 			}
 		);
 		mCommandProperty_GetKeys = new CommandProperty(
