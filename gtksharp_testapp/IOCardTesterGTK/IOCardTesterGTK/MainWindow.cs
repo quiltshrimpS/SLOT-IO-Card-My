@@ -276,7 +276,7 @@ public partial class MainWindow : Window
 		mCommandProperty_SetOutputs = new CommandProperty(
 			wrong_params_callback,
 			IOCard.Commands.CMD_SET_OUTPUT, 1,
-			"Set 74HC595 output.",
+			"Set 74HC595 output",
 			"Params: <states (byte[])>",
 			new string[] {
 				"0x12 0x34 0x56 // 3 bytes",
@@ -367,7 +367,7 @@ public partial class MainWindow : Window
 				"0x980, 64",
 				"0xa80, 64",
 				"0xb80, 64",
-				"0xc80, 64",
+				"0xc80, 64"
 			},
 			(command, parameters) =>
 			{
@@ -427,10 +427,6 @@ public partial class MainWindow : Window
 			mCommandProperty_ReadStorage.SendCommand(new string[] { "0x180", "64" });
 			mCommandProperty_ReadStorage.SendCommand(new string[] { "0x280", "64" });
 			mCommandProperty_ReadStorage.SendCommand(new string[] { "0x380", "64" });
-			mCommandProperty_ReadStorage.SendCommand(new string[] { "0x480", "64" });
-			mCommandProperty_ReadStorage.SendCommand(new string[] { "0x580", "64" });
-			mCommandProperty_ReadStorage.SendCommand(new string[] { "0x680", "64" });
-			mCommandProperty_ReadStorage.SendCommand(new string[] { "0x780", "64" });
 
 			Application.Invoke(delegate
 			{
