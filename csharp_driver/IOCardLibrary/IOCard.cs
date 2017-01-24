@@ -518,9 +518,9 @@ namespace Spark.Slot.IO
 
 		public class ErrorEjectInterruptedEventArgs : ErrorTrackEventArgs
 		{
-			public ushort CoinsFailed { get; internal set; }
+			public byte CoinsFailed { get; internal set; }
 
-			public ErrorEjectInterruptedEventArgs(Errors error, CoinTrack track, ushort coins) :
+			public ErrorEjectInterruptedEventArgs(Errors error, CoinTrack track, byte coins) :
 				base(error, track)
 			{
 				CoinsFailed = coins;
