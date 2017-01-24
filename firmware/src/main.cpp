@@ -51,7 +51,11 @@ static const uint8_t OUTPUT_MASK[3] = { OUT_MASK_0, OUT_MASK_1, OUT_MASK_2 };
 
 bool do_send = false;
 
-TimeoutTracker tracker_eject;
+TimeoutTracker tracker_eject(
+	#if defined(DEBUG_SERIAL)
+	"eject tracker"
+	#endif
+);
 
 Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_score;
 Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_wash;
@@ -339,8 +343,6 @@ void loop() {
 			out.port.ssr1 = false;
 			do_send = true;
 		}
-		out.port.ssr1 = false;
-		do_send = true;
 	}
 
 	Configuration::TrackLevelsT &track_levels = conf.getTrackLevels();
