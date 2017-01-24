@@ -369,6 +369,21 @@ public partial class MainWindow : Window
 						}
 						break;
 					case IOCard.Errors.ERR_EJECT_TIMEOUT:
+						{
+							var ev = (IOCard.ErrorEjectTimeoutEventArgs)e;
+							var iter = textview_received.Buffer.StartIter;
+							textview_received.Buffer.Insert(
+								ref iter,
+								string.Format(
+									"<= {0}: error = {1}, Track = {2}, Coins Failed = {3}\r\n",
+									DateTime.Now,
+									ev.ErrorCode,
+									ev.Track,
+									ev.CoinsFailed
+								)
+							);
+						}
+						break;
 					case IOCard.Errors.ERR_NOT_A_TRACK:
 						{
 							var ev = (IOCard.ErrorTrackEventArgs)e;
