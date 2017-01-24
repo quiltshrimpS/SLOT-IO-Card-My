@@ -228,11 +228,12 @@ void loop() {
     in.bytes[2] = spi.receive();
     fastDigitalWrite(PIN_LATCH_IN, LOW);
 	uint32_t now = micros();
-	debounce_banknote.feed(in.port.sw20, now);
-	debounce_eject.feed(in.port.sw11, now);
-	debounce_insert_1.feed(in.port.sw12, now);
-	debounce_insert_2.feed(in.port.sw13, now);
-	debounce_insert_3.feed(in.port.sw14, now);
+	Configuration::TrackLevelsT &track_levels = conf.getTrackLevels();
+	debounce_insert_1.feed(in.port.sw12, track_levels.bits.track_level_0, now);
+	debounce_insert_2.feed(in.port.sw13, track_levels.bits.track_level_1, now);
+	debounce_insert_3.feed(in.port.sw14, track_levels.bits.track_level_2, now);
+	debounce_banknote.feed(in.port.sw20, track_levels.bits.track_level_3, now);
+	debounce_eject.feed(in.port.sw11, track_levels.bits.track_level_4, now);
 	if (pulse_counter_score.update(now))
 	{
 		out.port.counter1 = pulse_counter_score.get();
