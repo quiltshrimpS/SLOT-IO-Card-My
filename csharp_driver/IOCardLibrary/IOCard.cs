@@ -181,6 +181,19 @@ namespace Spark.Slot.IO
 			return false;
 		}
 
+		public bool QuerySetEjectTimeout(CoinTrack track, uint timeout, SendQueue queuePosition = SendQueue.InFrontQueue)
+		{
+			if (IsConnected)
+			{
+				var cmd = new SendCommand((int)Commands.CMD_SET_EJECT_TIMEOUT);
+				cmd.AddBinArgument((byte)track);
+				cmd.AddBinArgument(timeout);
+				mMessenger.SendCommand(cmd, queuePosition);
+				return true;
+			}
+			return false;
+		}
+
 		public bool QueryWriteStorage(ushort address, byte[] data, SendQueue queuePosition = SendQueue.InFrontQueue)
 		{
 			if (IsConnected)
@@ -403,12 +416,13 @@ namespace Spark.Slot.IO
 		{
 			CMD_READ_STORAGE = 0x87,
 			CMD_WRITE_STORAGE = 0x96,
+			CMD_GET_KEYS = 0xA5,
+			CMD_SET_EJECT_TIMEOUT = 0xB0,
 			CMD_SET_OUTPUT = 0xB4,
 			CMD_RESET_COIN_COINTER = 0xC3,
 			CMD_GET_COIN_COUNTER = 0xD2,
 			CMD_EJECT_COIN = 0xE1,
 			CMD_GET_INFO = 0xF0,
-			CMD_GET_KEYS = 0xA5,
 		}
 
 		public enum Events
