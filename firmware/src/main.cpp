@@ -207,9 +207,9 @@ void setup() {
 				{
 					uint8_t const track = messenger.readBinArg<uint8_t>();
 					uint8_t const count = messenger.readBinArg<uint8_t>();
+					uint8_t const coins = conf.getCoinsToEject(TRACK_EJECT);
 
 					// block newer command if there are still coins left to be ejected
-					uint8_t const coins = conf.getCoinsToEject(TRACK_EJECT);
 					if (count != 0 && coins != 0) {
 						communicator.dispatchErrorEjectInterrupted(track, coins);
 					} else if (!conf.setCoinsToEject(track, count)) {
