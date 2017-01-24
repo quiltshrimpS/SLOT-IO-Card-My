@@ -74,12 +74,13 @@ public:
 		uint8_t crc0 = _getChecksum();
 		bool bank0_checksum_good = crc0 == _data.configs.crc;
 
-		dumpBuffer("bank0", _data.bytes, CONF_SIZE_ALL);
 		#if defined(DEBUG_SERIAL)
-		DEBUG_SERIAL.print(F("Configuration bank0: crc = "));
+		dumpBuffer("bank0", _data.bytes, CONF_SIZE_ALL);
+		DEBUG_SERIAL.print(F("90,bank0: crc = "));
 		if (crc0 < 0x10)
 			DEBUG_SERIAL.print('0');
-		DEBUG_SERIAL.println((int)crc0, HEX);
+		DEBUG_SERIAL.print((int)crc0, HEX);
+		DEBUG_SERIAL.print(';');
 		#endif
 
 		// read the data from bank 1
@@ -87,23 +88,24 @@ public:
 		uint8_t crc1 = _getChecksum();
 		bool bank1_checksum_good = crc1 == _data.configs.crc;
 
-		dumpBuffer("bank1", _data.bytes, CONF_SIZE_ALL);
 		#if defined(DEBUG_SERIAL)
-		DEBUG_SERIAL.print(F("Configuration bank1: crc = "));
+		dumpBuffer("bank1", _data.bytes, CONF_SIZE_ALL);
+		DEBUG_SERIAL.print(F("90,bank1: crc = "));
 		if (crc1 < 0x10)
 			DEBUG_SERIAL.print('0');
-		DEBUG_SERIAL.println((int)crc1, HEX);
+		DEBUG_SERIAL.print((int)crc1, HEX);
+		DEBUG_SERIAL.print(';');
 		#endif
 
 		// decide which bank to use
 		if (bank0_checksum_good && bank1_checksum_good) {
 			// both checksum good, does nothing.
 			#if defined(DEBUG_SERIAL)
-			DEBUG_SERIAL.println(F("Configuration: both good, use bank 1."));
+			DEBUG_SERIAL.print(F("90,both bank good/, use bank1;"));
 			#endif
 		} else if (!bank0_checksum_good && !bank1_checksum_good) {
 			#if defined(DEBUG_SERIAL)
-			DEBUG_SERIAL.println(F("Configuration: both bad, initialize bank 0 and use it."));
+			DEBUG_SERIAL.print(F("90,both bank bad/, initializing...;"));
 			#endif
 			// both bad, initialize bank0 and use it, write back to both bank
 			memset(_data.bytes, 0, CONF_SIZE_ALL);
@@ -118,13 +120,13 @@ public:
 		} else {
 			if (bank0_checksum_good) {
 				#if defined(DEBUG_SERIAL)
-				DEBUG_SERIAL.println(F("Configuration: bank 1 bad, use bank 0."));
+				DEBUG_SERIAL.print(F("90,bank1 bad/, use bank0;"));
 				#endif
 				// bank1 is bad, read back bank0
 				readBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
 			} else /* if (bank1_checksum_good) */ {
 				#if defined(DEBUG_SERIAL)
-				DEBUG_SERIAL.println(F("Configuration: bank 0 bad, use bank 1."));
+				DEBUG_SERIAL.print(F("90,bank0 bad/, use bank1;"));
 				#endif
 				// bank0 is bad, use bank1.
 			}
@@ -277,7 +279,7 @@ public:
 	__attribute__((always_inline)) inline
 	void dumpBuffer(char const * const tag, uint8_t const * const buffer, size_t const size) {
 		#if defined(DEBUG_SERIAL)
-		DEBUG_SERIAL.print(F("Configuration"));
+		DEBUG_SERIAL.print(F("90,conf = "));
 		if (tag != nullptr) {
 			DEBUG_SERIAL.print(' ');
 			DEBUG_SERIAL.print(tag);
@@ -289,7 +291,7 @@ public:
 				DEBUG_SERIAL.print('0');
 			DEBUG_SERIAL.print((int)(buffer[i]), HEX);
 		}
-		DEBUG_SERIAL.println();
+		DEBUG_SERIAL.print(';');
 		#endif
 	}
 
@@ -318,9 +320,21 @@ public:
 private:
 	__attribute__((always_inline)) inline
 	uint8_t _getChecksum() {
+		#if defined(DEBUG_SERIAL)
+		uint32_t t1, t2;
+		t1 = micros();
+		#endif
+
 		uint8_t crc = 0x87; // randomly picked seed...
 		for (uint8_t i = 0;i < CONF_SIZE_ALL - 1;++i)
 			crc = _crc8_ccitt_update(crc, _data.bytes[i]);
+
+		#if defined(DEBUG_SERIAL)
+		t2 = micros();
+		DEBUG_SERIAL.print(F("90,CRC took "));
+		DEBUG_SERIAL.print(t2 - t1);
+		DEBUG_SERIAL.print("us;");
+		#endif
 		return crc;
 	}
 
