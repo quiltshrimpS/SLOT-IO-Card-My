@@ -208,6 +208,13 @@ void setup() {
 					}
 				}
 				break;
+			case CMD_SET_TRACK_LEVEL:
+				{
+					uint8_t const track = messenger.readBinArg<uint8_t>();
+					uint8_t const level = messenger.readBinArg<bool>();
+					conf.setTrackLevel(track, level);
+				}
+				break;
 			case CMD_SET_EJECT_TIMEOUT:
 				{
 					uint8_t const track = messenger.readBinArg<uint8_t>();

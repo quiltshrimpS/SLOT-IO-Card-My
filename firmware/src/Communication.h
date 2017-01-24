@@ -11,6 +11,7 @@
 #define CMD_RESET_COIN_COINTER		(0xC3)
 #define CMD_GET_COIN_COUNTER		(0xD2)
 #define CMD_EJECT_COIN				(0xE1)
+#define CMD_SET_TRACK_LEVEL			(0xEA)
 #define CMD_GET_INFO				(0xF0)
 
 #define EVT_GET_INFO_RESULT			(0x0F)
