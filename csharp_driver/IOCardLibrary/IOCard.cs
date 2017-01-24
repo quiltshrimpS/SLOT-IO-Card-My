@@ -83,6 +83,15 @@ namespace Spark.Slot.IO
 			TrackNotATrack = 0xFF,
 		}
 
+		public enum AuditCounter
+		{
+			CounterNotACounter = 0x00,
+			Counter1 = 0x01,
+			Counter2 = 0x02,
+			Counter3 = 0x03,
+			Counter4 = 0x04,
+		}
+
 		public enum ButtonState
 		{
 			StatePressed,
@@ -227,6 +236,19 @@ namespace Spark.Slot.IO
 			return false;
 		}
 
+		public bool QueryTickCounter(AuditCounter counter, byte ticks, SendQueue queuePosition = SendQueue.InFrontQueue)
+		{
+			if (IsConnected)
+			{
+				var cmd = new SendCommand((int)Commands.CMD_TICK_COUNTER);
+				cmd.AddBinArgument((byte)counter);
+				cmd.AddBinArgument(ticks);
+				mMessenger.SendCommand(cmd, queuePosition);
+				return true;
+			}
+			return false;
+		}
+
 		public bool QueryWriteStorage(ushort address, byte[] data, SendQueue queuePosition = SendQueue.InFrontQueue)
 		{
 			if (IsConnected)
@@ -365,6 +387,9 @@ namespace Spark.Slot.IO
 						case Errors.ERR_NOT_A_TRACK:
 							e = new ErrorNotATrackEventArgs(err, (CoinTrack)receivedCommand.ReadBinByteArg());
 							break;
+						case Errors.ERR_NOT_A_COUNTER:
+							e = new ErrorNotACounterEventArgs(err, receivedCommand.ReadBinByteArg());
+							break;
 						case Errors.ERR_PROTECTED_STORAGE:
 							e = new ErrorProtectedStorageEventArgs(err, receivedCommand.ReadBinUInt16Arg());
 							break;
@@ -449,6 +474,7 @@ namespace Spark.Slot.IO
 		{
 			CMD_READ_STORAGE = 0x87,
 			CMD_WRITE_STORAGE = 0x96,
+			CMD_TICK_COUNTER = 0x99,
 			CMD_GET_KEYS = 0xA5,
 			CMD_SET_EJECT_TIMEOUT = 0xB0,
 			CMD_SET_OUTPUT = 0xB4,
@@ -478,6 +504,7 @@ namespace Spark.Slot.IO
 			ERR_NOT_A_TRACK = 0x03,
 			ERR_PROTECTED_STORAGE = 0x04,
 			ERR_TOO_LONG = 0x05,
+			ERR_NOT_A_COUNTER = 0x06,
 			ERR_UNKNOWN_COMMAND = 0xFF,
 		}
 
@@ -591,6 +618,17 @@ namespace Spark.Slot.IO
 			public ErrorNotATrackEventArgs(Errors error, CoinTrack track) :
 				base(error, track)
 			{
+			}
+		}
+
+		public class ErrorNotACounterEventArgs : ErrorEventArgs
+		{
+			public byte AuditCounter { get; internal set; }
+
+			public ErrorNotACounterEventArgs(Errors error, byte counter) :
+				base(error)
+			{
+				AuditCounter = counter;
 			}
 		}
 
