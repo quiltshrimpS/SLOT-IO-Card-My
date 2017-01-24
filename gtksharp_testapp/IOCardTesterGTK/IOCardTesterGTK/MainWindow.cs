@@ -113,7 +113,7 @@ public partial class MainWindow : Window
 			},
 			(command, parameters) =>
 			{
-				var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
+				var track = (IOCard.CoinTrack)_getTfromString<byte>(parameters[0].Trim());
 				var count = _getTfromString<byte>(parameters[1].Trim());
 
 				var iter = textview_received.Buffer.StartIter;
@@ -142,7 +142,7 @@ public partial class MainWindow : Window
 			},
 			(command, parameters) =>
 			{
-				var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
+				var track = (IOCard.CoinTrack)_getTfromString<byte>(parameters[0].Trim());
 
 				var iter = textview_received.Buffer.StartIter;
 				textview_received.Buffer.Insert(
@@ -169,7 +169,7 @@ public partial class MainWindow : Window
 			},
 			(command, parameters) =>
 			{
-				var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
+				var track = (IOCard.CoinTrack)_getTfromString<byte>(parameters[0].Trim());
 
 				var iter = textview_received.Buffer.StartIter;
 				textview_received.Buffer.Insert(
@@ -195,7 +195,7 @@ public partial class MainWindow : Window
 			},
 			(command, parameters) =>
 			{
-				var track = (IOCard.CoinTrack)(_getTfromString<byte>(parameters[0].Trim()));
+				var track = (IOCard.CoinTrack)_getTfromString<byte>(parameters[0].Trim());
 				var timeout = _getTfromString<uint>(parameters[1].Trim());
 
 				var iter = textview_received.Buffer.StartIter;
