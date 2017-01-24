@@ -310,7 +310,11 @@ namespace Spark.Slot.IO
 							}
 							break;
 						case Errors.ERR_EJECT_TIMEOUT:
-							e = new ErrorEjectTimeoutEventArgs(err, (CoinTrack)receivedCommand.ReadBinByteArg());
+							{
+								var track = (CoinTrack)receivedCommand.ReadBinByteArg();
+								var coins = receivedCommand.ReadBinByteArg();
+								e = new ErrorEjectTimeoutEventArgs(err, track, coins);
+							}
 							break;
 						case Errors.ERR_NOT_A_TRACK:
 							e = new ErrorNotATrackEventArgs(err, (CoinTrack)receivedCommand.ReadBinByteArg());
@@ -525,9 +529,12 @@ namespace Spark.Slot.IO
 
 		public class ErrorEjectTimeoutEventArgs : ErrorTrackEventArgs
 		{
-			public ErrorEjectTimeoutEventArgs(Errors error, CoinTrack track) :
+			public byte CoinsFailed { get; internal set; }
+
+			public ErrorEjectTimeoutEventArgs(Errors error, CoinTrack track, byte coins) :
 				base(error, track)
 			{
+				CoinsFailed = coins;
 			}
 		}
 
