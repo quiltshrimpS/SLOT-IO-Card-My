@@ -88,7 +88,7 @@ public partial class MainWindow : Window
 			textview_received.Buffer.Insert(
 				ref iter,
 				string.Format(
-					"=> {0}: cmd {1} wants {2} parameters, got {3}\r\n",
+					" => {0}: cmd {1} wants {2} parameters, got {3}\r\n",
 					DateTime.Now,
 					command,
 					required,
@@ -108,7 +108,7 @@ public partial class MainWindow : Window
 				textview_received.Buffer.Insert(
 					ref iter,
 					string.Format(
-						"=> {0}: cmd = {1}\r\n",
+						" => {0}: cmd = {1}\r\n",
 						DateTime.Now,
 						command
 					)
@@ -135,7 +135,7 @@ public partial class MainWindow : Window
 				textview_received.Buffer.Insert(
 					ref iter,
 					string.Format(
-						"=> {0}: cmd = {1}, track = {2}, count = {3}\r\n",
+						" => {0}: cmd = {1}, track = {2}, count = {3}\r\n",
 						DateTime.Now,
 						command,
 						track,
@@ -164,7 +164,7 @@ public partial class MainWindow : Window
 				textview_received.Buffer.Insert(
 					ref iter,
 					string.Format(
-						"=> {0}: cmd = {1}, track = {2}\r\n",
+						" => {0}: cmd = {1}, track = {2}\r\n",
 						DateTime.Now,
 						command,
 						track
@@ -192,7 +192,7 @@ public partial class MainWindow : Window
 				textview_received.Buffer.Insert(
 					ref iter,
 					string.Format(
-						"=> {0}: cmd = {1}, track = {2}\r\n",
+						" => {0}: cmd = {1}, track = {2}\r\n",
 						DateTime.Now,
 						command,
 						track
@@ -220,7 +220,7 @@ public partial class MainWindow : Window
 				textview_received.Buffer.Insert(
 					ref iter,
 					string.Format(
-						"=> {0}: cmd = {1}, track = {2}, timeout = {3}us\r\n",
+						" => {0}: cmd = {1}, track = {2}, timeout = {3}us\r\n",
 						DateTime.Now,
 						command,
 						track,
@@ -249,7 +249,7 @@ public partial class MainWindow : Window
 				textview_received.Buffer.Insert(
 					ref iter,
 					string.Format(
-						"=> {0}: cmd = {1}, track = {2}, level = {3}us\r\n",
+						" => {0}: cmd = {1}, track = {2}, level = {3}us\r\n",
 						DateTime.Now,
 						command,
 						track,
@@ -271,7 +271,7 @@ public partial class MainWindow : Window
 				textview_received.Buffer.Insert(
 					ref iter,
 					string.Format(
-						"=> {0}: cmd = {1}\r\n",
+						" => {0}: cmd = {1}\r\n",
 						DateTime.Now,
 						command
 					)
@@ -299,7 +299,7 @@ public partial class MainWindow : Window
 				textview_received.Buffer.Insert(
 					ref iter,
 					string.Format(
-						"=> {0}: cmd = {1}, counter = {2}, ticks = {3}\r\n",
+						" => {0}: cmd = {1}, counter = {2}, ticks = {3}\r\n",
 						DateTime.Now,
 						command,
 						counter,
@@ -334,7 +334,7 @@ public partial class MainWindow : Window
 				textview_received.Buffer.Insert(
 					ref iter,
 					string.Format(
-						"=> {0}: cmd = {1}, length = {2}, data ={3}\r\n",
+						" => {0}: cmd = {1}, length = {2}, data ={3}\r\n",
 						DateTime.Now,
 						command,
 						data.Length,
@@ -370,7 +370,7 @@ public partial class MainWindow : Window
 				textview_received.Buffer.Insert(
 					ref iter,
 					string.Format(
-						"=> {0}: cmd = {1}, address = 0x{2:X4}, length = {3}, data ={4}\r\n",
+						" => {0}: cmd = {1}, address = 0x{2:X4}, length = {3}, data ={4}\r\n",
 						DateTime.Now,
 						command,
 						address,
@@ -415,7 +415,7 @@ public partial class MainWindow : Window
 				textview_received.Buffer.Insert(
 					ref iter,
 					string.Format(
-						"=> {0}: cmd = {1}, address = 0x{2:X4}, length = {3}\r\n",
+						" => {0}: cmd = {1}, address = 0x{2:X4}, length = {3}\r\n",
 						DateTime.Now,
 						command,
 						address,
@@ -493,7 +493,7 @@ public partial class MainWindow : Window
 							textview_received.Buffer.Insert(
 								ref iter,
 								string.Format(
-									"<= {0}: error = {1}, Track = {2}, Coins Failed = {3}\r\n",
+									"<=  {0}: error = {1}, Track = {2}, Coins Failed = {3}\r\n",
 									DateTime.Now,
 									ev.ErrorCode,
 									ev.Track,
@@ -509,7 +509,7 @@ public partial class MainWindow : Window
 							textview_received.Buffer.Insert(
 								ref iter,
 								string.Format(
-									"<= {0}: error = {1}, Track = {2}, Coins Failed = {3}\r\n",
+									"<=  {0}: error = {1}, Track = {2}, Coins Failed = {3}\r\n",
 									DateTime.Now,
 									ev.ErrorCode,
 									ev.Track,
@@ -525,7 +525,7 @@ public partial class MainWindow : Window
 							textview_received.Buffer.Insert(
 								ref iter,
 								string.Format(
-									"<= {0}: error = {1}, Track = {2}\r\n",
+									"<=  {0}: error = {1}, Track = {2}\r\n",
 									DateTime.Now,
 									ev.ErrorCode,
 									ev.Track
@@ -540,7 +540,7 @@ public partial class MainWindow : Window
 							textview_received.Buffer.Insert(
 								ref iter,
 								string.Format(
-									"<= {0}: error = {1}, Counter = 0x{2:X2}\r\n",
+									"<=  {0}: error = {1}, Counter = 0x{2:X2}\r\n",
 									DateTime.Now,
 									ev.ErrorCode,
 									ev.AuditCounter
@@ -555,7 +555,7 @@ public partial class MainWindow : Window
 							textview_received.Buffer.Insert(
 								ref iter,
 								string.Format(
-									"<= {0}: error = {1}, address = 0x{2:X4}\r\n",
+									"<=  {0}: error = {1}, address = 0x{2:X4}\r\n",
 									DateTime.Now,
 									ev.ErrorCode,
 									ev.Address
@@ -570,7 +570,7 @@ public partial class MainWindow : Window
 							textview_received.Buffer.Insert(
 								ref iter,
 								string.Format(
-									"<= {0}: error = {1}, requested = {2}, desired = {3}\r\n",
+									"<=  {0}: error = {1}, requested = {2}, desired = {3}\r\n",
 									DateTime.Now,
 									ev.ErrorCode,
 									ev.RequestedLength,
@@ -586,7 +586,7 @@ public partial class MainWindow : Window
 							textview_received.Buffer.Insert(
 								ref iter,
 								string.Format(
-									"<= {0}: error = {1}, cmd = 0x{2:X2}\r\n",
+									"<=  {0}: error = {1}, cmd = 0x{2:X2}\r\n",
 									DateTime.Now,
 									ev.ErrorCode,
 									ev.Command
@@ -601,7 +601,7 @@ public partial class MainWindow : Window
 							textview_received.Buffer.Insert(
 								ref iter,
 								string.Format(
-									"<= {0}: error = {1}, unknown error = 0x{2:X2}\r\n",
+									"<=  {0}: error = {1}, unknown error = 0x{2:X2}\r\n",
 									DateTime.Now,
 									ev.ErrorCode,
 									ev.UnknownErrorCode
@@ -620,7 +620,7 @@ public partial class MainWindow : Window
 				textview_received.Buffer.Insert(
 					ref iter,
 					string.Format(
-						"<= {0}: Manufacturer = {1}, Product = {2}, Version = {3}, Protocol = {4}\r\n",
+						"<=  {0}: Manufacturer = {1}, Product = {2}, Version = {3}, Protocol = {4}\r\n",
 						DateTime.Now,
 						e.Manufacturer,
 						e.Product,
@@ -638,7 +638,7 @@ public partial class MainWindow : Window
 				textview_received.Buffer.Insert(
 					ref iter,
 					string.Format(
-						"<= {0}: Track = {1}, Coins = {2}\r\n",
+						"<=  {0}: Track = {1}, Coins = {2}\r\n",
 						DateTime.Now,
 						e.Track,
 						e.Coins
@@ -658,7 +658,7 @@ public partial class MainWindow : Window
 				textview_received.Buffer.Insert(
 					ref iter,
 					string.Format(
-						"<= {0}: Keys:{1}\r\n",
+						"<=  {0}: Keys:{1}\r\n",
 						DateTime.Now,
 						builder
 					)
@@ -673,7 +673,7 @@ public partial class MainWindow : Window
 				textview_received.Buffer.Insert(
 					ref iter,
 					string.Format(
-						"<= {0}: Address = 0x{1:X4}, Length = {2}\r\n",
+						"<=  {0}: Address = 0x{1:X4}, Length = {2}\r\n",
 						DateTime.Now,
 						e.Address,
 						e.Length
@@ -693,7 +693,7 @@ public partial class MainWindow : Window
 				textview_received.Buffer.Insert(
 					ref iter,
 					string.Format(
-						"<= {0}: Address = 0x{1:X4}, Data ={2}\r\n",
+						"<=  {0}: Address = 0x{1:X4}, Data ={2}\r\n",
 						DateTime.Now,
 						e.Address,
 						builder
@@ -709,7 +709,7 @@ public partial class MainWindow : Window
 				textview_received.Buffer.Insert(
 					ref iter,
 					string.Format(
-						"<= {0}: Debug = {1}\r\n",
+						"<=  {0}: Debug = {1}\r\n",
 						DateTime.Now,
 						e.Message
 					)
@@ -724,7 +724,7 @@ public partial class MainWindow : Window
 				textview_received.Buffer.Insert(
 					ref iter,
 					string.Format(
-						"<= {0}: Unknown = {1}\r\n",
+						"<=  {0}: Unknown = {1}\r\n",
 						DateTime.Now,
 						e.Command.CommandString()
 					)
