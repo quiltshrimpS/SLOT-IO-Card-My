@@ -26,7 +26,12 @@ public:
 
 	__attribute__((always_inline)) inline
 	void feed(bool const state, uint32_t const now = micros()) {
-		if (state == ACTIVE_LEVEL) {
+		feed(state, ACTIVE_LEVEL, now);
+	}
+
+	__attribute__((always_inline)) inline
+	void feed(bool const state, bool const active_level, uint32_t const now = micros()) {
+		if (state == active_level) {
 			_energy += _feed_micros - now;
 		} else {
 			_energy -= _feed_micros - now;
