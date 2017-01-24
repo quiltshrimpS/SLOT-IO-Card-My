@@ -7,6 +7,45 @@ namespace Spark.Slot.IO
 {
 	public class IOCard
 	{
+		public enum Commands
+		{
+			CMD_READ_STORAGE = 0x87,
+			CMD_WRITE_STORAGE = 0x96,
+			CMD_TICK_COUNTER = 0x99,
+			CMD_GET_KEYS = 0xA5,
+			CMD_SET_EJECT_TIMEOUT = 0xB0,
+			CMD_SET_OUTPUT = 0xB4,
+			CMD_RESET_COIN_COINTER = 0xC3,
+			CMD_ACK = 0xC5,
+			CMD_GET_COIN_COUNTER = 0xD2,
+			CMD_EJECT_COIN = 0xE1,
+			CMD_SET_TRACK_LEVEL = 0xEA,
+			CMD_GET_INFO = 0xF0,
+		}
+
+		public enum Events
+		{
+			EVT_GET_INFO_RESULT = 0x0F,
+			EVT_COIN_COUNTER_RESULT = 0x2D,
+			EVT_KEY = 0x4B,
+			EVT_WRITE_STORAGE_RESULT = 0x69,
+			EVT_READ_STORAGE_RESULT = 0x78,
+			EVT_ERROR = 0xFF,
+			EVT_DEBUG = 0x5A,
+		}
+
+		public enum Errors
+		{
+			ERR_UNKNOWN_ERROR = 0x00,
+			ERR_EJECT_INTERRUPTED = 0x01,
+			ERR_EJECT_TIMEOUT = 0x02,
+			ERR_NOT_A_TRACK = 0x03,
+			ERR_PROTECTED_STORAGE = 0x04,
+			ERR_TOO_LONG = 0x05,
+			ERR_NOT_A_COUNTER = 0x06,
+			ERR_UNKNOWN_COMMAND = 0xFF,
+		}
+
 		public enum CoinTrack
 		{
 			/* 0x00 ~ 0x7F are coin insert tracks */
@@ -90,20 +129,6 @@ namespace Spark.Slot.IO
 			Counter2 = 0x02,
 			Counter3 = 0x03,
 			Counter4 = 0x04,
-		}
-
-		public enum ButtonState
-		{
-			StatePressed,
-			StateReleased,
-			/// <summary>
-			///  button state not (yet) available.
-			/// </summary>
-			/// <value>
-			/// 1. not received any update, yet
-			/// 2. it's "masked", not an available input.
-			/// </value>
-			StateUnavailable,
 		}
 
 		public enum ActiveLevel
@@ -470,48 +495,9 @@ namespace Spark.Slot.IO
 		public event EventHandler<UnknownEventArgs> OnUnknown;
 		public event EventHandler<DebugEventArgs> OnDebug;
 
-		#region "implementations"
-
 		CmdMessenger mMessenger;
 
-		public enum Commands
-		{
-			CMD_READ_STORAGE = 0x87,
-			CMD_WRITE_STORAGE = 0x96,
-			CMD_TICK_COUNTER = 0x99,
-			CMD_GET_KEYS = 0xA5,
-			CMD_SET_EJECT_TIMEOUT = 0xB0,
-			CMD_SET_OUTPUT = 0xB4,
-			CMD_RESET_COIN_COINTER = 0xC3,
-			CMD_ACK = 0xC5,
-			CMD_GET_COIN_COUNTER = 0xD2,
-			CMD_EJECT_COIN = 0xE1,
-			CMD_SET_TRACK_LEVEL = 0xEA,
-			CMD_GET_INFO = 0xF0,
-		}
-
-		public enum Events
-		{
-			EVT_GET_INFO_RESULT = 0x0F,
-			EVT_COIN_COUNTER_RESULT = 0x2D,
-			EVT_KEY = 0x4B,
-			EVT_WRITE_STORAGE_RESULT = 0x69,
-			EVT_READ_STORAGE_RESULT = 0x78,
-			EVT_ERROR = 0xFF,
-			EVT_DEBUG = 0x5A,
-		}
-
-		public enum Errors
-		{
-			ERR_UNKNOWN_ERROR = 0x00,
-			ERR_EJECT_INTERRUPTED = 0x01,
-			ERR_EJECT_TIMEOUT = 0x02,
-			ERR_NOT_A_TRACK = 0x03,
-			ERR_PROTECTED_STORAGE = 0x04,
-			ERR_TOO_LONG = 0x05,
-			ERR_NOT_A_COUNTER = 0x06,
-			ERR_UNKNOWN_COMMAND = 0xFF,
-		}
+		#region "EventArgs"
 
 		public class GetInfoResultEventArgs : EventArgs
 		{
