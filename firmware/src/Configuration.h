@@ -28,10 +28,27 @@
 #define TRACK_EJECT			(0xC0)
 #define TRACK_NOT_A_TRACK	(0xFF)
 
+#define TRACK_LEVELS_DEFAULT	(0b11101111)
+#define EJECT_TIMEOUT_DEFAULT	(10000000L) // us
+
 #define MAX_BYTES_LENGTH	(64)
 
 class Configuration {
 public:
+	union TrackLevelsT {
+		struct {
+			uint8_t track_level_0:1;
+			uint8_t track_level_1:1;
+			uint8_t track_level_2:1;
+			uint8_t track_level_3:1;
+			uint8_t track_level_4:1;
+			uint8_t track_level_5:1;
+			uint8_t track_level_6:1;
+			uint8_t track_level_7:1;
+		} bits;
+		uint8_t bytes;
+	};
+
 	Configuration(FRAM_MB85RC_I2C &fram):
 		_fram(fram)
 	{
@@ -87,6 +104,11 @@ public:
 			#endif
 			// both bad, initialize bank0 and use it, write back to both bank
 			memset(_data.bytes, 0, CONF_SIZE_ALL);
+			_data.configs.track_levels.bytes = TRACK_LEVELS_DEFAULT;
+			_data.configs.eject_timeout[0] = EJECT_TIMEOUT_DEFAULT;
+			_data.configs.eject_timeout[1] = EJECT_TIMEOUT_DEFAULT;
+			_data.configs.eject_timeout[2] = EJECT_TIMEOUT_DEFAULT;
+			_data.configs.eject_timeout[3] = EJECT_TIMEOUT_DEFAULT;
 			_data.configs.checksum = _getChecksum();
 			writeBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
 			writeBytes(CONF_ADDR_BANK_1, CONF_SIZE_ALL, _data.bytes);
@@ -270,19 +292,7 @@ private:
 	union {
 		uint8_t bytes[CONF_SIZE_ALL];
 		struct {
-			union {
-				struct {
-					uint8_t track_level_0:1;
-					uint8_t track_level_1:1;
-					uint8_t track_level_2:1;
-					uint8_t track_level_3:1;
-					uint8_t track_level_4:1;
-					uint8_t track_level_5:1;
-					uint8_t track_level_6:1;
-					uint8_t track_level_7:1;
-				} bits;
-				uint8_t bytes;
-			} track_levels;
+			union TrackLevelsT track_levels;
 
 			uint8_t coins_to_eject[8];
 			uint32_t coin_count[8];
