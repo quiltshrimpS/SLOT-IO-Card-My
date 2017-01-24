@@ -3,8 +3,6 @@
 
 #include <Arduino.h>
 
-extern CmdMessenger messenger;
-
 class EjectTimeoutTracker {
 public:
 	EjectTimeoutTracker():
