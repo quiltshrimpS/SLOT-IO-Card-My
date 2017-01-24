@@ -10,6 +10,7 @@
 #define CMD_SET_EJECT_TIMEOUT		(0xB0)
 #define CMD_SET_OUTPUT				(0xB4)
 #define CMD_RESET_COIN_COINTER		(0xC3)
+#define CMD_ACK						(0xC5)
 #define CMD_GET_COIN_COUNTER		(0xD2)
 #define CMD_EJECT_COIN				(0xE1)
 #define CMD_SET_TRACK_LEVEL			(0xEA)

@@ -51,6 +51,11 @@ static const uint8_t OUTPUT_MASK[3] = { OUT_MASK_0, OUT_MASK_1, OUT_MASK_2 };
 
 bool do_send = false;
 
+TimeoutTracker tracker_nack(
+	#if defined(DEBUG_SERIAL)
+	"NACK tracker"
+	#endif
+);
 TimeoutTracker tracker_eject(
 	#if defined(DEBUG_SERIAL)
 	"eject tracker"
@@ -89,6 +94,7 @@ public:
 		uint8_t to_eject = conf.getCoinsToEject(TRACK_EJECT);
 		if (to_eject < 2) {
 			tracker_eject.stop();
+			tracker_nack.stop();
 			out.port.ssr1 = false; // pull LOW to stop the motor
 			do_send = true;
 		}
@@ -97,6 +103,7 @@ public:
 			conf.setCoinsToEject(TRACK_EJECT, to_eject - 1);
 		}
 		communicator.dispatchCoinCounterResult(TRACK_EJECT, coins);
+		tracker_nack.start();
 	}
 };
 Debounce<LOW, DEBOUNCE_TIMEOUT, EmptyFunctorT, DebounceEjectFallFunctorT> debounce_eject;
@@ -173,8 +180,9 @@ void setup() {
     fram.begin();
 	conf.begin();
 
-	// initialize eject timeout tracker
+	// initialize timeout trackers
 	tracker_eject.begin(conf.getEjectTimeout(TRACK_EJECT));
+	tracker_nack.begin(TIMEOUT_NACK);
 
 	// populate the debouncers
 	debounce_banknote.begin(in.port.sw20, now);
@@ -189,6 +197,9 @@ void setup() {
 		t1 = micros();
 		#endif
 		switch (messenger.commandID()) {
+			case CMD_ACK:
+				tracker_nack.stop();
+				break;
 			case CMD_GET_INFO:
 				communicator.dispatchGetInfoResult();
 				break;
@@ -335,6 +346,15 @@ void loop() {
 
 	// check the timeout tracker before we feed the debouncers, since debouncers
 	// might trigger tracker.start() when a coin is confirmed.
+	//
+	// run the NACK tracker earlier, since eject tracker might write the FRAM
+	// which takes a lot of time.
+	if (tracker_nack.trigger(now))
+	{
+		tracker_eject.stop();
+		out.port.ssr1 = false;
+		do_send = true;
+	}
 	if (tracker_eject.trigger(now))
 	{
 		uint8_t const coins = conf.getCoinsToEject(TRACK_EJECT);
