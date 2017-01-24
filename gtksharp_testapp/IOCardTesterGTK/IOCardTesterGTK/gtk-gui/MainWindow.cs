@@ -108,6 +108,8 @@ public partial class MainWindow
 		this.textview_received = new global::Gtk.TextView();
 		this.textview_received.CanFocus = true;
 		this.textview_received.Name = "textview_received";
+		this.textview_received.Editable = false;
+		this.textview_received.AcceptsTab = false;
 		this.GtkScrolledWindow.Add(this.textview_received);
 		this.table1.Add(this.GtkScrolledWindow);
 		global::Gtk.Table.TableChild w7 = ((global::Gtk.Table.TableChild)(this.table1[this.GtkScrolledWindow]));
