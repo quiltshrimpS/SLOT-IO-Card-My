@@ -111,30 +111,30 @@ public:
 	__attribute__((always_inline)) inline
 	uint8_t getTrackLevel(uint8_t track) {
 		if (track == TRACK_EJECT) // eject track
-			return _data.configs.track_level_4;
+			return _data.configs.track_levels.bits.track_level_4;
 		if (track == TRACK_INSERT_1) // coin track 1
-			return _data.configs.track_level_0;
+			return _data.configs.track_levels.bits.track_level_0;
 		if (track == TRACK_INSERT_2) // coin track 2
-			return _data.configs.track_level_1;
+			return _data.configs.track_levels.bits.track_level_1;
 		if (track == TRACK_INSERT_3) // coin track 3
-			return _data.configs.track_level_2;
+			return _data.configs.track_levels.bits.track_level_2;
 		if (track == TRACK_BANKNOTE) // banknote track
-			return _data.configs.track_level_3;
+			return _data.configs.track_levels.bits.track_level_3;
 		return TRACK_NOT_A_TRACK;
 	}
 
 	__attribute__((always_inline)) inline
 	bool setTrackLevel(uint8_t track, bool level) {
 		if (track == TRACK_EJECT) // eject track
-			_data.configs.track_level_4 = level;
+			_data.configs.track_levels.bits.track_level_4 = level;
 		else if (track == TRACK_INSERT_1) // coin track 1
-			_data.configs.track_level_0 = level;
+			_data.configs.track_levels.bits.track_level_0 = level;
 		else if (track == TRACK_INSERT_2) // coin track 2
-			_data.configs.track_level_1 = level;
+			_data.configs.track_levels.bits.track_level_1 = level;
 		else if (track == TRACK_INSERT_3) // coin track 3
-			_data.configs.track_level_2 = level;
+			_data.configs.track_levels.bits.track_level_2 = level;
 		else if (track == TRACK_BANKNOTE) // banknote track
-			_data.configs.track_level_3 = level;
+			_data.configs.track_levels.bits.track_level_3 = level;
 		else
 			return false;
 
@@ -270,14 +270,19 @@ private:
 	union {
 		uint8_t bytes[CONF_SIZE_ALL];
 		struct {
-			uint8_t track_level_0:1;
-			uint8_t track_level_1:1;
-			uint8_t track_level_2:1;
-			uint8_t track_level_3:1;
-			uint8_t track_level_4:1;
-			uint8_t track_level_5:1;
-			uint8_t track_level_6:1;
-			uint8_t track_level_7:1;
+			union {
+				struct {
+					uint8_t track_level_0:1;
+					uint8_t track_level_1:1;
+					uint8_t track_level_2:1;
+					uint8_t track_level_3:1;
+					uint8_t track_level_4:1;
+					uint8_t track_level_5:1;
+					uint8_t track_level_6:1;
+					uint8_t track_level_7:1;
+				} bits;
+				uint8_t bytes;
+			} track_levels;
 
 			uint8_t coins_to_eject[8];
 			uint32_t coin_count[8];
