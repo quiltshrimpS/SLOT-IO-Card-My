@@ -26,6 +26,7 @@
 #include "Debounce.h"
 #include "Pulse.h"
 #include "Configuration.h"
+#include "EjectTimeoutTracker.h"
 
 FRAM_MB85RC_I2C fram(MB85RC_DEFAULT_ADDRESS, true, /* WP */ A7, 16 /* kb */);
 WreckedSPI< /* MISO */ 7, /* MOSI */ 2, /* SCLK_MISO */ 8, /* SCLK_MOSI */ 3, /* MODE_MISO */ 2, /* MODE_MOSI */ 0 > spi;
@@ -45,6 +46,8 @@ union {
 } in, previous_in;
 
 bool do_send = false;
+
+EjectTimeoutTracker tracker_eject;
 
 Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_score;
 Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_wash;
@@ -68,11 +71,14 @@ Debounce<HIGH, DEBOUNCE_TIMEOUT> debounce_eject(
 		pulse_counter_eject.pulse(1);
 		uint8_t to_eject = conf.getCoinsToEject(TRACK_EJECT);
 		if (to_eject < 2) {
+			tracker_eject.stop();
 			out.port.ssr1 = false; // pull LOW to stop the motor
 			do_send = true;
 		}
-		if (to_eject > 0)
+		if (to_eject > 0) {
+			tracker_eject.start();
 			conf.setCoinsToEject(TRACK_EJECT, to_eject - 1);
+		}
 		communicator.dispatchCoinCounterResult(TRACK_EJECT, coins);
 	}
 );
@@ -138,6 +144,9 @@ void setup() {
     fram.begin();
 	conf.begin();
 
+	// initialize eject timeout tracker
+	tracker_eject.begin(conf.getEjectTimeout(TRACK_EJECT));
+
 	// populate the debouncers
 	debounce_banknote.begin(in.port.sw20, now);
 	debounce_eject.begin(in.port.sw11, now);
@@ -162,6 +171,7 @@ void setup() {
 					} else if (!conf.setCoinsToEject(track, count)) {
 						communicator.dispatchErrorNotATrack(track);
 					} else if (count != 0) {
+						tracker_eject.start();
 						out.port.ssr1 = true;
 						do_send = true;
 					}
@@ -227,13 +237,25 @@ void loop() {
     in.bytes[1] = spi.receive();
     in.bytes[2] = spi.receive();
     fastDigitalWrite(PIN_LATCH_IN, LOW);
+
 	uint32_t now = micros();
+
+	// check the timeout tracker before we feed the debouncers, since debouncers
+	// might trigger tracker.start() when a coin is confirmed.
+	if (tracker_eject.trigger(now))
+	{
+		communicator.dispatchErrorEjectTimeout(TRACK_EJECT, conf.getCoinsToEject(TRACK_EJECT));
+		out.port.ssr1 = false;
+		do_send = true;
+	}
+
 	Configuration::TrackLevelsT &track_levels = conf.getTrackLevels();
 	debounce_insert_1.feed(in.port.sw12, track_levels.bits.track_level_0, now);
 	debounce_insert_2.feed(in.port.sw13, track_levels.bits.track_level_1, now);
 	debounce_insert_3.feed(in.port.sw14, track_levels.bits.track_level_2, now);
 	debounce_banknote.feed(in.port.sw20, track_levels.bits.track_level_3, now);
 	debounce_eject.feed(in.port.sw11, track_levels.bits.track_level_4, now);
+
 	if (pulse_counter_score.update(now))
 	{
 		out.port.counter1 = pulse_counter_score.get();
