@@ -97,6 +97,12 @@ namespace Spark.Slot.IO
 			StateUnavailable,
 		}
 
+		public enum ActiveLevel
+		{
+			ActiveLow = 0x00,
+			ActiveHigh = 0x01
+		}
+
 		/// <summary>
 		/// queue a GET_INFO command
 		/// </summary>
@@ -203,6 +209,20 @@ namespace Spark.Slot.IO
 				foreach (var b in outputs)
 					cmd.AddBinArgument(b);
 				mMessenger.SendCommand(cmd, queuePosition);
+				return true;
+			}
+			return false;
+		}
+
+		public bool QuerySetTrackLevel(CoinTrack track, ActiveLevel level, SendQueue queuePosition = SendQueue.AtEndQueue)
+		{
+			if (IsConnected)
+			{
+				var cmd = new SendCommand((int)Commands.CMD_SET_TRACK_LEVEL);
+				cmd.AddBinArgument((byte)track);
+				cmd.AddBinArgument((byte)level);
+				mMessenger.SendCommand(cmd, queuePosition);
+				return true;
 			}
 			return false;
 		}
@@ -435,6 +455,7 @@ namespace Spark.Slot.IO
 			CMD_RESET_COIN_COINTER = 0xC3,
 			CMD_GET_COIN_COUNTER = 0xD2,
 			CMD_EJECT_COIN = 0xE1,
+			CMD_SET_TRACK_LEVEL = 0xEA,
 			CMD_GET_INFO = 0xF0,
 		}
 
