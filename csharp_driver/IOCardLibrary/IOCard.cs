@@ -120,15 +120,6 @@ namespace Spark.Slot.IO
 			TrackNotATrack = 0xFF,
 		}
 
-		public enum AuditCounter
-		{
-			CounterNotACounter = 0x00,
-			Counter1 = 0x01,
-			Counter2 = 0x02,
-			Counter3 = 0x03,
-			Counter4 = 0x04,
-		}
-
 		public enum ActiveLevel
 		{
 			ActiveLow = 0x00,
@@ -259,12 +250,12 @@ namespace Spark.Slot.IO
 			return false;
 		}
 
-		public bool QueryTickAuditCounter(AuditCounter counter, byte ticks, SendQueue queuePosition = SendQueue.InFrontQueue)
+		public bool QueryTickAuditCounter(byte counter, byte ticks, SendQueue queuePosition = SendQueue.InFrontQueue)
 		{
 			if (IsConnected)
 			{
 				var cmd = new SendCommand((int)Commands.CMD_TICK_AUDIT_COUNTER);
-				cmd.AddBinArgument((byte)counter);
+				cmd.AddBinArgument(counter);
 				cmd.AddBinArgument(ticks);
 				mMessenger.SendCommand(cmd, queuePosition);
 				return true;

@@ -254,16 +254,12 @@ void setup() {
 				{
 					uint8_t const counter = messenger.readBinArg<uint8_t>();
 					uint8_t const ticks = messenger.readBinArg<uint8_t>();
-					if (counter == 1) {
-						PULSE_COUNTER_SCORE.pulse(ticks);
-					} else if (counter == 2) {
-						PULSE_COUNTER_WASH.pulse(ticks);
 				#if defined(DEBUG_SERIAL)
-					} else if (counter == 3) {
-						PULSE_COUNTER_INSERT.pulse(ticks);
-					} else if (counter == 4) {
-						PULSE_COUNTER_EJECT.pulse(ticks);
+					if (counter < 4) {
+				#else
+					if (counter < 2) {
 				#endif
+						pulse_counters[counter].pulse(ticks);
 					} else {
 						communicator.dispatchErrorNotACounter(counter);
 					}

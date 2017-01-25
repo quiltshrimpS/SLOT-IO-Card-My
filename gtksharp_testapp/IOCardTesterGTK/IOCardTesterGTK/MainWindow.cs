@@ -70,7 +70,7 @@ public partial class MainWindow : Window
 	CommandProperty mCommandProperty_ResetCoinCounter;
 	CommandProperty mCommandProperty_GetKeys;
 	CommandProperty mCommandProperty_SetEjectTimeout;
-	CommandProperty mCommandProperty_TickCounter;
+	CommandProperty mCommandProperty_TickAuditCounter;
 	CommandProperty mCommandProperty_SetOutputs;
 	CommandProperty mCommandProperty_SetTrackLevel;
 	CommandProperty mCommandProperty_WriteStorage;
@@ -281,27 +281,27 @@ public partial class MainWindow : Window
 				sCard.QueryGetKeys();
 			}
 		);
-		mCommandProperty_TickCounter = new CommandProperty(
+		mCommandProperty_TickAuditCounter = new CommandProperty(
 			on_error_callback,
 			IOCard.Commands.CMD_TICK_AUDIT_COUNTER, 2,
 			"Tick the audit counter",
 			"Params: <counter (1 byte)>, <ticks (1 byte)>",
 			new string[] {
-				"0x01, 5 // tick Counter 1 (Score) 5 times",
-				"0x02, 70 // tick Counter 2 (Wash) 70 times",
-				"0x03, 2 // tick Counter 3 (Insert Coint) 2 times",
-				"0x04, 50 // tick Counter 4 (Eject Coin) 50 times"
+				"0, 5 // tick Counter 1 (Score) 5 times",
+				"1, 70 // tick Counter 2 (Wash) 70 times",
+				"2, 2 // tick Counter 3 (Insert Coint) 2 times",
+				"3, 50 // tick Counter 4 (Eject Coin) 50 times"
 			},
 			(command, parameters) =>
 			{
-				var counter = (IOCard.AuditCounter)_getTfromString<uint>(parameters[0].Trim());
-				var ticks = _getTfromString<uint>(parameters[1].Trim());
+				byte counter = (byte)_getTfromString<uint>(parameters[0].Trim());
+				byte ticks = (byte)_getTfromString<uint>(parameters[1].Trim());
 
 				var iter = textview_received.Buffer.StartIter;
 				textview_received.Buffer.Insert(
 					ref iter,
 					string.Format(
-						" => {0}: cmd = {1}, counter = {2}, ticks = {3}\r\n",
+						" => {0}: cmd = {1}, counter = 0x{2:X2}, ticks = {3}\r\n",
 						DateTime.Now,
 						command,
 						counter,
@@ -309,7 +309,7 @@ public partial class MainWindow : Window
 					)
 				);
 
-				sCard.QueryTickCounter(counter, (byte)ticks);
+				sCard.QueryTickAuditCounter(counter, ticks);
 			}
 		);
 		mCommandProperty_SetOutputs = new CommandProperty(
@@ -434,7 +434,7 @@ public partial class MainWindow : Window
 			mCommandProperty_EjectCoin,
 			mCommandProperty_GetCoinCounter,
 			mCommandProperty_ResetCoinCounter,
-			mCommandProperty_TickCounter,
+			mCommandProperty_TickAuditCounter,
 			mCommandProperty_GetKeys,
 			mCommandProperty_SetOutputs,
 			mCommandProperty_SetEjectTimeout,
