@@ -248,7 +248,7 @@ void setup() {
 				}
 				break;
 			case CMD_GET_KEYS:
-				communicator.dispatchKey(3, previous_in.bytes);
+				communicator.dispatchKeysResult(3, previous_in.bytes);
 				break;
 			case CMD_SET_OUTPUT:
 				{
@@ -440,7 +440,7 @@ void loop() {
 		masked[1] != previous_in.bytes[1] ||
 		masked[2] != previous_in.bytes[2])
 	{
-		communicator.dispatchKey(3, masked);
+		communicator.dispatchKeysResult(3, masked);
 
 		previous_in.bytes[0] = masked[0];
 		previous_in.bytes[1] = masked[1];
