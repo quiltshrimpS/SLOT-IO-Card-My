@@ -257,39 +257,45 @@ namespace Spark.Slot.IO
 		/// <exception cref="System.InvalidOperationException">Thrown on connection fails (already connected, port busy, etc.)</exception>
 		public void Connect(string port, int baudrate)
 		{
-			if (mMessenger != null)
-				throw new System.InvalidOperationException("Already connected.");
-
-			var messenger = new CmdMessenger(
-				new SerialTransport { CurrentSerialSettings = { PortName = port, BaudRate = baudrate, DtrEnable = false } },
-				512
-			);
-			if (messenger.Connect())
+			lock (this)
 			{
-				mMessenger = messenger;
-				_attachCallbacks();
-				if (OnConnected != null)
-					OnConnected(this, System.EventArgs.Empty);
-				return;
-			}
+				if (mMessenger != null)
+					throw new System.InvalidOperationException("Already connected.");
 
-			throw new System.InvalidOperationException("Connecting failed for unknown reason.");
+				var messenger = new CmdMessenger(
+					new SerialTransport { CurrentSerialSettings = { PortName = port, BaudRate = baudrate, DtrEnable = false } },
+					512
+				);
+				if (messenger.Connect())
+				{
+					mMessenger = messenger;
+					_attachCallbacks();
+					if (OnConnected != null)
+						OnConnected(this, System.EventArgs.Empty);
+					return;
+				}
+
+				throw new System.InvalidOperationException("Connecting failed for unknown reason.");
+			}
 		}
 
 		public bool Disconnect()
 		{
-			if (IsConnected)
+			lock (this)
 			{
-				var status = mMessenger.Disconnect();
-				if (status)
+				if (IsConnected)
 				{
-					mMessenger = null;
-					if (OnDisconnected != null)
-						OnDisconnected(this, System.EventArgs.Empty);
+					var status = mMessenger.Disconnect();
+					if (status)
+					{
+						mMessenger = null;
+						if (OnDisconnected != null)
+							OnDisconnected(this, System.EventArgs.Empty);
+					}
+					return status;
 				}
-				return status;
+				return false;
 			}
-			return false;
 		}
 
 		void _attachCallbacks()
@@ -414,7 +420,7 @@ namespace Spark.Slot.IO
 			});
 		}
 
-		public bool IsConnected { get { return mMessenger != null; } }
+		public bool IsConnected { get { lock (this) { return mMessenger != null; } } }
 
 		public event System.EventHandler OnConnected;
 		public event System.EventHandler OnDisconnected;
