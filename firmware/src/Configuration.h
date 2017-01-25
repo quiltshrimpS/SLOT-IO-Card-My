@@ -219,6 +219,13 @@ public:
 	}
 
 	__attribute__((always_inline)) inline
+	uint32_t getEjectTimeout(uint8_t const track) {
+		if (track >= NUM_EJECT_TRACKS)
+			return 0;
+		return _data.configs.eject_timeout[track];
+	}
+
+	__attribute__((always_inline)) inline
 	bool setEjectTimeout(uint8_t const track, uint32_t const timeout) {
 		if (track >= NUM_EJECT_TRACKS)
 			return false;
@@ -233,13 +240,6 @@ public:
 		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
 
 		return true;
-	}
-
-	__attribute__((always_inline)) inline
-	uint32_t getEjectTimeout(uint8_t const track) {
-		if (track >= NUM_EJECT_TRACKS)
-			return 0;
-		return _data.configs.eject_timeout[track];
 	}
 
 	__attribute__((always_inline)) inline
