@@ -8,8 +8,52 @@ using Spark.Slot.IO;
 
 public partial class MainWindow : Window
 {
-	IOCard mCard = new IOCard();
 	#region "Unity Integration Demo Codes"
+
+	// the IOCard is purely event based, which is faster and more responsive.
+	// However, to easy the development, create a <see cref="Spark.Slot.IO.IOCardStateCache"/> instance to cache the states.
+	IOCardStateCache mCardCache = new IOCardStateCache(new IOCard());
+	// or, you can instantiate the <see cref="Spark.Slot.IO.IOCardStateCache"/> with error capacity besides the default 3000.
+	//IOCardStateCache mCardCache = new IOCardStateCache(new IOCard(), 1000);
+
+	// this is how you connect to the card
+	void Connect(string port, int baudrate)
+	{
+		try
+		{
+			// pass in the port and desired baudrate, for example "COM3" (on Windows) or "/dev/ttyUSB0" (on Linux)
+			mCardCache.Card.Connect(port, baudrate);
+
+			// after connected, the Cache does these 2 things for you
+			//mCardCache.Card.QueryGetInfo();
+			//mCardCache.Card.QueryGetKeyMasks();
+
+			// you might also want to to query the initial key states here, else the key states are initially 
+			// <see cref="Spark.Slot.IO.IOCardStateCache.KeyState.StateUnknown"/>.
+			mCardCache.Card.QueryGetKeys();
+		}
+		catch (InvalidOperationException ex)
+		{
+			// catch the exception and handle it, here we just re-throw it.
+			throw ex;
+		}
+	}
+
+	// this is how you disconnect from the card
+	void Disconnect()
+	{
+		try
+		{
+			// just call disconnect on the card to disconnect.
+			mCardCache.Card.Disconnect();
+		}
+		catch (InvalidOperationException ex)
+		{
+			// catch the exception and handle it, here we just re-throw it.
+			throw ex;
+		}
+	}
+
 	// this function mimics MonoBehaviour.Update(), is called with an interval of (1000/60) milliseconds to simulate
 	// Unity frame update.
 	void Update()
@@ -19,6 +63,7 @@ public partial class MainWindow : Window
 	#endregion
 
 	#region "GTK# codes, safely ignores them if you're not interested."
+	IOCard mCard { get { return mCardCache.Card; } }
 
 	int mLastCmdIndex;
 
@@ -832,7 +877,7 @@ public partial class MainWindow : Window
 		{
 			if (mCard.IsConnected)
 			{
-				mCard.Disconnect();
+				Disconnect();
 			}
 			else
 			{
@@ -844,7 +889,7 @@ public partial class MainWindow : Window
 					_populateComboBoxEntry(comboboxentry_port, mPorts);
 				}
 
-				mCard.Connect(port, 250000);
+				Connect(port, 250000);
 			}
 		}
 		catch (InvalidOperationException ex)
