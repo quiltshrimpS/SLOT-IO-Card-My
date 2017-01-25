@@ -76,6 +76,15 @@ public partial class MainWindow : Window
 
 			mLedTime = DateTime.Now;
 		}
+
+		// there is an convinient <see cref="Spark.Slot.IO.IOCardStateCache.IsChanged"/>.
+		// if it is false, means nothing has changed since the last <see cref="Spark.Slot.IO.IOCardStateCache.Processed()"/> call,
+		// and you can safely skip every processing.
+		if (mCardCache.IsChanged)
+		{
+			// call this to tell the cache that all changes are processed.
+			mCardCache.Processed();
+		}
 	}
 
 	#endregion
