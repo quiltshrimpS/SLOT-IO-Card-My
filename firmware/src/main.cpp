@@ -431,22 +431,24 @@ void loop() {
 	// modify stuff.
 	messenger.feedinSerialData();
 
-    if (do_send) {
-		do_send = false;
-        fastDigitalWrite(PIN_LATCH_OUT, LOW);
-        spi.send(out.bytes[0]);
-        spi.send(out.bytes[1]);
-        spi.send(out.bytes[2]);
-        fastDigitalWrite(PIN_LATCH_OUT, HIGH);
-    }
+	#if defined(DEBUG_SERIAL)
+	if (do_send || millis() - last_millis > 1000) {
+	#endif
+		if (do_send) {
+			do_send = false;
+	        fastDigitalWrite(PIN_LATCH_OUT, LOW);
+	        spi.send(out.bytes[0]);
+	        spi.send(out.bytes[1]);
+	        spi.send(out.bytes[2]);
+	        fastDigitalWrite(PIN_LATCH_OUT, HIGH);
+		}
 
 	#if defined(DEBUG_SERIAL)
-	t2 = micros();
-	if (millis() - last_millis > 1000) {
+		t2 = micros();
 		last_millis = millis();
 		DEBUG_SERIAL.print(F("90,loop() took "));
 		DEBUG_SERIAL.print(t2 - t1);
 		DEBUG_SERIAL.print("us;");
-	}
+    }
 	#endif
 }
