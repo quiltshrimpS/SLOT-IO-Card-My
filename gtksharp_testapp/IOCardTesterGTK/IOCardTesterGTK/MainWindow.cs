@@ -9,6 +9,16 @@ using Spark.Slot.IO;
 public partial class MainWindow : Window
 {
 	IOCard mCard = new IOCard();
+	#region "Unity Integration Demo Codes"
+	// this function mimics MonoBehaviour.Update(), is called with an interval of (1000/60) milliseconds to simulate
+	// Unity frame update.
+	void Update()
+	{
+	}
+
+	#endregion
+
+	#region "GTK# codes, safely ignores them if you're not interested."
 
 	int mLastCmdIndex;
 
@@ -83,6 +93,12 @@ public partial class MainWindow : Window
 		Build();
 
 		textview_received.ModifyFont(Pango.FontDescription.FromString("Monospace 8"));
+
+		GLib.Timeout.Add(1000 / 60, delegate ()
+		{
+			Update();
+			return true;
+		});
 
 		Action<IOCard.Commands, Exception> on_error_callback = (command, ex) =>
 		{
@@ -883,4 +899,6 @@ public partial class MainWindow : Window
 		var foo = TypeDescriptor.GetConverter(typeof(T));
 		return (T)(foo.ConvertFromInvariantString(mystring));
 	}
+
+	#endregion
 }
