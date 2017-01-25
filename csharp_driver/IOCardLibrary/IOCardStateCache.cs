@@ -66,7 +66,7 @@ namespace Spark.Slot.IO
 				}
 			}
 		}
-		static readonly int DEFAULT_ERROR_QUEUE_CAPACITY = 3000;
+		const int DEFAULT_ERROR_QUEUE_CAPACITY = 3000;
 
 		/// <summary>
 		/// The number of items in the error queue
@@ -122,9 +122,9 @@ namespace Spark.Slot.IO
 			}
 		}
 
-		public IOCardStateCache(IOCard card = null)
+		public IOCardStateCache(IOCard card = null, int error_capacity = DEFAULT_ERROR_QUEUE_CAPACITY)
 		{
-			ErrorQueueCapacity = DEFAULT_ERROR_QUEUE_CAPACITY;
+			ErrorQueueCapacity = error_capacity;
 			Card = card;
 		}
 
