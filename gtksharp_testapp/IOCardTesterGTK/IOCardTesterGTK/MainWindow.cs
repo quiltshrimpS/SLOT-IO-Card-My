@@ -812,35 +812,36 @@ public partial class MainWindow : Window
 
 	protected void OnButtonConnect_Clicked(object sender, EventArgs e)
 	{
-		if (mCard.IsConnected)
+		try
 		{
-			mCard.Disconnect();
-		}
-		else
-		{
-			var port = comboboxentry_port.ActiveText;
-			if (comboboxentry_port.Active != 0)
+			if (mCard.IsConnected)
 			{
-				mPorts.Remove(port);
-				mPorts.Insert(0, port);
-				_populateComboBoxEntry(comboboxentry_port, mPorts);
+				mCard.Disconnect();
 			}
-			try
+			else
 			{
+				var port = comboboxentry_port.ActiveText;
+				if (comboboxentry_port.Active != 0)
+				{
+					mPorts.Remove(port);
+					mPorts.Insert(0, port);
+					_populateComboBoxEntry(comboboxentry_port, mPorts);
+				}
+
 				mCard.Connect(port, 250000);
 			}
-			catch (InvalidOperationException ex)
-			{
-				var iter = textview_received.Buffer.StartIter;
-				textview_received.Buffer.Insert(
-					ref iter,
-					string.Format(
-						"!!! {0}: Connection failed, reason = {1}\r\n",
-						DateTime.Now,
-						ex.Message
-					)
-				);
-			}
+		}
+		catch (InvalidOperationException ex)
+		{
+			var iter = textview_received.Buffer.StartIter;
+			textview_received.Buffer.Insert(
+				ref iter,
+				string.Format(
+					"!!! {0}: Connect / Disconnect failed, reason = {1}\r\n",
+					DateTime.Now,
+					ex.Message
+				)
+			);
 		}
 	}
 
