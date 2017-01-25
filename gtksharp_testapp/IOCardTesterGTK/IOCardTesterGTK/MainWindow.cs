@@ -8,7 +8,7 @@ using Spark.Slot.IO;
 
 public partial class MainWindow : Window
 {
-	static IOCard sCard = new IOCard();
+	IOCard mCard = new IOCard();
 
 	int mLastCmdIndex;
 
@@ -116,7 +116,7 @@ public partial class MainWindow : Window
 						command
 					)
 				);
-				sCard.QueryGetInfo();
+				mCard.QueryGetInfo();
 			}
 		);
 		mCommandProperty_EjectCoin = new CommandProperty(
@@ -146,7 +146,7 @@ public partial class MainWindow : Window
 					)
 				);
 
-				sCard.QueryEjectCoin(track, count);
+				mCard.QueryEjectCoin(track, count);
 			}
 		);
 		mCommandProperty_GetCoinCounter = new CommandProperty(
@@ -170,7 +170,7 @@ public partial class MainWindow : Window
 					)
 				);
 
-				sCard.QueryGetCoinCounter(track);
+				mCard.QueryGetCoinCounter(track);
 			}
 		);
 		mCommandProperty_ResetCoinCounter = new CommandProperty(
@@ -198,7 +198,7 @@ public partial class MainWindow : Window
 					)
 				);
 
-				sCard.QueryResetCoinCounter(track);
+				mCard.QueryResetCoinCounter(track);
 			}
 		);
 		mCommandProperty_SetEjectTimeout = new CommandProperty(
@@ -227,7 +227,7 @@ public partial class MainWindow : Window
 					)
 				);
 
-				sCard.QuerySetEjectTimeout(track, timeout);
+				mCard.QuerySetEjectTimeout(track, timeout);
 			}
 		);
 		mCommandProperty_SetTrackLevel = new CommandProperty(
@@ -256,7 +256,7 @@ public partial class MainWindow : Window
 					)
 				);
 
-				sCard.QuerySetTrackLevel(track, level);
+				mCard.QuerySetTrackLevel(track, level);
 			}
 		);
 		mCommandProperty_GetKeys = new CommandProperty(
@@ -275,7 +275,7 @@ public partial class MainWindow : Window
 						command
 					)
 				);
-				sCard.QueryGetKeys();
+				mCard.QueryGetKeys();
 			}
 		);
 		mCommandProperty_GetKeyMasks = new CommandProperty(
@@ -294,7 +294,7 @@ public partial class MainWindow : Window
 						command
 					)
 				);
-				sCard.QueryGetKeyMasks();
+				mCard.QueryGetKeyMasks();
 			}
 		);
 		mCommandProperty_TickAuditCounter = new CommandProperty(
@@ -325,7 +325,7 @@ public partial class MainWindow : Window
 					)
 				);
 
-				sCard.QueryTickAuditCounter(counter, ticks);
+				mCard.QueryTickAuditCounter(counter, ticks);
 			}
 		);
 		mCommandProperty_SetOutputs = new CommandProperty(
@@ -360,7 +360,7 @@ public partial class MainWindow : Window
 					)
 				);
 
-				sCard.QuerySetOutput(bytes);
+				mCard.QuerySetOutput(bytes);
 			}
 		);
 		mCommandProperty_WriteStorage = new CommandProperty(
@@ -397,7 +397,7 @@ public partial class MainWindow : Window
 					)
 				);
 
-				sCard.QueryWriteStorage(address, bytes);
+				mCard.QueryWriteStorage(address, bytes);
 			}
 		);
 		mCommandProperty_ReadStorage = new CommandProperty(
@@ -441,7 +441,7 @@ public partial class MainWindow : Window
 					)
 				);
 
-				sCard.QueryReadStorage(address, length);
+				mCard.QueryReadStorage(address, length);
 			}
 		);
 
@@ -472,7 +472,7 @@ public partial class MainWindow : Window
 		comboboxentry_params.Sensitive = mCommandProperties[mLastCmdIndex].Params != 0;
 		_populateComboBoxEntry(comboboxentry_port, mPorts);
 
-		sCard.OnConnected += (sender, e) =>
+		mCard.OnConnected += (sender, e) =>
 		{
 			mCommandProperty_GetInfo.SendCommand(new string[] { });
 			mCommandProperty_GetKeys.SendCommand(new string[] { });
@@ -488,7 +488,7 @@ public partial class MainWindow : Window
 				button_connect.Label = "_Disconnect";
 			});
 		};
-		sCard.OnDisconnected += (sender, e) =>
+		mCard.OnDisconnected += (sender, e) =>
 		{
 			Application.Invoke(delegate
 			{
@@ -496,7 +496,7 @@ public partial class MainWindow : Window
 				button_connect.Label = "_Connect";
 			});
 		};
-		sCard.OnError += (sender, e) =>
+		mCard.OnError += (sender, e) =>
 		{
 			Application.Invoke(delegate
 			{
@@ -628,7 +628,7 @@ public partial class MainWindow : Window
 				}
 			});
 		};
-		sCard.OnGetInfoResult += (sender, e) =>
+		mCard.OnGetInfoResult += (sender, e) =>
 		{
 			Application.Invoke(delegate
 			{
@@ -646,7 +646,7 @@ public partial class MainWindow : Window
 				);
 			});
 		};
-		sCard.OnCoinCounterResult += (sender, e) =>
+		mCard.OnCoinCounterResult += (sender, e) =>
 		{
 			Application.Invoke(delegate
 			{
@@ -662,7 +662,7 @@ public partial class MainWindow : Window
 				);
 			});
 		};
-		sCard.OnKeys += (sender, e) =>
+		mCard.OnKeys += (sender, e) =>
 		{
 			Application.Invoke(delegate
 			{
@@ -681,7 +681,7 @@ public partial class MainWindow : Window
 				);
 			});
 		};
-		sCard.OnKeyMasks += (sender, e) =>
+		mCard.OnKeyMasks += (sender, e) =>
 		{
 			Application.Invoke(delegate
 			{
@@ -700,7 +700,7 @@ public partial class MainWindow : Window
 				);
 			});
 		};
-		sCard.OnWriteStorageResult += (sender, e) =>
+		mCard.OnWriteStorageResult += (sender, e) =>
 		{
 			Application.Invoke(delegate
 			{
@@ -716,7 +716,7 @@ public partial class MainWindow : Window
 				);
 			});
 		};
-		sCard.OnReadStorageResult += (sender, e) =>
+		mCard.OnReadStorageResult += (sender, e) =>
 		{
 			Application.Invoke(delegate
 			{
@@ -736,7 +736,7 @@ public partial class MainWindow : Window
 				);
 			});
 		};
-		sCard.OnDebug += (sender, e) =>
+		mCard.OnDebug += (sender, e) =>
 		{
 			Application.Invoke(delegate
 			{
@@ -751,7 +751,7 @@ public partial class MainWindow : Window
 				);
 			});
 		};
-		sCard.OnUnknown += (sender, e) =>
+		mCard.OnUnknown += (sender, e) =>
 		{
 			Application.Invoke(delegate
 			{
@@ -770,7 +770,7 @@ public partial class MainWindow : Window
 
 	protected void OnDeleteEvent(object sender, DeleteEventArgs a)
 	{
-		sCard.Disconnect();
+		mCard.Disconnect();
 		Application.Quit();
 		a.RetVal = true;
 	}
@@ -814,9 +814,9 @@ public partial class MainWindow : Window
 
 	protected void OnButtonConnect_Clicked(object sender, EventArgs e)
 	{
-		if (sCard.IsConnected)
+		if (mCard.IsConnected)
 		{
-			sCard.Disconnect();
+			mCard.Disconnect();
 		}
 		else
 		{
@@ -829,7 +829,7 @@ public partial class MainWindow : Window
 			}
 			try
 			{
-				sCard.Connect(port, 250000);
+				mCard.Connect(port, 250000);
 			}
 			catch (InvalidOperationException ex)
 			{
