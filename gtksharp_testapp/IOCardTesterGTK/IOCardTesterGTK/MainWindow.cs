@@ -82,9 +82,7 @@ public partial class MainWindow : Window
 	{
 		Build();
 
-		var font = Pango.FontDescription.FromString("Monospace 8");
-
-		textview_received.ModifyFont(font);
+		textview_received.ModifyFont(Pango.FontDescription.FromString("Monospace 8"));
 
 		Action<IOCard.Commands, Exception> on_error_callback = (command, ex) =>
 		{
