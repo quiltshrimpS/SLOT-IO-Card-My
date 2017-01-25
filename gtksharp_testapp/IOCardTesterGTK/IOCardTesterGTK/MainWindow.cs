@@ -88,6 +88,13 @@ public partial class MainWindow : Window
 				mCardCache.Card.QueryEjectCoin(0, 5); // eject 5 coins from track 0
 			}
 
+			// hit key 1 to tick the counters :-)
+			if (mCardCache.GetKey(1) == IOCardStateCache.KeyState.StateLow)
+			{
+				// tick audit counter 0 for 100 times, and this command placed in front of the queue.
+				mCardCache.Card.QueryTickAuditCounter(0, 100, CommandMessenger.SendQueue.InFrontQueue);
+			}
+
 			// call this to tell the cache that all changes are processed.
 			mCardCache.Processed();
 		}
