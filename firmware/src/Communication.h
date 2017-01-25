@@ -19,8 +19,8 @@
 #define EVT_KEY_MASKS_RESULT		(0x02)
 #define EVT_KEYS_RESULT				(0x10)
 #define EVT_COIN_COUNTER_RESULT		(0x20)
-#define EVT_WRITE_STORAGE_RESULT	(0x58)
 #define EVT_READ_STORAGE_RESULT		(0x50)
+#define EVT_WRITE_STORAGE_RESULT	(0x58)
 #define EVT_DEBUG					(0xFE)
 #define EVT_ERROR					(0xFF)
 
