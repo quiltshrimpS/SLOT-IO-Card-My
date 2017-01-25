@@ -51,16 +51,13 @@ static const uint8_t OUTPUT_MASK[3] = { OUT_MASK_0, OUT_MASK_1, OUT_MASK_2 };
 
 bool do_send = false;
 
-TimeoutTracker tracker_nack(
-	#if defined(DEBUG_SERIAL)
-	"NACK tracker"
-	#endif
-);
-TimeoutTracker tracker_eject(
-	#if defined(DEBUG_SERIAL)
-	"eject tracker"
-	#endif
-);
+#if defined(DEBUG_SERIAL)
+TimeoutTracker tracker_nack("NACK tracker");
+TimeoutTracker tracker_eject("eject tracker");
+#else
+TimeoutTracker tracker_nack;
+TimeoutTracker tracker_eject;
+#endif
 
 Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_score;
 Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_wash;
