@@ -431,6 +431,7 @@ public partial class MainWindow : Window
 
 		mCommandProperties = new CommandProperty[] {
 			mCommandProperty_GetInfo,
+			mCommandProperty_SetTrackLevel,
 			mCommandProperty_EjectCoin,
 			mCommandProperty_GetCoinCounter,
 			mCommandProperty_ResetCoinCounter,
