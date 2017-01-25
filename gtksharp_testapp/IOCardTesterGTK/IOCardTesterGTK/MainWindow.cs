@@ -54,10 +54,28 @@ public partial class MainWindow : Window
 		}
 	}
 
+	// variables used in the demo
+	DateTime mLedTime = DateTime.Now;
+	static readonly byte[] outputs = { 0xff, 0xff, 0xff };
+
 	// this function mimics MonoBehaviour.Update(), is called with an interval of (1000/60) milliseconds to simulate
 	// Unity frame update.
 	void Update()
 	{
+		// call <c>Spark.Slot.IO.IOCard.QuerySomething()</c> with coressponding arguments to queue a command to the card.
+		// they return true if the command is queued, false otherwise.
+		//
+		// for example, here we toggle the onboard outputs (with SSR bits masked out)
+		if (DateTime.Now - mLedTime > TimeSpan.FromSeconds(1.0))
+		{
+			mCardCache.Card.QuerySetOutput(outputs); // set outputs
+
+			// toggle the bits :-D
+			for (int i = 0; i < outputs.Length; ++i)
+				outputs[i] = (byte)~outputs[i];
+
+			mLedTime = DateTime.Now;
+		}
 	}
 
 	#endregion
