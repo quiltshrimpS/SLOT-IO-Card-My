@@ -145,15 +145,16 @@ static uint8_t const PIN_LATCH_OUT = 4; // for 74HC595
 static uint8_t const PIN_LATCH_IN = 9;  // for 74HC165
 
 void setup() {
-	// FIXME: write the SPI as early as possible, because 74HC595 defaults to
-	// FIXME: HIGH on power-on. pull it low as early as possible.
+	// FIXME: because 74HC595 defaults to HIGH on power-on, send the initial
+	// FIXME: states as soon as we enter `setup()`
     fastPinConfig(5, OUTPUT, LOW); // 595 nCLR (active LOW), clear register
     fastPinConfig(6, OUTPUT, LOW); // 595 nG (active LOW), enable
     fastPinConfig(PIN_LATCH_OUT, OUTPUT, HIGH); // 595 latch
     fastPinConfig(PIN_LATCH_IN, OUTPUT, LOW);   // 165 latch
     spi.begin(); // for 74HC595 and 74HC165
     fastDigitalWrite(5, HIGH); // cleared 74HC595, put it back on.
-	// read the initial states, and write the initial states.
+
+	// send and receive the initial states
     fastDigitalWrite(PIN_LATCH_OUT, LOW);
     fastDigitalWrite(PIN_LATCH_IN, HIGH);
     previous_in.bytes[0] = spi.transfer(out.bytes[0]) | IN_MASK_0;
@@ -164,16 +165,17 @@ void setup() {
 
 	uint32_t now = micros(); // record the time early, for better accuracy
 
-	power_adc_disable(); // we're not using the ADC module
-	power_spi_disable(); // we're not using the SPI module
-	power_timer1_disable(); // we're not using timer1
-	power_timer2_disable(); // we're not using timer2
+	// power-off unused peripherals, so they don't generate interrupts
+	// also saves some power...
+	power_adc_disable(); // we're not using the ADC
+	power_spi_disable(); // we're not using the hardware SPI
+	power_timer1_disable(); // we're not using Timer1
+	power_timer2_disable(); // we're not using Timer2
 
 	// do the rest of the thing after we switch off the motor
     Serial.begin(UART_BAUDRATE);
-
     Wire.begin(); // for FRAM
-	Wire.setClock(TWI_BAUDRATE);
+	Wire.setClock(TWI_BAUDRATE); // set clock after Wire.begin()
     fram.begin();
 	conf.begin();
 
@@ -188,6 +190,7 @@ void setup() {
 	debounce_insert_2.begin(in.port.sw13, now);
 	debounce_insert_3.begin(in.port.sw14, now);
 
+	// attach command handler
 	messenger.attach([]() {
 		#if defined(DEBUG_SERIAL)
 		uint32_t t1, t2;
@@ -333,6 +336,8 @@ void loop() {
 	uint32_t t1, t2;
 	t1 = micros();
 	#endif
+
+	// read key states
     fastDigitalWrite(PIN_LATCH_IN, HIGH);
     in.bytes[0] = spi.receive();
     in.bytes[1] = spi.receive();
@@ -362,6 +367,7 @@ void loop() {
 		}
 	}
 
+	// debounce the inputs
 	Configuration::TrackLevelsT &track_levels = conf.getTrackLevels();
 	debounce_insert_1.feed(in.port.sw12, track_levels.bits.track_level_0, now);
 	debounce_insert_2.feed(in.port.sw13, track_levels.bits.track_level_1, now);
@@ -369,6 +375,7 @@ void loop() {
 	debounce_banknote.feed(in.port.sw20, track_levels.bits.track_level_3, now);
 	debounce_eject.feed(in.port.sw11, track_levels.bits.track_level_4, now);
 
+	// pulse the counters
 	if (pulse_counter_score.update(now))
 	{
 		out.port.counter1 = pulse_counter_score.get();
@@ -428,6 +435,7 @@ void loop() {
 	// modify stuff.
 	messenger.feedinSerialData();
 
+	// send the outputs only when needed
 	#if defined(DEBUG_SERIAL)
 	if (do_send || millis() - last_millis > 1000) {
 	#endif
