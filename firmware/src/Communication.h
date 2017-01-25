@@ -1,6 +1,7 @@
 #ifndef __COMMUNICATION_H__
 #define __COMMUNICATION_H__
 
+#include "Ports.h"
 #include "Configuration.h"
 
 #define CMD_READ_STORAGE			(0x87)
@@ -12,6 +13,7 @@
 #define CMD_RESET_COIN_COINTER		(0xC3)
 #define CMD_ACK						(0xC5)
 #define CMD_GET_COIN_COUNTER		(0xD2)
+#define CMD_GET_KEY_MASKS			(0xD5)
 #define CMD_EJECT_COIN				(0xE1)
 #define CMD_SET_TRACK_LEVEL			(0xEA)
 #define CMD_GET_INFO				(0xF0)
@@ -19,6 +21,7 @@
 #define EVT_GET_INFO_RESULT			(0x0F)
 #define EVT_COIN_COUNTER_RESULT		(0x2D)
 #define EVT_KEYS_RESULT				(0x4B)
+#define EVT_KEY_MASKS_RESULT		(0x5D)
 #define EVT_WRITE_STORAGE_RESULT	(0x69)
 #define EVT_READ_STORAGE_RESULT		(0x78)
 #define EVT_ERROR					(0xFF)
@@ -54,6 +57,16 @@ public:
 		_messenger.sendCmdStart(EVT_COIN_COUNTER_RESULT);
 		_messenger.sendCmdBinArg<uint8_t>(track);
 		_messenger.sendCmdBinArg<uint32_t>(coins);
+		_messenger.sendCmdEnd();
+	}
+
+	__attribute__((always_inline)) inline
+	void dispatchKeyMasksResult() {
+		_messenger.sendCmdStart(EVT_KEY_MASKS_RESULT);
+		_messenger.sendCmdBinArg<uint8_t>(3); // length
+		_messenger.sendCmdBinArg<uint8_t>(IN_MASK_0);
+		_messenger.sendCmdBinArg<uint8_t>(IN_MASK_1);
+		_messenger.sendCmdBinArg<uint8_t>(IN_MASK_2);
 		_messenger.sendCmdEnd();
 	}
 

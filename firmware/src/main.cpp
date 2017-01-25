@@ -247,6 +247,9 @@ void setup() {
 					}
 				}
 				break;
+			case CMD_GET_KEY_MASKS:
+				communicator.dispatchKeyMasksResult();
+				break;
 			case CMD_GET_KEYS:
 				communicator.dispatchKeysResult(3, previous_in.bytes);
 				break;
