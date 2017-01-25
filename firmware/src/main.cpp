@@ -344,7 +344,8 @@ void setup() {
 		}
 		#if defined(DEBUG_SERIAL)
 		t2 = micros();
-		DEBUG_SERIAL.print(F("90,cmd handler took "));
+		DEBUG_SERIAL.print((int)EVT_DEBUG);
+		DEBUG_SERIAL.print(F(",cmd handler took "));
 		DEBUG_SERIAL.print(t2 - t1);
 		DEBUG_SERIAL.print("us;");
 		#endif
@@ -401,7 +402,8 @@ void loop() {
 	{
 		out.port.counter1 = PULSE_COUNTER_SCORE.get();
 		#if defined(DEBUG_SERIAL)
-		DEBUG_SERIAL.print(F("90,pulsing counter1 = "));
+		DEBUG_SERIAL.print((int)EVT_DEBUG);
+		DEBUG_SERIAL.print(F(",pulsing counter1 = "));
 		DEBUG_SERIAL.print(out.port.counter1 ? F("HIGH;") : F("LOW;"));
 		#endif
 		do_send = true;
@@ -410,7 +412,8 @@ void loop() {
 	{
 		out.port.counter2 = PULSE_COUNTER_WASH.get();
 		#if defined(DEBUG_SERIAL)
-		DEBUG_SERIAL.print(F("90,pulsing counter2 = "));
+		DEBUG_SERIAL.print((int)EVT_DEBUG);
+		DEBUG_SERIAL.print(F(",pulsing counter2 = "));
 		DEBUG_SERIAL.print(out.port.counter2 ? F("HIGH;") : F("LOW;"));
 		#endif
 		do_send = true;
@@ -419,7 +422,8 @@ void loop() {
 	{
 		out.port.counter3 = PULSE_COUNTER_INSERT.get();
 		#if defined(DEBUG_SERIAL)
-		DEBUG_SERIAL.print(F("90,pulsing counter3 = "));
+		DEBUG_SERIAL.print((int)EVT_DEBUG);
+		DEBUG_SERIAL.print(F(",pulsing counter3 = "));
 		DEBUG_SERIAL.print(out.port.counter3 ? F("HIGH;") : F("LOW;"));
 		#endif
 		do_send = true;
@@ -428,7 +432,8 @@ void loop() {
 	{
 		out.port.counter4 = PULSE_COUNTER_EJECT.get();
 		#if defined(DEBUG_SERIAL)
-		DEBUG_SERIAL.print(F("90,pulsing counter4 = "));
+		DEBUG_SERIAL.print((int)EVT_DEBUG);
+		DEBUG_SERIAL.print(F(",pulsing counter4 = "));
 		DEBUG_SERIAL.print(out.port.counter4 ? F("HIGH;") : F("LOW;"));
 		#endif
 		do_send = true;
@@ -472,7 +477,8 @@ void loop() {
 	#if defined(DEBUG_SERIAL)
 		t2 = micros();
 		last_millis = millis();
-		DEBUG_SERIAL.print(F("90,loop() took "));
+		DEBUG_SERIAL.print((int)EVT_DEBUG);
+		DEBUG_SERIAL.print(F(",loop() took "));
 		DEBUG_SERIAL.print(t2 - t1);
 		DEBUG_SERIAL.print("us;");
     }

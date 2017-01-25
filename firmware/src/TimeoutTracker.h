@@ -32,7 +32,8 @@ public:
 	void stop() {
 		#if defined(DEBUG_SERIAL)
 		if (_check) {
-			DEBUG_SERIAL.print(F("90,"));
+			DEBUG_SERIAL.print((int)EVT_DEBUG);
+			DEBUG_SERIAL.print(',');
 			DEBUG_SERIAL.print(_name);
 			DEBUG_SERIAL.print(F(" stopped within "));
 			DEBUG_SERIAL.print(micros() - _start_us);
@@ -46,7 +47,8 @@ public:
 	bool trigger(uint32_t const now = micros()) {
 		if (_check && now - _start_us > _timeout_us) {
 			#if defined(DEBUG_SERIAL)
-			DEBUG_SERIAL.print(F("90,"));
+			DEBUG_SERIAL.print((int)EVT_DEBUG);
+			DEBUG_SERIAL.print(',');
 			DEBUG_SERIAL.print(_name);
 			DEBUG_SERIAL.print(F(" timedout after "));
 			DEBUG_SERIAL.print(now - _start_us);

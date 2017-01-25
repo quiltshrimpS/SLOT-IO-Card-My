@@ -80,7 +80,8 @@ public:
 
 		#if defined(DEBUG_SERIAL)
 		dumpBuffer("bank0", _data.bytes, CONF_SIZE_ALL);
-		DEBUG_SERIAL.print(F("90,bank0: crc = "));
+		DEBUG_SERIAL.print((int)EVT_DEBUG);
+		DEBUG_SERIAL.print(F(",bank0: crc = "));
 		if (crc0 < 0x10)
 			DEBUG_SERIAL.print('0');
 		DEBUG_SERIAL.print((int)crc0, HEX);
@@ -94,7 +95,8 @@ public:
 
 		#if defined(DEBUG_SERIAL)
 		dumpBuffer("bank1", _data.bytes, CONF_SIZE_ALL);
-		DEBUG_SERIAL.print(F("90,bank1: crc = "));
+		DEBUG_SERIAL.print((int)EVT_DEBUG);
+		DEBUG_SERIAL.print(F(",bank1: crc = "));
 		if (crc1 < 0x10)
 			DEBUG_SERIAL.print('0');
 		DEBUG_SERIAL.print((int)crc1, HEX);
@@ -105,11 +107,13 @@ public:
 		if (bank0_checksum_good && bank1_checksum_good) {
 			// both checksum good, does nothing.
 			#if defined(DEBUG_SERIAL)
-			DEBUG_SERIAL.print(F("90,both bank good/, use bank1;"));
+			DEBUG_SERIAL.print((int)EVT_DEBUG);
+			DEBUG_SERIAL.print(F(",both bank good/, use bank1;"));
 			#endif
 		} else if (!bank0_checksum_good && !bank1_checksum_good) {
 			#if defined(DEBUG_SERIAL)
-			DEBUG_SERIAL.print(F("90,both bank bad/, initializing...;"));
+			DEBUG_SERIAL.print((int)EVT_DEBUG);
+			DEBUG_SERIAL.print(F(",both bank bad/, initializing...;"));
 			#endif
 			// both bad, initialize bank0 and use it, write back to both bank
 
@@ -128,13 +132,15 @@ public:
 		} else {
 			if (bank0_checksum_good) {
 				#if defined(DEBUG_SERIAL)
-				DEBUG_SERIAL.print(F("90,bank1 bad/, use bank0;"));
+				DEBUG_SERIAL.print((int)EVT_DEBUG);
+				DEBUG_SERIAL.print(F(",bank1 bad/, use bank0;"));
 				#endif
 				// bank1 is bad, read back bank0
 				readBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
 			} else /* if (bank1_checksum_good) */ {
 				#if defined(DEBUG_SERIAL)
-				DEBUG_SERIAL.print(F("90,bank0 bad/, use bank1;"));
+				DEBUG_SERIAL.print((int)EVT_DEBUG);
+				DEBUG_SERIAL.print(F(",bank0 bad/, use bank1;"));
 				#endif
 				// bank0 is bad, use bank1.
 			}
@@ -215,7 +221,8 @@ public:
 	__attribute__((always_inline)) inline
 	void dumpBuffer(char const * const tag, uint8_t const * const buffer, size_t const size) {
 		#if defined(DEBUG_SERIAL)
-		DEBUG_SERIAL.print(F("90,conf"));
+		DEBUG_SERIAL.print((int)EVT_DEBUG);
+		DEBUG_SERIAL.print(F(",conf"));
 		if (tag != nullptr) {
 			DEBUG_SERIAL.print(' ');
 			DEBUG_SERIAL.print(tag);
@@ -267,7 +274,8 @@ private:
 
 		#if defined(DEBUG_SERIAL)
 		t2 = micros();
-		DEBUG_SERIAL.print(F("90,CRC took "));
+		DEBUG_SERIAL.print((int)EVT_DEBUG);
+		DEBUG_SERIAL.print(F(",CRC took "));
 		DEBUG_SERIAL.print(t2 - t1);
 		DEBUG_SERIAL.print("us;");
 		#endif
