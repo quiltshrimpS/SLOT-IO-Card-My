@@ -32,6 +32,7 @@
   <ItemGroup>
     <Compile Include="IOCard.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="IOCardStateCache.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\firmware\lib\Arduino-CmdMessenger\extras\CSharp\CommandMessenger\CommandMessenger.csproj">
