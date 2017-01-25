@@ -21,6 +21,8 @@
 
 #include <avr/power.h>
 
+#include "util.h"
+
 #include "Communication.h"
 #include "WreckedSPI.h"
 #include "Ports.h"
@@ -213,7 +215,7 @@ void setup() {
 					// block newer command if there are still coins left to be ejected
 					if (count != 0 && coins != 0) {
 						communicator.dispatchErrorEjectInterrupted(track, coins);
-					} else if (track >= NUM_EJECT_TRACKS) {
+					} else if (unlikely(track >= NUM_EJECT_TRACKS)) {
 						communicator.dispatchErrorNotATrack(track);
 					} else {
 						conf.setCoinsToEject(track, count);
@@ -228,7 +230,7 @@ void setup() {
 			case CMD_GET_COIN_COUNTER:
 				{
 					uint8_t const track = messenger.readBinArg<uint8_t>();
-					if (track >= NUM_TRACKS) {
+					if (unlikely(track >= NUM_TRACKS)) {
 						communicator.dispatchErrorNotATrack(track);
 					} else {
 						communicator.dispatchCoinCounterResult(track, conf.getCoinCount(track));
@@ -238,11 +240,10 @@ void setup() {
 			case CMD_RESET_COIN_COINTER:
 				{
 					uint8_t const track = messenger.readBinArg<uint8_t>();
-					if (track >= NUM_TRACKS) {
+					if (unlikely(track >= NUM_TRACKS)) {
 						communicator.dispatchErrorNotATrack(track);
 					} else {
 						conf.setCoinCount(track, 0);
-
 					}
 				}
 				break;
@@ -252,7 +253,7 @@ void setup() {
 			case CMD_SET_OUTPUT:
 				{
 					uint8_t const length = messenger.readBinArg<uint8_t>();
-					if (length != 0) {
+					if (unlikely(length != 0)) {
 						for (int i = 0;i < length && i < 3;++i)
 							out.bytes[i] =
 								(out.bytes[i] & ~OUTPUT_MASK[i]) |
@@ -266,9 +267,9 @@ void setup() {
 					uint8_t const counter = messenger.readBinArg<uint8_t>();
 					uint8_t const ticks = messenger.readBinArg<uint8_t>();
 				#if defined(DEBUG_SERIAL)
-					if (counter < 4) {
+					if (unlikely(counter < 4)) {
 				#else
-					if (counter < 2) {
+					if (unlikely(counter < 2)) {
 				#endif
 						pulse_counters[counter].pulse(ticks);
 					} else {
@@ -279,7 +280,7 @@ void setup() {
 			case CMD_SET_TRACK_LEVEL:
 				{
 					uint8_t const track = messenger.readBinArg<uint8_t>();
-					if (track >= NUM_TRACKS) {
+					if (unlikely(track >= NUM_TRACKS)) {
 						communicator.dispatchErrorNotATrack(track);
 					} else {
 						uint8_t const level = messenger.readBinArg<bool>();
@@ -290,7 +291,7 @@ void setup() {
 			case CMD_SET_EJECT_TIMEOUT:
 				{
 					uint8_t const track = messenger.readBinArg<uint8_t>();
-					if (track >= NUM_EJECT_TRACKS) {
+					if (unlikely(track >= NUM_EJECT_TRACKS)) {
 						communicator.dispatchErrorNotATrack(track);
 					} else {
 						uint32_t const timeout = messenger.readBinArg<uint32_t>();
@@ -302,9 +303,9 @@ void setup() {
 				{
 					uint16_t const address = messenger.readBinArg<uint16_t>();
 					uint8_t const length = messenger.readBinArg<uint8_t>();
-					if (address < 0x200) {
+					if (unlikely(address < 0x200)) {
 						communicator.dispatchErrorProtectedStorage(address);
-					} else if (length > MAX_BYTES_LENGTH) {
+					} else if (unlikely(length > MAX_BYTES_LENGTH)) {
 						communicator.dispatchErrorTooLong(length);
 					} else {
 						uint8_t buffer[length];
@@ -320,11 +321,11 @@ void setup() {
 					uint16_t const address = messenger.readBinArg<uint16_t>();
 					uint8_t const length = messenger.readBinArg<uint8_t>();
 				#if !defined(DEBUG_SERIAL)
-					if (address < 0x200) {
+					if (unlikely(address < 0x200)) {
 						communicator.dispatchErrorProtectedStorage(address);
 					} else
 				#endif
-					if (length > MAX_BYTES_LENGTH) {
+					if (unlikely(length > MAX_BYTES_LENGTH)) {
 						communicator.dispatchErrorTooLong(length);
 					} else {
 						uint8_t buffer[length];
