@@ -9,7 +9,7 @@
   </import>
   <widget class="Gtk.Window" id="MainWindow" design-size="670 397">
     <property name="MemberName" />
-    <property name="Title" translatable="yes">MainWindow</property>
+    <property name="Title" translatable="yes">SLOT-IO-Card Demo App</property>
     <property name="WindowPosition">CenterOnParent</property>
     <signal name="DeleteEvent" handler="OnDeleteEvent" />
     <child>
