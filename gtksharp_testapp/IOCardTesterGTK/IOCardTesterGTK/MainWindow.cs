@@ -69,6 +69,7 @@ public partial class MainWindow : Window
 	CommandProperty mCommandProperty_GetCoinCounter;
 	CommandProperty mCommandProperty_ResetCoinCounter;
 	CommandProperty mCommandProperty_GetKeys;
+	CommandProperty mCommandProperty_GetKeyMasks;
 	CommandProperty mCommandProperty_SetEjectTimeout;
 	CommandProperty mCommandProperty_TickAuditCounter;
 	CommandProperty mCommandProperty_SetOutputs;
@@ -277,6 +278,25 @@ public partial class MainWindow : Window
 				sCard.QueryGetKeys();
 			}
 		);
+		mCommandProperty_GetKeyMasks = new CommandProperty(
+			on_error_callback,
+			IOCard.Commands.CMD_GET_KEY_MASKS, 0,
+			"Get key masks from device",
+			"Params: N/A",
+			(command, parameters) =>
+			{
+				var iter = textview_received.Buffer.StartIter;
+				textview_received.Buffer.Insert(
+					ref iter,
+					string.Format(
+						" => {0}: cmd = {1}\r\n",
+						DateTime.Now,
+						command
+					)
+				);
+				sCard.QueryGetKeyMasks();
+			}
+		);
 		mCommandProperty_TickAuditCounter = new CommandProperty(
 			on_error_callback,
 			IOCard.Commands.CMD_TICK_AUDIT_COUNTER, 2,
@@ -432,6 +452,7 @@ public partial class MainWindow : Window
 			mCommandProperty_GetCoinCounter,
 			mCommandProperty_ResetCoinCounter,
 			mCommandProperty_TickAuditCounter,
+			mCommandProperty_GetKeyMasks,
 			mCommandProperty_GetKeys,
 			mCommandProperty_SetOutputs,
 			mCommandProperty_SetEjectTimeout,
@@ -654,6 +675,25 @@ public partial class MainWindow : Window
 					ref iter,
 					string.Format(
 						"<=  {0}: Keys:{1}\r\n",
+						e.DateTime,
+						builder
+					)
+				);
+			});
+		};
+		sCard.OnKeyMasks += (sender, e) =>
+		{
+			Application.Invoke(delegate
+			{
+				var builder = new StringBuilder(e.KeyMasks.Length * 5);
+				foreach (var mask in e.KeyMasks)
+					builder.Append(string.Format(" 0x{0:X2}", mask));
+
+				var iter = textview_received.Buffer.StartIter;
+				textview_received.Buffer.Insert(
+					ref iter,
+					string.Format(
+						"<=  {0}: Key Masks:{1}\r\n",
 						e.DateTime,
 						builder
 					)
