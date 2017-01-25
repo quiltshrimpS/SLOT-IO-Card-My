@@ -124,20 +124,20 @@ public partial class MainWindow : Window
 			"Eject N coins.",
 			"Params: <track (byte)>, <coins (byte)>",
 			new string[] {
-				"0xC0, 0x0A // eject 10 coins from track 0xC0 (eject track 1)",
-				"0xC0, 5 // eject 5 coins from track 0xC0 (eject track 1)",
-				"0xC0, 0 // interrupt track 0xC0 (eject track 1)"
+				"0, 0x0A // eject 10 coins from track 0",
+				"0, 5 // eject 5 coins from track 0",
+				"0, 0 // interrupt the ongoing ejection on track 0"
 			},
 			(command, parameters) =>
 			{
-				var track = (IOCard.CoinTrack)_getTfromString<byte>(parameters[0].Trim());
-				var count = _getTfromString<byte>(parameters[1].Trim());
+				var track = (byte)_getTfromString<uint>(parameters[0].Trim());
+				var count = (byte)_getTfromString<uint>(parameters[1].Trim());
 
 				var iter = textview_received.Buffer.StartIter;
 				textview_received.Buffer.Insert(
 					ref iter,
 					string.Format(
-						" => {0}: cmd = {1}, track = {2}, count = {3}\r\n",
+						" => {0}: cmd = {1}, track = {2:X2}, count = {3}\r\n",
 						DateTime.Now,
 						command,
 						track,
@@ -153,20 +153,16 @@ public partial class MainWindow : Window
 			IOCard.Commands.CMD_GET_COIN_COUNTER, 1,
 			"Get coin counter.",
 			"Params: <track (byte)>",
-			new string[] {
-				"0x00 // track 0x00 (insert 1)",
-				"0x80 // track 0x80 (banknote 1)",
-				"0xC0 // track 0xC0 (eject track 1)"
-			},
+			new string[] { "0 // track 0", "1 // track 1", "2 // track 2", "3 // track 2", "4 // track 4", "5 // track 5" },
 			(command, parameters) =>
 			{
-				var track = (IOCard.CoinTrack)_getTfromString<byte>(parameters[0].Trim());
+				var track = (byte)_getTfromString<uint>(parameters[0].Trim());
 
 				var iter = textview_received.Buffer.StartIter;
 				textview_received.Buffer.Insert(
 					ref iter,
 					string.Format(
-						" => {0}: cmd = {1}, track = {2}\r\n",
+						" => {0}: cmd = {1}, track = 0x{2:X2}\r\n",
 						DateTime.Now,
 						command,
 						track
@@ -188,13 +184,13 @@ public partial class MainWindow : Window
 			},
 			(command, parameters) =>
 			{
-				var track = (IOCard.CoinTrack)_getTfromString<byte>(parameters[0].Trim());
+				var track = (byte)_getTfromString<uint>(parameters[0].Trim());
 
 				var iter = textview_received.Buffer.StartIter;
 				textview_received.Buffer.Insert(
 					ref iter,
 					string.Format(
-						" => {0}: cmd = {1}, track = {2}\r\n",
+						" => {0}: cmd = {1}, track = 0x{2:X2}\r\n",
 						DateTime.Now,
 						command,
 						track
@@ -210,12 +206,12 @@ public partial class MainWindow : Window
 			"Sets the Timeout on Eject tracks (in us)",
 			"Params: <track (byte)>, <timeout_us (uint32_t)>",
 			new string[] {
-				"0xC0, 5000000 // track 0xC0 (eject track 1) times out in 5 sec",
+				"0, 5000000 // track 0xC0 (eject track 1) times out in 5 sec",
 				"0xC0, 10000000 // track 0xC0 (eject track 1) times out in 10 sec"
 			},
 			(command, parameters) =>
 			{
-				var track = (IOCard.CoinTrack)_getTfromString<byte>(parameters[0].Trim());
+				var track = (byte)_getTfromString<uint>(parameters[0].Trim());
 				var timeout = _getTfromString<uint>(parameters[1].Trim());
 
 				var iter = textview_received.Buffer.StartIter;
@@ -244,8 +240,8 @@ public partial class MainWindow : Window
 			},
 			(command, parameters) =>
 			{
-				var track = (IOCard.CoinTrack)_getTfromString<byte>(parameters[0].Trim());
-				var level = (IOCard.ActiveLevel)_getTfromString<byte>(parameters[1].Trim());
+				var track = (byte)_getTfromString<uint>(parameters[0].Trim());
+				var level = (IOCard.ActiveLevel)_getTfromString<uint>(parameters[1].Trim());
 
 				var iter = textview_received.Buffer.StartIter;
 				textview_received.Buffer.Insert(
@@ -287,15 +283,15 @@ public partial class MainWindow : Window
 			"Tick the audit counter",
 			"Params: <counter (1 byte)>, <ticks (1 byte)>",
 			new string[] {
-				"0, 5 // tick Counter 1 (Score) 5 times",
-				"1, 70 // tick Counter 2 (Wash) 70 times",
-				"2, 2 // tick Counter 3 (Insert Coint) 2 times",
-				"3, 50 // tick Counter 4 (Eject Coin) 50 times"
+				"0, 100 // tick the AuditCounter1 for 100 times",
+				"1, 200 // tick the AuditCounter2 for 200 times",
+				"2, 150 // tick the AuditCounter3 for 150 times",
+				"3, 0 // tick the AuditCounter4 for 0 times (??)"
 			},
 			(command, parameters) =>
 			{
-				byte counter = (byte)_getTfromString<uint>(parameters[0].Trim());
-				byte ticks = (byte)_getTfromString<uint>(parameters[1].Trim());
+				var counter = (byte)_getTfromString<uint>(parameters[0].Trim());
+				var ticks = (byte)_getTfromString<uint>(parameters[1].Trim());
 
 				var iter = textview_received.Buffer.StartIter;
 				textview_received.Buffer.Insert(
@@ -459,15 +455,11 @@ public partial class MainWindow : Window
 		{
 			mCommandProperty_GetInfo.SendCommand(new string[] { });
 			mCommandProperty_GetKeys.SendCommand(new string[] { });
-			mCommandProperty_GetCoinCounter.SendCommand(new string[] { ((int)(IOCard.CoinTrack.TrackInsert1)).ToString() });
-			mCommandProperty_GetCoinCounter.SendCommand(new string[] { ((int)(IOCard.CoinTrack.TrackInsert2)).ToString() });
-			mCommandProperty_GetCoinCounter.SendCommand(new string[] { ((int)(IOCard.CoinTrack.TrackInsert3)).ToString() });
-			mCommandProperty_GetCoinCounter.SendCommand(new string[] { ((int)(IOCard.CoinTrack.TrackBanknote1)).ToString() });
-			mCommandProperty_GetCoinCounter.SendCommand(new string[] { ((int)(IOCard.CoinTrack.TrackEject1)).ToString() });
-			mCommandProperty_ReadStorage.SendCommand(new string[] { "0x080", "64" });
-			mCommandProperty_ReadStorage.SendCommand(new string[] { "0x180", "64" });
-			mCommandProperty_ReadStorage.SendCommand(new string[] { "0x280", "64" });
-			mCommandProperty_ReadStorage.SendCommand(new string[] { "0x380", "64" });
+			mCommandProperty_GetCoinCounter.SendCommand(new string[] { "0" });
+			mCommandProperty_GetCoinCounter.SendCommand(new string[] { "1" });
+			mCommandProperty_GetCoinCounter.SendCommand(new string[] { "2" });
+			mCommandProperty_GetCoinCounter.SendCommand(new string[] { "3" });
+			mCommandProperty_GetCoinCounter.SendCommand(new string[] { "3" });
 
 			Application.Invoke(delegate
 			{

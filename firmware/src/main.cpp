@@ -225,7 +225,10 @@ void setup() {
 			case CMD_GET_COIN_COUNTER:
 				{
 					uint8_t const track = messenger.readBinArg<uint8_t>();
-					communicator.dispatchCoinCounterResult(track, conf.getCoinCount(track));
+					if (track >= NUM_TRACKS)
+						communicator.dispatchErrorNotATrack(track);
+					else
+						communicator.dispatchCoinCounterResult(track, conf.getCoinCount(track));
 				}
 				break;
 			case CMD_RESET_COIN_COINTER:

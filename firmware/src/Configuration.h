@@ -8,14 +8,18 @@
 
 #include <util/crc16.h>
 
+#define NUM_EJECT_TRACKS				(1)
+#define NUM_INSERT_TRACKS				(4)
+#define NUM_TRACKS						(NUM_EJECT_TRACKS + NUM_INSERT_TRACKS)
+
 #define CONF_OFFSET_COIN_TRACK_LEVEL	(0x0000)
 #define CONF_SIZE_COIN_TRACK_LEVEL		(1)
 #define CONF_OFFSET_COINS_TO_EJECT		(CONF_OFFSET_COIN_TRACK_LEVEL + CONF_SIZE_COIN_TRACK_LEVEL)
-#define CONF_SIZE_COINS_TO_EJECT		(8 * sizeof(uint8_t))
+#define CONF_SIZE_COINS_TO_EJECT		(NUM_EJECT_TRACKS * sizeof(uint8_t))
 #define CONF_OFFSET_COIN_COUNT			(CONF_OFFSET_COINS_TO_EJECT + CONF_SIZE_COINS_TO_EJECT)
-#define CONF_SIZE_COIN_COUNT			(8 * sizeof(uint32_t))
+#define CONF_SIZE_COIN_COUNT			(NUM_TRACKS * sizeof(uint32_t))
 #define CONF_OFFSET_EJECT_TIMEOUT		(CONF_OFFSET_COIN_COUNT + CONF_SIZE_COIN_COUNT)
-#define CONF_SIZE_EJECT_TIMEOUT			(4 * sizeof(uint32_t))
+#define CONF_SIZE_EJECT_TIMEOUT			(NUM_EJECT_TRACKS * sizeof(uint32_t))
 #define CONF_OFFSET_CHECKSUM			(CONF_OFFSET_EJECT_TIMEOUT + CONF_SIZE_EJECT_TIMEOUT)
 #define CONF_SIZE_CHECKSUM				(1)
 #define CONF_OFFSET_END					(CONF_OFFSET_CHECKSUM + CONF_SIZE_CHECKSUM)
@@ -25,14 +29,14 @@
 #define CONF_ADDR_BANK_0				(CONF_ADDR_BEGIN)
 #define CONF_ADDR_BANK_1				(CONF_ADDR_BEGIN + 0x0100)
 
-#define TRACK_INSERT_1		(0x00)
-#define TRACK_INSERT_2		(0x01)
-#define TRACK_INSERT_3		(0x02)
-#define TRACK_BANKNOTE		(0x80)
-#define TRACK_EJECT			(0xC0)
+#define TRACK_EJECT			(0)
+#define TRACK_INSERT_1		(1)
+#define TRACK_INSERT_2		(2)
+#define TRACK_INSERT_3		(3)
+#define TRACK_BANKNOTE		(4)
 #define TRACK_NOT_A_TRACK	(0xFF)
 
-#define TRACK_LEVELS_DEFAULT	(0b11101111)
+#define TRACK_LEVELS_DEFAULT	(0b11111110)
 #define EJECT_TIMEOUT_DEFAULT	(10000000L) // us
 
 #define MAX_BYTES_LENGTH	(64)
@@ -108,13 +112,17 @@ public:
 			DEBUG_SERIAL.print(F("90,both bank bad/, initializing...;"));
 			#endif
 			// both bad, initialize bank0 and use it, write back to both bank
-			memset(_data.bytes, 0, CONF_SIZE_ALL);
+
+			for (uint8_t i = 0;i < NUM_EJECT_TRACKS;++i) {
+				_data.configs.coins_to_eject[i] = 0;
+				_data.configs.eject_timeout[i] = EJECT_TIMEOUT_DEFAULT;
+			}
+			for (uint8_t i = 0;i < NUM_TRACKS;++i)
+				_data.configs.coin_count[i] = 0;
+
 			_data.configs.track_levels.bytes = TRACK_LEVELS_DEFAULT;
-			_data.configs.eject_timeout[0] = EJECT_TIMEOUT_DEFAULT;
-			_data.configs.eject_timeout[1] = EJECT_TIMEOUT_DEFAULT;
-			_data.configs.eject_timeout[2] = EJECT_TIMEOUT_DEFAULT;
-			_data.configs.eject_timeout[3] = EJECT_TIMEOUT_DEFAULT;
 			_data.configs.crc = _getChecksum();
+
 			writeBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
 			writeBytes(CONF_ADDR_BANK_1, CONF_SIZE_ALL, _data.bytes);
 		} else {
@@ -137,34 +145,17 @@ public:
 
 	__attribute__((always_inline)) inline
 	uint8_t getTrackLevel(uint8_t const track) {
-		if (track == TRACK_EJECT) // eject track
-			return _data.configs.track_levels.bits.track_level_4;
-		if (track == TRACK_INSERT_1) // coin track 1
-			return _data.configs.track_levels.bits.track_level_0;
-		if (track == TRACK_INSERT_2) // coin track 2
-			return _data.configs.track_levels.bits.track_level_1;
-		if (track == TRACK_INSERT_3) // coin track 3
-			return _data.configs.track_levels.bits.track_level_2;
-		if (track == TRACK_BANKNOTE) // banknote track
-			return _data.configs.track_levels.bits.track_level_3;
-		return TRACK_NOT_A_TRACK;
+		if (track >= NUM_TRACKS)
+			return TRACK_NOT_A_TRACK;
+		return bitRead(_data.configs.track_levels.bytes, track);
 	}
 
 	__attribute__((always_inline)) inline
 	bool setTrackLevel(uint8_t const track, bool const level) {
-		if (track == TRACK_EJECT) // eject track
-			_data.configs.track_levels.bits.track_level_4 = level;
-		else if (track == TRACK_INSERT_1) // coin track 1
-			_data.configs.track_levels.bits.track_level_0 = level;
-		else if (track == TRACK_INSERT_2) // coin track 2
-			_data.configs.track_levels.bits.track_level_1 = level;
-		else if (track == TRACK_INSERT_3) // coin track 3
-			_data.configs.track_levels.bits.track_level_2 = level;
-		else if (track == TRACK_BANKNOTE) // banknote track
-			_data.configs.track_levels.bits.track_level_3 = level;
-		else
+		if (track >= NUM_TRACKS)
 			return false;
 
+		bitSet(_data.configs.track_levels.bytes, track);
 		_data.configs.crc = _getChecksum();
 		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_COIN_TRACK_LEVEL, _data.bytes[CONF_OFFSET_COIN_TRACK_LEVEL]);
 		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
@@ -181,24 +172,21 @@ public:
 
 	__attribute__((always_inline)) inline
 	uint8_t getCoinsToEject(uint8_t const track) {
-		if (track == TRACK_EJECT)
-			return _data.configs.coins_to_eject[4];
-		return 0;
+		if (track >= NUM_EJECT_TRACKS)
+			return 0;
+		return _data.configs.coins_to_eject[track];
 	}
 
 	__attribute__((always_inline)) inline
-	bool setCoinsToEject(uint8_t const track, uint8_t coins) {
-		uint8_t track_idx = TRACK_NOT_A_TRACK;
-		if (track == TRACK_EJECT)
-			track_idx = 4;
-		else
+	bool setCoinsToEject(uint8_t const track, uint8_t const coins) {
+		if (track >= NUM_EJECT_TRACKS)
 			return false;
 
-		_data.configs.coins_to_eject[track_idx] = coins;
+		_data.configs.coins_to_eject[track] = coins;
 		_data.configs.crc = _getChecksum();
-		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_COINS_TO_EJECT + track_idx, coins);
+		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_COINS_TO_EJECT + track, coins);
 		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
-		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_COINS_TO_EJECT + track_idx, coins);
+		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_COINS_TO_EJECT + track, coins);
 		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
 
 		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
@@ -208,40 +196,21 @@ public:
 
 	__attribute__((always_inline)) inline
 	uint32_t getCoinCount(uint8_t const track) {
-		if (track == TRACK_EJECT)
-			return _data.configs.coin_count[4];
-		else if (track == TRACK_INSERT_1)
-			return _data.configs.coin_count[0];
-		else if (track == TRACK_INSERT_2)
-			return _data.configs.coin_count[1];
-		else if (track == TRACK_INSERT_3)
-			return _data.configs.coin_count[2];
-		else if (track == TRACK_BANKNOTE)
-			return _data.configs.coin_count[3];
-		return 0;
+		if (track >= NUM_TRACKS)
+			return 0;
+		return _data.configs.coin_count[track];
 	}
 
 	__attribute__((always_inline)) inline
-	bool setCoinCount(uint8_t const track, uint32_t count) {
-		uint8_t track_idx = TRACK_NOT_A_TRACK;
-		if (track == TRACK_EJECT)
-			track_idx = 4;
-		else if (track == TRACK_INSERT_1)
-			track_idx = 0;
-		else if (track == TRACK_INSERT_2)
-			track_idx = 1;
-		else if (track == TRACK_INSERT_3)
-			track_idx = 2;
-		else if (track == TRACK_BANKNOTE)
-			track_idx = 3;
-		else
-		 	return false;
+	bool setCoinCount(uint8_t const track, uint32_t const count) {
+		if (track >= NUM_TRACKS)
+			return false;
 
-		_data.configs.coin_count[track_idx] = count;
+		_data.configs.coin_count[track] = count;
 		_data.configs.crc = _getChecksum();
-		_fram.writeLong(CONF_ADDR_BANK_0 + CONF_OFFSET_COIN_COUNT + track_idx * sizeof(uint32_t), count);
+		_fram.writeLong(CONF_ADDR_BANK_0 + CONF_OFFSET_COIN_COUNT + track * sizeof(uint32_t), count);
 		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
-		_fram.writeLong(CONF_ADDR_BANK_1 + CONF_OFFSET_COIN_COUNT + track_idx * sizeof(uint32_t), count);
+		_fram.writeLong(CONF_ADDR_BANK_1 + CONF_OFFSET_COIN_COUNT + track * sizeof(uint32_t), count);
 		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
 
 		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
@@ -250,18 +219,15 @@ public:
 	}
 
 	__attribute__((always_inline)) inline
-	bool setEjectTimeout(uint8_t const track, uint32_t timeout) {
-		uint8_t track_idx = TRACK_NOT_A_TRACK;
-		if (track == TRACK_EJECT)
-			track_idx = 0;
-		else
+	bool setEjectTimeout(uint8_t const track, uint32_t const timeout) {
+		if (track >= NUM_EJECT_TRACKS)
 			return false;
 
-		_data.configs.eject_timeout[track_idx] = timeout;
+		_data.configs.eject_timeout[track] = timeout;
 		_data.configs.crc = _getChecksum();
-		_fram.writeLong(CONF_ADDR_BANK_0 + CONF_OFFSET_EJECT_TIMEOUT + track_idx * sizeof(uint32_t), timeout);
+		_fram.writeLong(CONF_ADDR_BANK_0 + CONF_OFFSET_EJECT_TIMEOUT + track * sizeof(uint32_t), timeout);
 		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
-		_fram.writeLong(CONF_ADDR_BANK_1 + CONF_OFFSET_EJECT_TIMEOUT + track_idx * sizeof(uint32_t), timeout);
+		_fram.writeLong(CONF_ADDR_BANK_1 + CONF_OFFSET_EJECT_TIMEOUT + track * sizeof(uint32_t), timeout);
 		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
 
 		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
@@ -271,9 +237,9 @@ public:
 
 	__attribute__((always_inline)) inline
 	uint32_t getEjectTimeout(uint8_t const track) {
-		if (track == TRACK_EJECT)
-			return _data.configs.eject_timeout[0];
-		return 0;
+		if (track >= NUM_EJECT_TRACKS)
+			return 0;
+		return _data.configs.eject_timeout[track];
 	}
 
 	__attribute__((always_inline)) inline
@@ -343,9 +309,9 @@ private:
 		struct {
 			union TrackLevelsT track_levels;
 
-			uint8_t coins_to_eject[8];
-			uint32_t coin_count[8];
-			uint32_t eject_timeout[4];
+			uint8_t coins_to_eject[NUM_EJECT_TRACKS];
+			uint32_t coin_count[NUM_TRACKS];
+			uint32_t eject_timeout[NUM_EJECT_TRACKS];
 
 			uint8_t crc;
 		} configs;

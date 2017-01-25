@@ -44,82 +44,6 @@ namespace Spark.Slot.IO
 			ERR_UNKNOWN_COMMAND = 0xFF,
 		}
 
-		public enum CoinTrack
-		{
-			/* 0x00 ~ 0x7F are coin insert tracks */
-			TrackInsert1 = 0x00, TrackInsert2 = 0x01, TrackInsert3 = 0x02, TrackInsert4 = 0x03,
-			TrackInsert5 = 0x04, TrackInsert6 = 0x05, TrackInsert7 = 0x06, TrackInsert8 = 0x07,
-			TrackInsert9 = 0x08, TrackInsert10 = 0x09, TrackInsert11 = 0x0A, TrackInsert12 = 0x0B,
-			TrackInsert13 = 0x0C, TrackInsert14 = 0x0D, TrackInsert15 = 0x0E, TrackInsert16 = 0x0F,
-			TrackInsert17 = 0x10, TrackInsert18 = 0x11, TrackInsert19 = 0x12, TrackInsert20 = 0x13,
-			TrackInsert21 = 0x14, TrackInsert22 = 0x15, TrackInsert23 = 0x16, TrackInsert24 = 0x17,
-			TrackInsert25 = 0x18, TrackInsert26 = 0x19, TrackInsert27 = 0x1A, TrackInsert28 = 0x1B,
-			TrackInsert29 = 0x1C, TrackInsert30 = 0x1D, TrackInsert31 = 0x1E, TrackInsert32 = 0x1F,
-			TrackInsert33 = 0x20, TrackInsert34 = 0x21, TrackInsert35 = 0x22, TrackInsert36 = 0x23,
-			TrackInsert37 = 0x24, TrackInsert38 = 0x25, TrackInsert39 = 0x26, TrackInsert40 = 0x27,
-			TrackInsert41 = 0x28, TrackInsert42 = 0x29, TrackInsert43 = 0x2A, TrackInsert44 = 0x2B,
-			TrackInsert45 = 0x2C, TrackInsert46 = 0x2D, TrackInsert47 = 0x2E, TrackInsert48 = 0x2F,
-			TrackInsert49 = 0x30, TrackInsert50 = 0x31, TrackInsert51 = 0x32, TrackInsert52 = 0x33,
-			TrackInsert53 = 0x34, TrackInsert54 = 0x35, TrackInsert55 = 0x36, TrackInsert56 = 0x37,
-			TrackInsert57 = 0x38, TrackInsert58 = 0x39, TrackInsert59 = 0x3A, TrackInsert60 = 0x3B,
-			TrackInsert61 = 0x3C, TrackInsert62 = 0x3D, TrackInsert63 = 0x3E, TrackInsert64 = 0x3F,
-			TrackInsert65 = 0x40, TrackInsert66 = 0x41, TrackInsert67 = 0x42, TrackInsert68 = 0x43,
-			TrackInsert69 = 0x44, TrackInsert70 = 0x45, TrackInsert71 = 0x46, TrackInsert72 = 0x47,
-			TrackInsert73 = 0x48, TrackInsert74 = 0x49, TrackInsert75 = 0x4A, TrackInsert76 = 0x4B,
-			TrackInsert77 = 0x4C, TrackInsert78 = 0x4D, TrackInsert79 = 0x4E, TrackInsert80 = 0x4F,
-			TrackInsert81 = 0x50, TrackInsert82 = 0x51, TrackInsert83 = 0x52, TrackInsert84 = 0x53,
-			TrackInsert85 = 0x54, TrackInsert86 = 0x55, TrackInsert87 = 0x56, TrackInsert88 = 0x57,
-			TrackInsert89 = 0x58, TrackInsert90 = 0x59, TrackInsert91 = 0x5A, TrackInsert92 = 0x5B,
-			TrackInsert93 = 0x5C, TrackInsert94 = 0x5D, TrackInsert95 = 0x5E, TrackInsert96 = 0x5F,
-			TrackInsert97 = 0x60, TrackInsert98 = 0x61, TrackInsert99 = 0x62, TrackInsert100 = 0x63,
-			TrackInsert101 = 0x64, TrackInsert102 = 0x65, TrackInsert103 = 0x66, TrackInsert104 = 0x67,
-			TrackInsert105 = 0x68, TrackInsert106 = 0x69, TrackInsert107 = 0x6A, TrackInsert108 = 0x6B,
-			TrackInsert109 = 0x6C, TrackInsert110 = 0x6D, TrackInsert111 = 0x6E, TrackInsert112 = 0x6F,
-			TrackInsert113 = 0x70, TrackInsert114 = 0x71, TrackInsert115 = 0x72, TrackInsert116 = 0x73,
-			TrackInsert117 = 0x74, TrackInsert118 = 0x75, TrackInsert119 = 0x76, TrackInsert120 = 0x77,
-			TrackInsert121 = 0x78, TrackInsert122 = 0x79, TrackInsert123 = 0x7A, TrackInsert124 = 0x7B,
-			TrackInsert125 = 0x7C, TrackInsert126 = 0x7D, TrackInsert127 = 0x7E, TrackInsert128 = 0x7F,
-
-			/* 0x80 ~ 0xBF are banknote insert tracks */
-			TrackBanknote1 = 0x80, TrackBanknote2 = 0x81, TrackBanknote3 = 0x82, TrackBanknote4 = 0x83,
-			TrackBanknote5 = 0x84, TrackBanknote6 = 0x85, TrackBanknote7 = 0x86, TrackBanknote8 = 0x87,
-			TrackBanknote9 = 0x88, TrackBanknote10 = 0x89, TrackBanknote11 = 0x8A, TrackBanknote12 = 0x8B,
-			TrackBanknote13 = 0x8C, TrackBanknote14 = 0x8D, TrackBanknote15 = 0x8E, TrackBanknote16 = 0x8F,
-			TrackBanknote17 = 0x90, TrackBanknote18 = 0x91, TrackBanknote19 = 0x92, TrackBanknote20 = 0x93,
-			TrackBanknote21 = 0x94, TrackBanknote22 = 0x95, TrackBanknote23 = 0x96, TrackBanknote24 = 0x97,
-			TrackBanknote25 = 0x98, TrackBanknote26 = 0x99, TrackBanknote27 = 0x9A, TrackBanknote28 = 0x9B,
-			TrackBanknote29 = 0x9C, TrackBanknote30 = 0x9D, TrackBanknote31 = 0x9E, TrackBanknote32 = 0x9F,
-			TrackBanknote33 = 0xA0, TrackBanknote34 = 0xA1, TrackBanknote35 = 0xA2, TrackBanknote36 = 0xA3,
-			TrackBanknote37 = 0xA4, TrackBanknote38 = 0xA5, TrackBanknote39 = 0xA6, TrackBanknote40 = 0xA7,
-			TrackBanknote41 = 0xA8, TrackBanknote42 = 0xA9, TrackBanknote43 = 0xAA, TrackBanknote44 = 0xAB,
-			TrackBanknote45 = 0xAC, TrackBanknote46 = 0xAD, TrackBanknote47 = 0xAE, TrackBanknote48 = 0xAF,
-			TrackBanknote49 = 0xB0, TrackBanknote50 = 0xB1, TrackBanknote51 = 0xB2, TrackBanknote52 = 0xB3,
-			TrackBanknote53 = 0xB4, TrackBanknote54 = 0xB5, TrackBanknote55 = 0xB6, TrackBanknote56 = 0xB7,
-			TrackBanknote57 = 0xB8, TrackBanknote58 = 0xB9, TrackBanknote59 = 0xBA, TrackBanknote60 = 0xBB,
-			TrackBanknote61 = 0xBC, TrackBanknote62 = 0xBD, TrackBanknote63 = 0xBE, TrackBanknote64 = 0xBF,
-
-			/* 0xC0 ~ 0xFE are coin eject tracks */
-			TrackEject1 = 0xC0, TrackEject2 = 0xC1, TrackEject3 = 0xC2, TrackEject4 = 0xC3,
-			TrackEject5 = 0xC4, TrackEject6 = 0xC5, TrackEject7 = 0xC6, TrackEject8 = 0xC7,
-			TrackEject9 = 0xC8, TrackEject10 = 0xC9, TrackEject11 = 0xCA, TrackEject12 = 0xCB,
-			TrackEject13 = 0xCC, TrackEject14 = 0xCD, TrackEject15 = 0xCE, TrackEject16 = 0xCF,
-			TrackEject17 = 0xD0, TrackEject18 = 0xD1, TrackEject19 = 0xD2, TrackEject20 = 0xD3,
-			TrackEject21 = 0xD4, TrackEject22 = 0xD5, TrackEject23 = 0xD6, TrackEject24 = 0xD7,
-			TrackEject25 = 0xD8, TrackEject26 = 0xD9, TrackEject27 = 0xDA, TrackEject28 = 0xDB,
-			TrackEject29 = 0xDC, TrackEject30 = 0xDD, TrackEject31 = 0xDE, TrackEject32 = 0xDF,
-			TrackEject33 = 0xE0, TrackEject34 = 0xE1, TrackEject35 = 0xE2, TrackEject36 = 0xE3,
-			TrackEject37 = 0xE4, TrackEject38 = 0xE5, TrackEject39 = 0xE6, TrackEject40 = 0xE7,
-			TrackEject41 = 0xE8, TrackEject42 = 0xE9, TrackEject43 = 0xEA, TrackEject44 = 0xEB,
-			TrackEject45 = 0xEC, TrackEject46 = 0xED, TrackEject47 = 0xEE, TrackEject48 = 0xEF,
-			TrackEject49 = 0xF0, TrackEject50 = 0xF1, TrackEject51 = 0xF2, TrackEject52 = 0xF3,
-			TrackEject53 = 0xF4, TrackEject54 = 0xF5, TrackEject55 = 0xF6, TrackEject56 = 0xF7,
-			TrackEject57 = 0xF8, TrackEject58 = 0xF9, TrackEject59 = 0xFA, TrackEject60 = 0xFB,
-			TrackEject61 = 0xFC, TrackEject62 = 0xFD, TrackEject63 = 0xFE,
-
-			/* 0xFF for Not A Track */
-			TrackNotATrack = 0xFF,
-		}
-
 		public enum ActiveLevel
 		{
 			ActiveLow = 0x00,
@@ -156,13 +80,13 @@ namespace Spark.Slot.IO
 		/// the queue, or <c>SendQueue.AtEndQueue</c> to place the command at the end of the queue. Defaults to
 		/// <c>SendQueue.InFrontQueue</c>.
 		/// </param>
-		public bool QueryEjectCoin(CoinTrack track, byte count, SendQueue queuePosition = SendQueue.InFrontQueue)
+		public bool QueryEjectCoin(byte track, byte count, SendQueue queuePosition = SendQueue.InFrontQueue)
 		{
 			if (IsConnected)
 			{
 				var cmd = new SendCommand((int)Commands.CMD_EJECT_COIN);
-				cmd.AddBinArgument((byte)track);
-				cmd.AddBinArgument((uint)count);
+				cmd.AddBinArgument(track);
+				cmd.AddBinArgument(count);
 				mMessenger.SendCommand(cmd, queuePosition);
 				return true;
 			}
@@ -179,12 +103,12 @@ namespace Spark.Slot.IO
 		/// the queue, or <c>SendQueue.AtEndQueue</c> to place the command at the end of the queue. Defaults to
 		/// <c>SendQueue.InFrontQueue</c>.
 		/// </param>
-		public bool QueryGetCoinCounter(CoinTrack track, SendQueue queuePosition = SendQueue.InFrontQueue)
+		public bool QueryGetCoinCounter(byte track, SendQueue queuePosition = SendQueue.InFrontQueue)
 		{
 			if (IsConnected)
 			{
 				var cmd = new SendCommand((int)Commands.CMD_GET_COIN_COUNTER);
-				cmd.AddBinArgument((byte)track);
+				cmd.AddBinArgument(track);
 				mMessenger.SendCommand(cmd, queuePosition);
 				return true;
 			}
@@ -210,12 +134,12 @@ namespace Spark.Slot.IO
 			return false;
 		}
 
-		public bool QuerySetEjectTimeout(CoinTrack track, uint timeout, SendQueue queuePosition = SendQueue.InFrontQueue)
+		public bool QuerySetEjectTimeout(byte track, uint timeout, SendQueue queuePosition = SendQueue.InFrontQueue)
 		{
 			if (IsConnected)
 			{
 				var cmd = new SendCommand((int)Commands.CMD_SET_EJECT_TIMEOUT);
-				cmd.AddBinArgument((byte)track);
+				cmd.AddBinArgument(track);
 				cmd.AddBinArgument(timeout);
 				mMessenger.SendCommand(cmd, queuePosition);
 				return true;
@@ -237,12 +161,12 @@ namespace Spark.Slot.IO
 			return false;
 		}
 
-		public bool QuerySetTrackLevel(CoinTrack track, ActiveLevel level, SendQueue queuePosition = SendQueue.AtEndQueue)
+		public bool QuerySetTrackLevel(byte track, ActiveLevel level, SendQueue queuePosition = SendQueue.AtEndQueue)
 		{
 			if (IsConnected)
 			{
 				var cmd = new SendCommand((int)Commands.CMD_SET_TRACK_LEVEL);
-				cmd.AddBinArgument((byte)track);
+				cmd.AddBinArgument(track);
 				cmd.AddBinArgument((byte)level);
 				mMessenger.SendCommand(cmd, queuePosition);
 				return true;
@@ -301,12 +225,12 @@ namespace Spark.Slot.IO
 		/// the queue, or <c>SendQueue.AtEndQueue</c> to place the command at the end of the queue. Defaults to
 		/// <c>SendQueue.InFrontQueue</c>.
 		/// </param>
-		public bool QueryResetCoinCounter(CoinTrack track, SendQueue queuePosition = SendQueue.InFrontQueue)
+		public bool QueryResetCoinCounter(byte track, SendQueue queuePosition = SendQueue.InFrontQueue)
 		{
 			if (IsConnected)
 			{
 				var cmd = new SendCommand((int)Commands.CMD_RESET_COIN_COINTER);
-				cmd.AddBinArgument((byte)track);
+				cmd.AddBinArgument(track);
 				mMessenger.SendCommand(cmd, queuePosition);
 				return true;
 			}
@@ -346,7 +270,7 @@ namespace Spark.Slot.IO
 				if (IsConnected)
 					mMessenger.SendCommand(new SendCommand((int)Commands.CMD_ACK), SendQueue.InFrontQueue);
 
-				int track = receivedCommand.ReadBinByteArg();
+				byte track = receivedCommand.ReadBinByteArg();
 				uint coins = receivedCommand.ReadBinUInt32Arg();
 
 				if (OnCoinCounterResult != null)
@@ -389,20 +313,20 @@ namespace Spark.Slot.IO
 				{
 					case Errors.ERR_EJECT_INTERRUPTED:
 						{
-							var track = (CoinTrack)receivedCommand.ReadBinByteArg();
+							var track = receivedCommand.ReadBinByteArg();
 							var coins = receivedCommand.ReadBinByteArg();
 							e = new ErrorEjectInterruptedEventArgs(receivedCommand.TimeStamp, err, track, coins);
 						}
 						break;
 					case Errors.ERR_EJECT_TIMEOUT:
 						{
-							var track = (CoinTrack)receivedCommand.ReadBinByteArg();
+							var track = receivedCommand.ReadBinByteArg();
 							var coins = receivedCommand.ReadBinByteArg();
 							e = new ErrorEjectTimeoutEventArgs(receivedCommand.TimeStamp, err, track, coins);
 						}
 						break;
 					case Errors.ERR_NOT_A_TRACK:
-						e = new ErrorNotATrackEventArgs(receivedCommand.TimeStamp, err, (CoinTrack)receivedCommand.ReadBinByteArg());
+						e = new ErrorNotATrackEventArgs(receivedCommand.TimeStamp, err, receivedCommand.ReadBinByteArg());
 						break;
 					case Errors.ERR_NOT_A_COUNTER:
 						e = new ErrorNotACounterEventArgs(receivedCommand.TimeStamp, err, receivedCommand.ReadBinByteArg());
@@ -526,10 +450,10 @@ namespace Spark.Slot.IO
 
 		public class CoinCounterResultEventArgs : EventArgs
 		{
-			public int Track { get; internal set; }
+			public byte Track { get; internal set; }
 			public uint Coins { get; internal set; }
 
-			public CoinCounterResultEventArgs(long timestamp, int track, uint coins) :
+			public CoinCounterResultEventArgs(long timestamp, byte track, uint coins) :
 				base(timestamp)
 			{
 				Track = track;
@@ -587,9 +511,9 @@ namespace Spark.Slot.IO
 
 		public class ErrorTrackEventArgs : ErrorEventArgs
 		{
-			public CoinTrack Track { get; internal set; }
+			public byte Track { get; internal set; }
 
-			public ErrorTrackEventArgs(long timestamp, Errors error, CoinTrack track) :
+			public ErrorTrackEventArgs(long timestamp, Errors error, byte track) :
 				base(timestamp, error)
 			{
 				Track = track;
@@ -600,7 +524,7 @@ namespace Spark.Slot.IO
 		{
 			public byte CoinsFailed { get; internal set; }
 
-			public ErrorEjectInterruptedEventArgs(long timestamp, Errors error, CoinTrack track, byte coins) :
+			public ErrorEjectInterruptedEventArgs(long timestamp, Errors error, byte track, byte coins) :
 				base(timestamp, error, track)
 			{
 				CoinsFailed = coins;
@@ -611,7 +535,7 @@ namespace Spark.Slot.IO
 		{
 			public byte CoinsFailed { get; internal set; }
 
-			public ErrorEjectTimeoutEventArgs(long timestamp, Errors error, CoinTrack track, byte coins) :
+			public ErrorEjectTimeoutEventArgs(long timestamp, Errors error, byte track, byte coins) :
 				base(timestamp, error, track)
 			{
 				CoinsFailed = coins;
@@ -620,7 +544,7 @@ namespace Spark.Slot.IO
 
 		public class ErrorNotATrackEventArgs : ErrorTrackEventArgs
 		{
-			public ErrorNotATrackEventArgs(long timestamp, Errors error, CoinTrack track) :
+			public ErrorNotATrackEventArgs(long timestamp, Errors error, byte track) :
 				base(timestamp, error, track)
 			{
 			}
