@@ -104,7 +104,60 @@ public partial class MainWindow : Window
 
 				// null check, if other threads pops the error we might get null.
 				if (error != null)
-					Debug.WriteLine("Got an error: {0} on {1}", error.ErrorCode, error.DateTime);
+				{
+					// cast the errors according to error codes to get more information from it
+					switch (error.ErrorCode)
+					{
+						case IOCard.Errors.ERR_UNKNOWN_ERROR:
+							{
+								var e = (IOCard.ErrorUnknownErrorEventArgs)error;
+								Debug.WriteLine("Got: error = {0}, time = {1}", e.ErrorCode, e.DateTime);
+							}
+							break;
+						case IOCard.Errors.ERR_EJECT_INTERRUPTED:
+							{
+								var e = (IOCard.ErrorEjectInterruptedEventArgs)error;
+								Debug.WriteLine("Got: error = {0}, track = {1}, coins failed = {2}, time = {3}", e.ErrorCode, e.Track, e.CoinsFailed, e.DateTime);
+							}
+							break;
+						case IOCard.Errors.ERR_EJECT_TIMEOUT:
+							{
+								var e = (IOCard.ErrorEjectTimeoutEventArgs)error;
+								Debug.WriteLine("Got: error = {0}, track = {1}, coins failed = {2}, time = {3}", e.ErrorCode, e.Track, e.CoinsFailed, e.DateTime);
+							}
+							break;
+						case IOCard.Errors.ERR_NOT_A_TRACK:
+							{
+								var e = (IOCard.ErrorNotATrackEventArgs)error;
+								Debug.WriteLine("Got: error = {0}, track = {1}, time = {2}", e.ErrorCode, e.Track, e.DateTime);
+							}
+							break;
+						case IOCard.Errors.ERR_PROTECTED_STORAGE:
+							{
+								var e = (IOCard.ErrorProtectedStorageEventArgs)error;
+								Debug.WriteLine("Got: error = {0}, address = 0x{1:X4}, time = {2}", e.ErrorCode, e.Address, e.DateTime);
+							}
+							break;
+						case IOCard.Errors.ERR_TOO_LONG:
+							{
+								var e = (IOCard.ErrorTooLongEventArgs)error;
+								Debug.WriteLine("Got: error = {0}, desired = {1}, requested = {2}, time = {3}", e.DesiredLength, e.RequestedLength, e.DateTime);
+							}
+							break;
+						case IOCard.Errors.ERR_NOT_A_COUNTER:
+							{
+								var e = (IOCard.ErrorNotACounterEventArgs)error;
+								Debug.WriteLine("Got: error = {0}, counter = {1}, time = {3}", e.ErrorCode, e.AuditCounter, e.DateTime);
+							}
+							break;
+						case IOCard.Errors.ERR_UNKNOWN_COMMAND:
+							{
+								var e = (IOCard.ErrorUnknownCommandEventArgs)error;
+								Debug.WriteLine("Got: error = {0}, command = {1}, time = {2}", e.ErrorCode, e.Command, e.DateTime);
+							}
+							break;
+					}
+				}
 			}
 
 			// call this to tell the cache that all changes are processed.
