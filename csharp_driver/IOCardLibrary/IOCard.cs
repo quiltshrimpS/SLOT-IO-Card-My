@@ -16,6 +16,7 @@ namespace Spark.Slot.IO
 			CMD_RESET_COIN_COINTER = 0xC3,
 			CMD_ACK = 0xC5,
 			CMD_GET_COIN_COUNTER = 0xD2,
+			CMD_GET_KEY_MASKS = 0xD5,
 			CMD_EJECT_COIN = 0xE1,
 			CMD_SET_TRACK_LEVEL = 0xEA,
 			CMD_GET_INFO = 0xF0,
@@ -26,6 +27,7 @@ namespace Spark.Slot.IO
 			EVT_GET_INFO_RESULT = 0x0F,
 			EVT_COIN_COUNTER_RESULT = 0x2D,
 			EVT_KEYS_RESULT = 0x4B,
+			EVT_KEY_MASKS_RESULT = 0x5D,
 			EVT_WRITE_STORAGE_RESULT = 0x69,
 			EVT_READ_STORAGE_RESULT = 0x78,
 			EVT_ERROR = 0xFF,
@@ -129,6 +131,16 @@ namespace Spark.Slot.IO
 			if (IsConnected)
 			{
 				mMessenger.SendCommand(new SendCommand((int)Commands.CMD_GET_KEYS), queuePosition);
+				return true;
+			}
+			return false;
+		}
+
+		public bool QueryGetKeyMasks(SendQueue queuePosition = SendQueue.InFrontQueue)
+		{
+			if (IsConnected)
+			{
+				mMessenger.SendCommand(new SendCommand((int)Commands.CMD_GET_KEY_MASKS), queuePosition);
 				return true;
 			}
 			return false;
@@ -276,6 +288,16 @@ namespace Spark.Slot.IO
 				if (OnCoinCounterResult != null)
 					OnCoinCounterResult(this, new CoinCounterResultEventArgs(receivedCommand.TimeStamp, track, coins));
 			});
+			messenger.Attach((int)Events.EVT_KEY_MASKS_RESULT, (receivedCommand) =>
+			{
+				var count = receivedCommand.ReadBinByteArg();
+				var masks = new byte[count];
+				for (int i = 0; i < count; ++i)
+					masks[i] = receivedCommand.ReadBinByteArg();
+
+				if (OnKeyMasks != null)
+					OnKeyMasks(this, new KeyMasksEventArgs(receivedCommand.TimeStamp, masks));
+			});
 			messenger.Attach((int)Events.EVT_KEYS_RESULT, (receivedCommand) =>
 			{
 				var count = receivedCommand.ReadBinByteArg();
@@ -397,6 +419,7 @@ namespace Spark.Slot.IO
 		public event System.EventHandler<GetInfoResultEventArgs> OnGetInfoResult;
 		public event System.EventHandler<CoinCounterResultEventArgs> OnCoinCounterResult;
 		public event System.EventHandler<KeysEventArgs> OnKeys;
+		public event System.EventHandler<KeyMasksEventArgs> OnKeyMasks;
 		public event System.EventHandler<WriteStorageResultEventArgs> OnWriteStorageResult;
 		public event System.EventHandler<ReadStorageResultEventArgs> OnReadStorageResult;
 		public event System.EventHandler<ErrorEventArgs> OnError;
@@ -458,6 +481,17 @@ namespace Spark.Slot.IO
 			{
 				Track = track;
 				Coins = coins;
+			}
+		}
+
+		public class KeyMasksEventArgs : EventArgs
+		{
+			public byte[] KeyMasks { get; internal set; }
+
+			public KeyMasksEventArgs(long timestamp, byte[] masks) :
+				base(timestamp)
+			{
+				KeyMasks = masks;
 			}
 		}
 
