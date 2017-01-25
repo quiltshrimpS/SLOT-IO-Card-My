@@ -39,6 +39,7 @@ public:
 	{
 	}
 
+	__attribute__((always_inline)) inline
 	void dispatchGetInfoResult() {
 		_messenger.sendCmdStart(EVT_GET_INFO_RESULT);
 		_messenger.sendCmdArg(F("Spark"));
@@ -48,6 +49,7 @@ public:
 		_messenger.sendCmdEnd();
 	}
 
+	__attribute__((always_inline)) inline
 	void dispatchCoinCounterResult(uint8_t const track, uint32_t const coins) {
 		_messenger.sendCmdStart(EVT_COIN_COUNTER_RESULT);
 		_messenger.sendCmdBinArg<uint8_t>(track);
@@ -55,6 +57,7 @@ public:
 		_messenger.sendCmdEnd();
 	}
 
+	__attribute__((always_inline)) inline
 	void dispatchKey(uint8_t const length, uint8_t const * const keys) {
 		_messenger.sendCmdStart(EVT_KEYS);
 		_messenger.sendCmdBinArg<uint8_t>(length);
@@ -63,6 +66,7 @@ public:
 		_messenger.sendCmdEnd();
 	}
 
+	__attribute__((always_inline)) inline
 	void dispatchWriteStorageResult(uint16_t const address, uint8_t const length) {
 		_messenger.sendCmdStart(EVT_WRITE_STORAGE_RESULT);
 		_messenger.sendCmdBinArg<uint16_t>(address);
@@ -70,6 +74,7 @@ public:
 		_messenger.sendCmdEnd();
 	}
 
+	__attribute__((always_inline)) inline
 	void dispatchReadStorageResult(uint16_t const address, uint8_t const length, uint8_t const * const buffer) {
 		_messenger.sendCmdStart(EVT_READ_STORAGE_RESULT);
 		_messenger.sendCmdBinArg<uint16_t>(address);
@@ -79,6 +84,7 @@ public:
 		_messenger.sendCmdEnd();
 	}
 
+	__attribute__((always_inline)) inline
 	void dispatchErrorEjectInterrupted(uint8_t const track, uint8_t const count) {
 		_messenger.sendCmdStart(EVT_ERROR);
 		_messenger.sendCmdBinArg<uint8_t>(ERR_EJECT_INTERRUPTED);
@@ -87,6 +93,7 @@ public:
 		_messenger.sendCmdEnd();
 	}
 
+	__attribute__((always_inline)) inline
 	void dispatchErrorEjectTimeout(uint8_t const track, uint8_t const coins) {
 		_messenger.sendCmdStart(EVT_ERROR);
 		_messenger.sendCmdBinArg<uint8_t>(ERR_EJECT_TIMEOUT);
@@ -95,6 +102,7 @@ public:
 		_messenger.sendCmdEnd();
 	}
 
+	__attribute__((always_inline)) inline
 	void dispatchErrorNotATrack(uint8_t const track) {
 		_messenger.sendCmdStart(EVT_ERROR);
 		_messenger.sendCmdBinArg<uint8_t>(ERR_NOT_A_TRACK);
@@ -102,6 +110,7 @@ public:
 		_messenger.sendCmdEnd();
 	}
 
+	__attribute__((always_inline)) inline
 	void dispatchErrorNotACounter(uint8_t const counter) {
 		_messenger.sendCmdStart(EVT_ERROR);
 		_messenger.sendCmdBinArg<uint8_t>(ERR_NOT_A_COUNTER);
@@ -109,6 +118,7 @@ public:
 		_messenger.sendCmdEnd();
 	}
 
+	__attribute__((always_inline)) inline
 	void dispatchErrorProtectedStorage(uint16_t const address) {
 		_messenger.sendCmdStart(EVT_ERROR);
 		_messenger.sendCmdBinArg<uint8_t>(ERR_PROTECTED_STORAGE);
@@ -124,6 +134,7 @@ public:
 		_messenger.sendCmdEnd();
 	}
 
+	__attribute__((always_inline)) inline
 	void dispatchErrorUnknownCommand(uint8_t const command) {
 		_messenger.sendCmdStart(EVT_ERROR);
 		_messenger.sendCmdBinArg<uint8_t>(ERR_UNKNOWN_COMMAND);
