@@ -641,7 +641,7 @@ public partial class MainWindow : Window
 				);
 			});
 		};
-		sCard.OnKey += (sender, e) =>
+		sCard.OnKeys += (sender, e) =>
 		{
 			Application.Invoke(delegate
 			{
