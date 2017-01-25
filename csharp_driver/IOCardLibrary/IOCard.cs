@@ -266,7 +266,38 @@ namespace Spark.Slot.IO
 			};
 
 			var messenger = new CmdMessenger(transport, 512);
-			messenger.Attach((int)Events.EVT_GET_INFO_RESULT, (receivedCommand) =>
+
+			if (messenger.Connect())
+			{
+				mMessenger = messenger;
+				_attachCallbacks();
+				if (OnConnected != null)
+					OnConnected(this, System.EventArgs.Empty);
+				return;
+			}
+
+			throw new System.InvalidOperationException("Connecting failed for unknown reason.");
+		}
+
+		public bool Disconnect()
+		{
+			if (IsConnected)
+			{
+				var status = mMessenger.Disconnect();
+				if (status)
+				{
+					mMessenger = null;
+					if (OnDisconnected != null)
+						OnDisconnected(this, System.EventArgs.Empty);
+				}
+				return status;
+			}
+			return false;
+		}
+
+		void _attachCallbacks()
+		{
+			mMessenger.Attach((int)Events.EVT_GET_INFO_RESULT, (receivedCommand) =>
 			{
 				string manufacturer = receivedCommand.ReadBinStringArg();
 				string product = receivedCommand.ReadBinStringArg();
@@ -276,7 +307,7 @@ namespace Spark.Slot.IO
 				if (OnGetInfoResult != null)
 					OnGetInfoResult(this, new GetInfoResultEventArgs(receivedCommand.TimeStamp, manufacturer, product, version, protocol));
 			});
-			messenger.Attach((int)Events.EVT_COIN_COUNTER_RESULT, (receivedCommand) =>
+			mMessenger.Attach((int)Events.EVT_COIN_COUNTER_RESULT, (receivedCommand) =>
 			{
 				// ACK this event so ejection don't get interruptted.
 				if (IsConnected)
@@ -288,7 +319,7 @@ namespace Spark.Slot.IO
 				if (OnCoinCounterResult != null)
 					OnCoinCounterResult(this, new CoinCounterResultEventArgs(receivedCommand.TimeStamp, track, coins));
 			});
-			messenger.Attach((int)Events.EVT_KEY_MASKS_RESULT, (receivedCommand) =>
+			mMessenger.Attach((int)Events.EVT_KEY_MASKS_RESULT, (receivedCommand) =>
 			{
 				var count = receivedCommand.ReadBinByteArg();
 				var masks = new byte[count];
@@ -298,7 +329,7 @@ namespace Spark.Slot.IO
 				if (OnKeyMasks != null)
 					OnKeyMasks(this, new KeyMasksEventArgs(receivedCommand.TimeStamp, masks));
 			});
-			messenger.Attach((int)Events.EVT_KEYS_RESULT, (receivedCommand) =>
+			mMessenger.Attach((int)Events.EVT_KEYS_RESULT, (receivedCommand) =>
 			{
 				var count = receivedCommand.ReadBinByteArg();
 				var keys = new byte[count];
@@ -308,7 +339,7 @@ namespace Spark.Slot.IO
 				if (OnKeys != null)
 					OnKeys(this, new KeysEventArgs(receivedCommand.TimeStamp, keys));
 			});
-			messenger.Attach((int)Events.EVT_WRITE_STORAGE_RESULT, (receivedCommand) =>
+			mMessenger.Attach((int)Events.EVT_WRITE_STORAGE_RESULT, (receivedCommand) =>
 			{
 				var address = receivedCommand.ReadBinUInt16Arg();
 				var length = receivedCommand.ReadBinByteArg();
@@ -316,7 +347,7 @@ namespace Spark.Slot.IO
 				if (OnWriteStorageResult != null)
 					OnWriteStorageResult(this, new WriteStorageResultEventArgs(receivedCommand.TimeStamp, address, length));
 			});
-			messenger.Attach((int)Events.EVT_READ_STORAGE_RESULT, (receivedCommand) =>
+			mMessenger.Attach((int)Events.EVT_READ_STORAGE_RESULT, (receivedCommand) =>
 			{
 				var address = receivedCommand.ReadBinUInt16Arg();
 				var length = receivedCommand.ReadBinByteArg();
@@ -327,7 +358,7 @@ namespace Spark.Slot.IO
 				if (OnReadStorageResult != null)
 					OnReadStorageResult(this, new ReadStorageResultEventArgs(receivedCommand.TimeStamp, address, data));
 			});
-			messenger.Attach((int)Events.EVT_ERROR, (receivedCommand) =>
+			mMessenger.Attach((int)Events.EVT_ERROR, (receivedCommand) =>
 			{
 				ErrorEventArgs e = null;
 				var err = (Errors)receivedCommand.ReadBinByteArg();
@@ -374,42 +405,16 @@ namespace Spark.Slot.IO
 				if (OnError != null)
 					OnError(this, e);
 			});
-			messenger.Attach((int)Events.EVT_DEBUG, (receivedCommand) =>
+			mMessenger.Attach((int)Events.EVT_DEBUG, (receivedCommand) =>
 			{
 				if (OnDebug != null)
 					OnDebug(this, new DebugEventArgs(receivedCommand.TimeStamp, receivedCommand.ReadBinStringArg()));
 			});
-			messenger.Attach((receivedCommand) =>
+			mMessenger.Attach((receivedCommand) =>
 			{
 				if (OnUnknown != null)
 					OnUnknown(this, new UnknownEventArgs(receivedCommand.TimeStamp, receivedCommand));
 			});
-
-			if (messenger.Connect())
-			{
-				mMessenger = messenger;
-				if (OnConnected != null)
-					OnConnected(this, System.EventArgs.Empty);
-				return;
-			}
-
-			throw new System.InvalidOperationException("Connecting failed for unknown reason.");
-		}
-
-		public bool Disconnect()
-		{
-			if (IsConnected)
-			{
-				var status = mMessenger.Disconnect();
-				if (status)
-				{
-					mMessenger = null;
-					if (OnDisconnected != null)
-						OnDisconnected(this, System.EventArgs.Empty);
-				}
-				return status;
-			}
-			return false;
 		}
 
 		public bool IsConnected { get { return mMessenger != null; } }
