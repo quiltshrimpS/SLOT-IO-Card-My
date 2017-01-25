@@ -260,13 +260,10 @@ namespace Spark.Slot.IO
 			if (mMessenger != null)
 				throw new System.InvalidOperationException("Already connected.");
 
-			var transport = new SerialTransport
-			{
-				CurrentSerialSettings = { PortName = port, BaudRate = baudrate, DtrEnable = false }
-			};
-
-			var messenger = new CmdMessenger(transport, 512);
-
+			var messenger = new CmdMessenger(
+				new SerialTransport { CurrentSerialSettings = { PortName = port, BaudRate = baudrate, DtrEnable = false } },
+				512
+			);
 			if (messenger.Connect())
 			{
 				mMessenger = messenger;
