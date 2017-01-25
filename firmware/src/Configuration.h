@@ -145,16 +145,11 @@ public:
 
 	__attribute__((always_inline)) inline
 	uint8_t getTrackLevel(uint8_t const track) {
-		if (track >= NUM_TRACKS)
-			return TRACK_NOT_A_TRACK;
 		return bitRead(_data.configs.track_levels.bytes, track);
 	}
 
 	__attribute__((always_inline)) inline
-	bool setTrackLevel(uint8_t const track, bool const level) {
-		if (track >= NUM_TRACKS)
-			return false;
-
+	void setTrackLevel(uint8_t const track, bool const level) {
 		bitSet(_data.configs.track_levels.bytes, track);
 		_data.configs.crc = _getChecksum();
 		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_COIN_TRACK_LEVEL, _data.bytes[CONF_OFFSET_COIN_TRACK_LEVEL]);
@@ -162,7 +157,6 @@ public:
 		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_COIN_TRACK_LEVEL, _data.bytes[CONF_OFFSET_COIN_TRACK_LEVEL]);
 		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
 		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
-		return true;
 	}
 
 	__attribute__((always_inline)) inline
@@ -172,80 +166,56 @@ public:
 
 	__attribute__((always_inline)) inline
 	uint8_t getCoinsToEject(uint8_t const track) {
-		if (track >= NUM_EJECT_TRACKS)
-			return 0;
 		return _data.configs.coins_to_eject[track];
 	}
 
 	__attribute__((always_inline)) inline
-	bool setCoinsToEject(uint8_t const track, uint8_t const coins) {
-		if (track >= NUM_EJECT_TRACKS)
-			return false;
-
+	void setCoinsToEject(uint8_t const track, uint8_t const coins) {
 		_data.configs.coins_to_eject[track] = coins;
 		_data.configs.crc = _getChecksum();
 		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_COINS_TO_EJECT + track, coins);
 		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
 		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_COINS_TO_EJECT + track, coins);
 		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
-
 		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
-
-		return true;
 	}
 
 	__attribute__((always_inline)) inline
 	uint32_t getCoinCount(uint8_t const track) {
-		if (track >= NUM_TRACKS)
-			return 0;
 		return _data.configs.coin_count[track];
 	}
 
 	__attribute__((always_inline)) inline
-	bool setCoinCount(uint8_t const track, uint32_t const count) {
-		if (track >= NUM_TRACKS)
-			return false;
-
+	void setCoinCount(uint8_t const track, uint32_t const count) {
 		_data.configs.coin_count[track] = count;
 		_data.configs.crc = _getChecksum();
 		_fram.writeLong(CONF_ADDR_BANK_0 + CONF_OFFSET_COIN_COUNT + track * sizeof(uint32_t), count);
 		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
 		_fram.writeLong(CONF_ADDR_BANK_1 + CONF_OFFSET_COIN_COUNT + track * sizeof(uint32_t), count);
 		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
-
 		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
-
-		return true;
 	}
 
 	__attribute__((always_inline)) inline
 	uint32_t getEjectTimeout(uint8_t const track) {
-		if (track >= NUM_EJECT_TRACKS)
-			return 0;
 		return _data.configs.eject_timeout[track];
 	}
 
 	__attribute__((always_inline)) inline
-	bool setEjectTimeout(uint8_t const track, uint32_t const timeout) {
-		if (track >= NUM_EJECT_TRACKS)
-			return false;
-
+	void setEjectTimeout(uint8_t const track, uint32_t const timeout) {
 		_data.configs.eject_timeout[track] = timeout;
 		_data.configs.crc = _getChecksum();
 		_fram.writeLong(CONF_ADDR_BANK_0 + CONF_OFFSET_EJECT_TIMEOUT + track * sizeof(uint32_t), timeout);
 		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
 		_fram.writeLong(CONF_ADDR_BANK_1 + CONF_OFFSET_EJECT_TIMEOUT + track * sizeof(uint32_t), timeout);
 		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
-
 		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
-
-		return true;
 	}
 
 	__attribute__((always_inline)) inline
 	void dumpBuffer(char const * const tag, uint8_t const * const buffer, size_t const size) {
 		#if defined(DEBUG_SERIAL)
-		DEBUG_SERIAL.print(F("90,conf = "));
+		DEBUG_SERIAL.print(F("90,conf"));
 		if (tag != nullptr) {
 			DEBUG_SERIAL.print(' ');
 			DEBUG_SERIAL.print(tag);

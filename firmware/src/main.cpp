@@ -213,12 +213,15 @@ void setup() {
 					// block newer command if there are still coins left to be ejected
 					if (count != 0 && coins != 0) {
 						communicator.dispatchErrorEjectInterrupted(track, coins);
-					} else if (!conf.setCoinsToEject(track, count)) {
+					} else if (track >= NUM_EJECT_TRACKS) {
 						communicator.dispatchErrorNotATrack(track);
-					} else if (count != 0) {
-						tracker_eject.start();
-						out.port.ssr1 = true;
-						do_send = true;
+					} else {
+						conf.setCoinsToEject(track, count);
+						if (count != 0) {
+							tracker_eject.start();
+							out.port.ssr1 = true;
+							do_send = true;
+						}
 					}
 				}
 				break;
@@ -234,8 +237,12 @@ void setup() {
 			case CMD_RESET_COIN_COINTER:
 				{
 					uint8_t const track = messenger.readBinArg<uint8_t>();
-					if (!conf.setCoinCount(track, 0))
+					if (track >= NUM_TRACKS) {
 						communicator.dispatchErrorNotATrack(track);
+					} else {
+						conf.setCoinCount(track, 0);
+
+					}
 				}
 				break;
 			case CMD_GET_KEYS:
@@ -271,19 +278,23 @@ void setup() {
 			case CMD_SET_TRACK_LEVEL:
 				{
 					uint8_t const track = messenger.readBinArg<uint8_t>();
-					uint8_t const level = messenger.readBinArg<bool>();
-					if (!conf.setTrackLevel(track, level))
+					if (track >= NUM_TRACKS) {
 						communicator.dispatchErrorNotATrack(track);
+					} else {
+						uint8_t const level = messenger.readBinArg<bool>();
+						conf.setTrackLevel(track, level);
+					}
 				}
 				break;
 			case CMD_SET_EJECT_TIMEOUT:
 				{
 					uint8_t const track = messenger.readBinArg<uint8_t>();
-					uint32_t const timeout = messenger.readBinArg<uint32_t>();
-					if (!conf.setEjectTimeout(track, timeout))
+					if (track >= NUM_EJECT_TRACKS) {
 						communicator.dispatchErrorNotATrack(track);
-					else
-						tracker_eject.begin(timeout);
+					} else {
+						uint32_t const timeout = messenger.readBinArg<uint32_t>();
+						conf.setEjectTimeout(track, timeout);
+					}
 				}
 				break;
 			case CMD_WRITE_STORAGE:
