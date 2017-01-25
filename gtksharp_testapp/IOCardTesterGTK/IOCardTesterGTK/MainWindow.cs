@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
 using Gtk;
@@ -93,6 +94,17 @@ public partial class MainWindow : Window
 			{
 				// tick audit counter 0 for 100 times, and this command placed in front of the queue.
 				mCardCache.Card.QueryTickAuditCounter(0, 100, CommandMessenger.SendQueue.InFrontQueue);
+			}
+
+			// get the errors like this
+			while (!mCardCache.IsErrorQueueEmpty)
+			{
+				// pop an error
+				var error = mCardCache.PopError();
+
+				// null check, if other threads pops the error we might get null.
+				if (error != null)
+					Debug.WriteLine("Got an error: {0} on {1}", error.ErrorCode, error.DateTime);
 			}
 
 			// call this to tell the cache that all changes are processed.
