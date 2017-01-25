@@ -82,6 +82,12 @@ public partial class MainWindow : Window
 		// and you can safely skip every processing.
 		if (mCardCache.IsChanged)
 		{
+			// get keys like this, depends on active level, normally active low.
+			if (mCardCache.GetKey(0) == IOCardStateCache.KeyState.StateLow)
+			{
+				mCardCache.Card.QueryEjectCoin(0, 5); // eject 5 coins from track 0
+			}
+
 			// call this to tell the cache that all changes are processed.
 			mCardCache.Processed();
 		}
