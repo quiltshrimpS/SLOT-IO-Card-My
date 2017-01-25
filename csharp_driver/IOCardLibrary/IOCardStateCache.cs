@@ -161,7 +161,7 @@ namespace Spark.Slot.IO
 		/// </summary>
 		/// <returns>The key.</returns>
 		/// <param name="key">Key.</param>
-		public KeyState getKey(byte key)
+		public KeyState GetKey(byte key)
 		{
 			lock (mKeyStates)
 			{
