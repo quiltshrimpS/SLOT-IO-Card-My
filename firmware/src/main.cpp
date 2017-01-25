@@ -308,9 +308,12 @@ void setup() {
 				{
 					uint16_t const address = messenger.readBinArg<uint16_t>();
 					uint8_t const length = messenger.readBinArg<uint8_t>();
+				#if !defined(DEBUG_SERIAL)
 					if (address < 0x200) {
 						communicator.dispatchErrorProtectedStorage(address);
-					} else if (length > MAX_BYTES_LENGTH) {
+					} else
+				#endif
+					if (length > MAX_BYTES_LENGTH) {
 						communicator.dispatchErrorTooLong(length);
 					} else {
 						uint8_t buffer[length];
