@@ -318,7 +318,7 @@ public:
 	}
 
 private:
-	__attribute__((always_inline)) inline
+	__attribute__((always_inline, optimize("unroll-loops"))) inline
 	uint8_t _getChecksum() {
 		#if defined(DEBUG_SERIAL)
 		uint32_t t1, t2;
