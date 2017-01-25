@@ -9,7 +9,7 @@ namespace Spark.Slot.IO
 		{
 			CMD_READ_STORAGE = 0x87,
 			CMD_WRITE_STORAGE = 0x96,
-			CMD_TICK_COUNTER = 0x99,
+			CMD_TICK_AUDIT_COUNTER = 0x99,
 			CMD_GET_KEYS = 0xA5,
 			CMD_SET_EJECT_TIMEOUT = 0xB0,
 			CMD_SET_OUTPUT = 0xB4,
@@ -259,11 +259,11 @@ namespace Spark.Slot.IO
 			return false;
 		}
 
-		public bool QueryTickCounter(AuditCounter counter, byte ticks, SendQueue queuePosition = SendQueue.InFrontQueue)
+		public bool QueryTickAuditCounter(AuditCounter counter, byte ticks, SendQueue queuePosition = SendQueue.InFrontQueue)
 		{
 			if (IsConnected)
 			{
-				var cmd = new SendCommand((int)Commands.CMD_TICK_COUNTER);
+				var cmd = new SendCommand((int)Commands.CMD_TICK_AUDIT_COUNTER);
 				cmd.AddBinArgument((byte)counter);
 				cmd.AddBinArgument(ticks);
 				mMessenger.SendCommand(cmd, queuePosition);

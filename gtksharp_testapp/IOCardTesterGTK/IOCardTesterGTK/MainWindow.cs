@@ -281,7 +281,7 @@ public partial class MainWindow : Window
 		);
 		mCommandProperty_TickCounter = new CommandProperty(
 			wrong_params_callback,
-			IOCard.Commands.CMD_TICK_COUNTER, 2,
+			IOCard.Commands.CMD_TICK_AUDIT_COUNTER, 2,
 			"Tick the audit counter",
 			"Params: <counter (1 byte)>, <ticks (1 byte)>",
 			new string[] {

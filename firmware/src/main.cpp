@@ -249,7 +249,7 @@ void setup() {
 					}
 				}
 				break;
-			case CMD_TICK_COUNTER:
+			case CMD_TICK_AUDIT_COUNTER:
 				{
 					uint8_t const counter = messenger.readBinArg<uint8_t>();
 					uint8_t const ticks = messenger.readBinArg<uint8_t>();
