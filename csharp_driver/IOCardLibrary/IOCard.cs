@@ -25,7 +25,7 @@ namespace Spark.Slot.IO
 		{
 			EVT_GET_INFO_RESULT = 0x0F,
 			EVT_COIN_COUNTER_RESULT = 0x2D,
-			EVT_KEY = 0x4B,
+			EVT_KEYS_RESULT = 0x4B,
 			EVT_WRITE_STORAGE_RESULT = 0x69,
 			EVT_READ_STORAGE_RESULT = 0x78,
 			EVT_ERROR = 0xFF,
@@ -276,15 +276,15 @@ namespace Spark.Slot.IO
 				if (OnCoinCounterResult != null)
 					OnCoinCounterResult(this, new CoinCounterResultEventArgs(receivedCommand.TimeStamp, track, coins));
 			});
-			messenger.Attach((int)Events.EVT_KEY, (receivedCommand) =>
+			messenger.Attach((int)Events.EVT_KEYS_RESULT, (receivedCommand) =>
 			{
 				var count = receivedCommand.ReadBinByteArg();
 				var keys = new byte[count];
 				for (int i = 0; i < count; ++i)
 					keys[i] = receivedCommand.ReadBinByteArg();
 
-				if (OnKey != null)
-					OnKey(this, new KeyEventArgs(receivedCommand.TimeStamp, keys));
+				if (OnKeys != null)
+					OnKeys(this, new KeysEventArgs(receivedCommand.TimeStamp, keys));
 			});
 			messenger.Attach((int)Events.EVT_WRITE_STORAGE_RESULT, (receivedCommand) =>
 			{
@@ -396,7 +396,7 @@ namespace Spark.Slot.IO
 		public event System.EventHandler OnDisconnected;
 		public event System.EventHandler<GetInfoResultEventArgs> OnGetInfoResult;
 		public event System.EventHandler<CoinCounterResultEventArgs> OnCoinCounterResult;
-		public event System.EventHandler<KeyEventArgs> OnKey;
+		public event System.EventHandler<KeysEventArgs> OnKeys;
 		public event System.EventHandler<WriteStorageResultEventArgs> OnWriteStorageResult;
 		public event System.EventHandler<ReadStorageResultEventArgs> OnReadStorageResult;
 		public event System.EventHandler<ErrorEventArgs> OnError;
@@ -461,11 +461,11 @@ namespace Spark.Slot.IO
 			}
 		}
 
-		public class KeyEventArgs : EventArgs
+		public class KeysEventArgs : EventArgs
 		{
 			public byte[] Keys { get; internal set; }
 
-			public KeyEventArgs(long timestamp, byte[] keys) :
+			public KeysEventArgs(long timestamp, byte[] keys) :
 				base(timestamp)
 			{
 				Keys = keys;
