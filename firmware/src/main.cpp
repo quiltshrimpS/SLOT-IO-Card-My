@@ -59,10 +59,11 @@ TimeoutTracker tracker_nack;
 TimeoutTracker tracker_eject;
 #endif
 
-Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_score;
-Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_wash;
-Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_insert;
-Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counter_eject;
+Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counters[4];
+#define PULSE_COUNTER_SCORE (pulse_counters[0])
+#define PULSE_COUNTER_WASH (pulse_counters[1])
+#define PULSE_COUNTER_INSERT (pulse_counters[2])
+#define PULSE_COUNTER_EJECT (pulse_counters[3])
 
 class EmptyFunctorT {
 public:
@@ -87,7 +88,7 @@ public:
 	void operator () () {
 		uint32_t coins = conf.getCoinCount(TRACK_EJECT) + 1;
 		conf.setCoinCount(TRACK_EJECT, coins);
-		pulse_counter_eject.pulse(1);
+		PULSE_COUNTER_EJECT.pulse(1);
 		uint8_t to_eject = conf.getCoinsToEject(TRACK_EJECT);
 		if (to_eject < 2) {
 			tracker_eject.stop();
@@ -112,7 +113,7 @@ public:
 		uint32_t coins = conf.getCoinCount(TRACK_INSERT_1) + 1;
 		conf.setCoinCount(TRACK_INSERT_1, coins);
 		communicator.dispatchCoinCounterResult(TRACK_INSERT_1, coins);
-		pulse_counter_insert.pulse(1);
+		PULSE_COUNTER_INSERT.pulse(1);
 	}
 };
 Debounce<LOW, DEBOUNCE_TIMEOUT, EmptyFunctorT, DebounceInsert1FallFunctorT> debounce_insert_1;
@@ -124,7 +125,7 @@ public:
 		uint32_t coins = conf.getCoinCount(TRACK_INSERT_2) + 1;
 		conf.setCoinCount(TRACK_INSERT_2, coins);
 		communicator.dispatchCoinCounterResult(TRACK_INSERT_2, coins);
-		pulse_counter_insert.pulse(1);
+		PULSE_COUNTER_INSERT.pulse(1);
 	}
 };
 Debounce<LOW, DEBOUNCE_TIMEOUT, EmptyFunctorT, DebounceInsert2FallFunctorT> debounce_insert_2;
@@ -136,7 +137,7 @@ public:
 		uint32_t coins = conf.getCoinCount(TRACK_INSERT_3) + 1;
 		conf.setCoinCount(TRACK_INSERT_3, coins);
 		communicator.dispatchCoinCounterResult(TRACK_INSERT_3, coins);
-		pulse_counter_insert.pulse(1);
+		PULSE_COUNTER_INSERT.pulse(1);
 	}
 };
 Debounce<LOW, DEBOUNCE_TIMEOUT, EmptyFunctorT, DebounceInsert3FallFunctorT> debounce_insert_3;
@@ -254,14 +255,14 @@ void setup() {
 					uint8_t const counter = messenger.readBinArg<uint8_t>();
 					uint8_t const ticks = messenger.readBinArg<uint8_t>();
 					if (counter == 1) {
-						pulse_counter_score.pulse(ticks);
+						PULSE_COUNTER_SCORE.pulse(ticks);
 					} else if (counter == 2) {
-						pulse_counter_wash.pulse(ticks);
+						PULSE_COUNTER_WASH.pulse(ticks);
 				#if defined(DEBUG_SERIAL)
 					} else if (counter == 3) {
-						pulse_counter_insert.pulse(ticks);
+						PULSE_COUNTER_INSERT.pulse(ticks);
 					} else if (counter == 4) {
-						pulse_counter_eject.pulse(ticks);
+						PULSE_COUNTER_EJECT.pulse(ticks);
 				#endif
 					} else {
 						communicator.dispatchErrorNotACounter(counter);
@@ -376,36 +377,36 @@ void loop() {
 	debounce_eject.feed(in.port.sw11, track_levels.bits.track_level_4, now);
 
 	// pulse the counters
-	if (pulse_counter_score.update(now))
+	if (PULSE_COUNTER_SCORE.update(now))
 	{
-		out.port.counter1 = pulse_counter_score.get();
+		out.port.counter1 = PULSE_COUNTER_SCORE.get();
 		#if defined(DEBUG_SERIAL)
 		DEBUG_SERIAL.print(F("90,pulsing counter1 = "));
 		DEBUG_SERIAL.print(out.port.counter1 ? F("HIGH;") : F("LOW;"));
 		#endif
 		do_send = true;
 	}
-	if (pulse_counter_wash.update(now))
+	if (PULSE_COUNTER_WASH.update(now))
 	{
-		out.port.counter2 = pulse_counter_wash.get();
+		out.port.counter2 = PULSE_COUNTER_WASH.get();
 		#if defined(DEBUG_SERIAL)
 		DEBUG_SERIAL.print(F("90,pulsing counter2 = "));
 		DEBUG_SERIAL.print(out.port.counter2 ? F("HIGH;") : F("LOW;"));
 		#endif
 		do_send = true;
 	}
-	if (pulse_counter_insert.update(now))
+	if (PULSE_COUNTER_INSERT.update(now))
 	{
-		out.port.counter3 = pulse_counter_insert.get();
+		out.port.counter3 = PULSE_COUNTER_INSERT.get();
 		#if defined(DEBUG_SERIAL)
 		DEBUG_SERIAL.print(F("90,pulsing counter3 = "));
 		DEBUG_SERIAL.print(out.port.counter3 ? F("HIGH;") : F("LOW;"));
 		#endif
 		do_send = true;
 	}
-	if (pulse_counter_eject.update(now))
+	if (PULSE_COUNTER_EJECT.update(now))
 	{
-		out.port.counter4 = pulse_counter_eject.get();
+		out.port.counter4 = PULSE_COUNTER_EJECT.get();
 		#if defined(DEBUG_SERIAL)
 		DEBUG_SERIAL.print(F("90,pulsing counter4 = "));
 		DEBUG_SERIAL.print(out.port.counter4 ? F("HIGH;") : F("LOW;"));
