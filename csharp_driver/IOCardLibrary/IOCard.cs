@@ -53,9 +53,9 @@ namespace Spark.Slot.IO
 		}
 
 		/// <summary>
-		/// queue a GET_INFO command
+		/// queues a GET_INFO command
 		/// </summary>
-		/// <returns><c>true</c>, if GET_INFO was queued, <c>false</c> otherwise.</returns>
+		/// <returns><c>true</c>, if the command was queued, <c>false</c> otherwise.</returns>
 		/// <param name="queuePosition">
 		/// position of the command to be placed, either <c>SendQueue.InFrontQueue</c> to place the command in front of
 		/// the queue, or <c>SendQueue.AtEndQueue</c> to place the command at the end of the queue. Defaults to
@@ -72,9 +72,9 @@ namespace Spark.Slot.IO
 		}
 
 		/// <summary>
-		/// queue a EJECT_COIN command
+		/// queues a EJECT_COIN command
 		/// </summary>
-		/// <returns><c>true</c>, if EJECT_COIN was queued, <c>false</c> otherwise.</returns>
+		/// <returns><c>true</c>, if the command was queued, <c>false</c> otherwise.</returns>
 		/// <param name="track"><c>CoinTrack</c> indicates which track to eject</param>
 		/// <param name="count">number of coins to be ejected.</param>
 		/// <param name="queuePosition">
@@ -96,9 +96,9 @@ namespace Spark.Slot.IO
 		}
 
 		/// <summary>
-		/// queue a GET_COIN_COUNTER command
+		/// queues a GET_COIN_COUNTER command
 		/// </summary>
-		/// <returns><c>true</c>, if GET_COIN_COUNTER was queued, <c>false</c> otherwise.</returns>
+		/// <returns><c>true</c>, if the command was queued, <c>false</c> otherwise.</returns>
 		/// <param name="track"><c>CoinTrack</c> indicates which track to get</param>
 		/// <param name="queuePosition">
 		/// position of the command to be placed, either <c>SendQueue.InFrontQueue</c> to place the command in front of
@@ -118,9 +118,9 @@ namespace Spark.Slot.IO
 		}
 
 		/// <summary>
-		/// queue a GET_KEYS command
+		/// queues a GET_KEYS command
 		/// </summary>
-		/// <returns><c>true</c>, if GET_KEYS was queued, <c>false</c> otherwise.</returns>
+		/// <returns><c>true</c>, if the command was queued, <c>false</c> otherwise.</returns>
 		/// <param name="queuePosition">
 		/// position of the command to be placed, either <c>SendQueue.InFrontQueue</c> to place the command in front of
 		/// the queue, or <c>SendQueue.AtEndQueue</c> to place the command at the end of the queue. Defaults to
@@ -136,6 +136,15 @@ namespace Spark.Slot.IO
 			return false;
 		}
 
+		/// <summary>
+		/// queues a GET_KEY_MASKS command
+		/// </summary>
+		/// <returns><c>true</c>, if the command was queued, <c>false</c> otherwise.</returns>
+		/// <param name="queuePosition">
+		/// position of the command to be placed, either <c>SendQueue.InFrontQueue</c> to place the command in front of
+		/// the queue, or <c>SendQueue.AtEndQueue</c> to place the command at the end of the queue. Defaults to
+		/// <c>SendQueue.InFrontQueue</c>.
+		/// </param>
 		public bool QueryGetKeyMasks(SendQueue queuePosition = SendQueue.InFrontQueue)
 		{
 			if (IsConnected)
@@ -146,6 +155,19 @@ namespace Spark.Slot.IO
 			return false;
 		}
 
+		/// <summary>
+		/// queues a SET_EJECT_TIMEOUT command
+		/// </summary>
+		/// <returns><c>true</c>, if the command was queued, <c>false</c> otherwise.</returns>
+		/// <param name="track">Track.</param>
+		/// <param name="timeout">
+		/// Timeout, in microseconds. Timeouts less than 1000us might not work, since processing takes time...
+		/// </param>
+		/// <param name="queuePosition">
+		/// position of the command to be placed, either <c>SendQueue.InFrontQueue</c> to place the command in front of
+		/// the queue, or <c>SendQueue.AtEndQueue</c> to place the command at the end of the queue. Defaults to
+		/// <c>SendQueue.InFrontQueue</c>.
+		/// </param>
 		public bool QuerySetEjectTimeout(byte track, uint timeout, SendQueue queuePosition = SendQueue.InFrontQueue)
 		{
 			if (IsConnected)
@@ -159,6 +181,16 @@ namespace Spark.Slot.IO
 			return false;
 		}
 
+		/// <summary>
+		/// queues a SET_OUTPUT command
+		/// </summary>
+		/// <returns><c>true</c>, if the command was queued, <c>false</c> otherwise.</returns>
+		/// <param name="outputs">Outputs.</param>
+		/// <param name="queuePosition">
+		/// position of the command to be placed, either <c>SendQueue.InFrontQueue</c> to place the command in front of
+		/// the queue, or <c>SendQueue.AtEndQueue</c> to place the command at the end of the queue. Defaults to
+		/// <c>SendQueue.AtEndQueue</c>.
+		/// </param>
 		public bool QuerySetOutput(byte[] outputs, SendQueue queuePosition = SendQueue.AtEndQueue)
 		{
 			if (IsConnected)
@@ -173,7 +205,18 @@ namespace Spark.Slot.IO
 			return false;
 		}
 
-		public bool QuerySetTrackLevel(byte track, ActiveLevel level, SendQueue queuePosition = SendQueue.AtEndQueue)
+		/// <summary>
+		/// queues a SET_TRACK_LEVEL command
+		/// </summary>
+		/// <returns><c>true</c>, if the command was queued, <c>false</c> otherwise.</returns>
+		/// <param name="track">Track.</param>
+		/// <param name="level">Level.</param>
+		/// <param name="queuePosition">
+		/// position of the command to be placed, either <c>SendQueue.InFrontQueue</c> to place the command in front of
+		/// the queue, or <c>SendQueue.AtEndQueue</c> to place the command at the end of the queue. Defaults to
+		/// <c>SendQueue.InFrontQueue</c>.
+		/// </param>
+		public bool QuerySetTrackLevel(byte track, ActiveLevel level, SendQueue queuePosition = SendQueue.InFrontQueue)
 		{
 			if (IsConnected)
 			{
@@ -186,6 +229,17 @@ namespace Spark.Slot.IO
 			return false;
 		}
 
+		/// <summary>
+		/// queues a TICK_AUDIT_COUNTER command
+		/// </summary>
+		/// <returns><c>true</c>, if the command was queued, <c>false</c> otherwise.</returns>
+		/// <param name="counter">Counter.</param>
+		/// <param name="ticks">Ticks.</param>
+		/// <param name="queuePosition">
+		/// position of the command to be placed, either <c>SendQueue.InFrontQueue</c> to place the command in front of
+		/// the queue, or <c>SendQueue.AtEndQueue</c> to place the command at the end of the queue. Defaults to
+		/// <c>SendQueue.InFrontQueue</c>.
+		/// </param>
 		public bool QueryTickAuditCounter(byte counter, byte ticks, SendQueue queuePosition = SendQueue.InFrontQueue)
 		{
 			if (IsConnected)
@@ -199,6 +253,17 @@ namespace Spark.Slot.IO
 			return false;
 		}
 
+		/// <summary>
+		/// queues a WRITE_STORAGE command
+		/// </summary>
+		/// <returns><c>true</c>, if the command was queued, <c>false</c> otherwise.</returns>
+		/// <param name="address">Address.</param>
+		/// <param name="data">Data.</param>
+		/// <param name="queuePosition">
+		/// position of the command to be placed, either <c>SendQueue.InFrontQueue</c> to place the command in front of
+		/// the queue, or <c>SendQueue.AtEndQueue</c> to place the command at the end of the queue. Defaults to
+		/// <c>SendQueue.InFrontQueue</c>.
+		/// </param>
 		public bool QueryWriteStorage(ushort address, byte[] data, SendQueue queuePosition = SendQueue.InFrontQueue)
 		{
 			if (IsConnected)
@@ -214,6 +279,17 @@ namespace Spark.Slot.IO
 			return false;
 		}
 
+		/// <summary>
+		/// queues a READ_STORAGE command
+		/// </summary>
+		/// <returns><c>true</c>, if read storage was queryed, <c>false</c> otherwise.</returns>
+		/// <param name="address">Address.</param>
+		/// <param name="length">Length.</param>
+		/// <param name="queuePosition">
+		/// position of the command to be placed, either <c>SendQueue.InFrontQueue</c> to place the command in front of
+		/// the queue, or <c>SendQueue.AtEndQueue</c> to place the command at the end of the queue. Defaults to
+		/// <c>SendQueue.AtEndQueue</c>.
+		/// </param>
 		public bool QueryReadStorage(ushort address, byte length, SendQueue queuePosition = SendQueue.AtEndQueue)
 		{
 			if (IsConnected)
@@ -228,7 +304,7 @@ namespace Spark.Slot.IO
 		}
 
 		/// <summary>
-		/// queue a RESET_COIN_COUNTER command
+		/// queues a RESET_COIN_COUNTER command
 		/// </summary>
 		/// <returns><c>true</c>, if reset coin counter was queryed, <c>false</c> otherwise.</returns>
 		/// <param name="track"><c>CoinTrack</c> indicates which track to reset</param>
@@ -250,9 +326,9 @@ namespace Spark.Slot.IO
 		}
 
 		/// <summary>
-		/// Connect the specified port and baudrate.
+		/// Connect to the IOCard with the specified port and baudrate.
 		/// </summary>
-		/// <param name="port">Port.</param>
+		/// <param name="port">Port, ex. "COM10" on Windows, or "/dev/ttyUSB0" on Linux</param>
 		/// <param name="baudrate">Baudrate.</param>
 		/// <exception cref="System.InvalidOperationException">Thrown on connection fails (already connected, port busy, etc.)</exception>
 		public void Connect(string port, int baudrate)
@@ -279,6 +355,9 @@ namespace Spark.Slot.IO
 			}
 		}
 
+		/// <summary>
+		/// Disconnect from the IOCard
+		/// </summary>
 		public bool Disconnect()
 		{
 			lock (this)
