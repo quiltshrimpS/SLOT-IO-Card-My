@@ -33,9 +33,8 @@
 #include "TimeoutTracker.h"
 #include "Communicator.h"
 
-FRAM_MB85RC_I2C fram(MB85RC_DEFAULT_ADDRESS, true, /* WP */ A7, 16 /* kb */);
 WreckedSPI< /* MISO */ 7, /* MOSI */ 2, /* SCLK_MISO */ 8, /* SCLK_MOSI */ 3, /* MODE_MISO */ 2, /* MODE_MOSI */ 0 > spi;
-Configuration conf(fram);
+Configuration conf;
 
 CmdMessenger messenger(Serial);
 Communicator communicator(messenger);
@@ -179,9 +178,6 @@ void setup() {
 
 	// do the rest of the thing after we switch off the motor
     Serial.begin(UART_BAUDRATE);
-    Wire.begin(); // for FRAM
-	Wire.setClock(TWI_BAUDRATE); // set clock after Wire.begin()
-    fram.begin();
 	conf.begin();
 
 	// initialize timeout trackers

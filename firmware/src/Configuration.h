@@ -4,9 +4,12 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <utility/twi.h>
+
 #include <FRAM_MB85RC_I2C.h>
 
 #include <util/crc16.h>
+
+#include "Communication.h"
 
 #define NUM_EJECT_TRACKS				(1)
 #define NUM_INSERT_TRACKS				(4)
@@ -57,13 +60,18 @@ public:
 		uint8_t bytes;
 	};
 
-	Configuration(FRAM_MB85RC_I2C &fram):
-		_fram(fram)
+	Configuration():
+		_fram(MB85RC_DEFAULT_ADDRESS, true, /* WP */ A7, 16 /* kb */)
 	{
 	}
 
 	__attribute__((always_inline)) inline
 	void begin() {
+		// setup underlying facilities
+		Wire.begin();
+		Wire.setClock(TWI_BAUDRATE); // set clock after Wire.begin()
+		_fram.begin();
+
 		// there are 2 banks of memories inside the fram:
 		//   - CONF_ADDR_BANK_0 (256 bytes): [ CONF_SIZE_ALL ] [ RESERVED ]
 		//   - CONF_ADDR_BANK_1 (256 bytes): [ CONF_SIZE_ALL ] [ RESERVED ]
@@ -294,7 +302,8 @@ private:
 			uint8_t crc;
 		} configs;
 	} _data;
-	FRAM_MB85RC_I2C & _fram;
+
+	FRAM_MB85RC_I2C _fram;
 };
 
 #endif
