@@ -33,9 +33,11 @@
 #include "TimeoutTracker.h"
 #include "Communicator.h"
 
+typedef Configuration<FRAM_MB85RC_I2C> ConfigurationT;
+
 FRAM_MB85RC_I2C fram(MB85RC_DEFAULT_ADDRESS, true, /* WP */ A7, 16 /* kb */);
 WreckedSPI< /* MISO */ 7, /* MOSI */ 2, /* SCLK_MISO */ 8, /* SCLK_MOSI */ 3, /* MODE_MISO */ 2, /* MODE_MOSI */ 0 > spi;
-Configuration conf(fram);
+ConfigurationT conf(fram);
 
 CmdMessenger messenger(Serial);
 Communicator communicator(messenger);
@@ -390,7 +392,7 @@ void loop() {
 	}
 
 	// debounce the inputs
-	Configuration::TrackLevelsT &track_levels = conf.getTrackLevels();
+	ConfigurationT::TrackLevelsT &track_levels = conf.getTrackLevels();
 	debounce_insert_1.feed(in.port.sw12, track_levels.bits.track_level_0, now);
 	debounce_insert_2.feed(in.port.sw13, track_levels.bits.track_level_1, now);
 	debounce_insert_3.feed(in.port.sw14, track_levels.bits.track_level_2, now);

@@ -8,6 +8,8 @@
 
 #include <util/crc16.h>
 
+#include "Communication.h"
+
 #define NUM_EJECT_TRACKS				(1)
 #define NUM_INSERT_TRACKS				(4)
 #define NUM_TRACKS						(NUM_EJECT_TRACKS + NUM_INSERT_TRACKS)
@@ -41,6 +43,7 @@
 
 #define MAX_BYTES_LENGTH	(64)
 
+template < typename FRAM_T >
 class Configuration {
 public:
 	union TrackLevelsT {
@@ -57,7 +60,7 @@ public:
 		uint8_t bytes;
 	};
 
-	Configuration(FRAM_MB85RC_I2C &fram):
+	Configuration(FRAM_T &fram):
 		_fram(fram)
 	{
 	}
@@ -294,7 +297,8 @@ private:
 			uint8_t crc;
 		} configs;
 	} _data;
-	FRAM_MB85RC_I2C & _fram;
+
+	FRAM_T & _fram;
 };
 
 #endif
