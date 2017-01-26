@@ -508,9 +508,9 @@ public partial class MainWindow : Window
 				for (int i = 0; i < data.Length; ++i)
 					bytes[i] = _getTfromString<byte>(data[i]);
 
-				var builder = new StringBuilder(bytes.Length * 5);
+				var builder = new StringBuilder(bytes.Length * 3);
 				foreach (var b in bytes)
-					builder.AppendFormat(" 0x{0:X2}", b);
+					builder.AppendFormat(" {0:X2}", b);
 
 				var iter = textview_received.Buffer.StartIter;
 				textview_received.Buffer.Insert(
@@ -544,9 +544,9 @@ public partial class MainWindow : Window
 				for (int i = 0; i < data.Length; ++i)
 					bytes[i] = _getTfromString<byte>(data[i]);
 
-				var builder = new StringBuilder(bytes.Length * 5);
+				var builder = new StringBuilder(bytes.Length * 3);
 				foreach (var b in bytes)
-					builder.AppendFormat(" 0x{0:X2}", b);
+					builder.AppendFormat(" {0:X2}", b);
 
 				var iter = textview_received.Buffer.StartIter;
 				textview_received.Buffer.Insert(
@@ -830,9 +830,9 @@ public partial class MainWindow : Window
 		{
 			Application.Invoke(delegate
 			{
-				var builder = new StringBuilder(e.Keys.Length * 5);
+				var builder = new StringBuilder(e.Keys.Length * 3);
 				foreach (var key in e.Keys)
-					builder.Append(string.Format(" 0x{0:X2}", key));
+					builder.Append(string.Format(" {0:X2}", key));
 
 				var iter = textview_received.Buffer.StartIter;
 				textview_received.Buffer.Insert(
@@ -849,9 +849,9 @@ public partial class MainWindow : Window
 		{
 			Application.Invoke(delegate
 			{
-				var builder = new StringBuilder(e.KeyMasks.Length * 5);
+				var builder = new StringBuilder(e.KeyMasks.Length * 3);
 				foreach (var mask in e.KeyMasks)
-					builder.Append(string.Format(" 0x{0:X2}", mask));
+					builder.Append(string.Format(" {0:X2}", mask));
 
 				var iter = textview_received.Buffer.StartIter;
 				textview_received.Buffer.Insert(
@@ -884,9 +884,9 @@ public partial class MainWindow : Window
 		{
 			Application.Invoke(delegate
 			{
-				var builder = new StringBuilder(e.Data.Length * 5);
+				var builder = new StringBuilder(e.Data.Length * 3);
 				foreach (var data in e.Data)
-					builder.Append(string.Format(" 0x{0:X2}", data));
+					builder.Append(string.Format(" {0:X2}", data));
 
 				var iter = textview_received.Buffer.StartIter;
 				textview_received.Buffer.Insert(
