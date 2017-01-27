@@ -476,7 +476,7 @@ public partial class MainWindow : Window
 			(command, parameters) =>
 			{
 				var counter = (byte)_getTfromString<uint>(parameters[0].Trim());
-				var ticks = (byte)_getTfromString<uint>(parameters[1].Trim());
+				var ticks = _getTfromString<uint>(parameters[1].Trim());
 
 				var iter = textview_received.Buffer.StartIter;
 				textview_received.Buffer.Insert(
