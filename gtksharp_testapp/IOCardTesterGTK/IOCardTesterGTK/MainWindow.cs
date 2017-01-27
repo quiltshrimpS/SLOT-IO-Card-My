@@ -633,9 +633,10 @@ public partial class MainWindow : Window
 		label_cmd_desc.Text = mCommandProperties[mLastCmdIndex].CommandDescription;
 		label_params_desc.Text = mCommandProperties[mLastCmdIndex].ParamsDescription;
 
-		_populateComboBoxEntry(comboboxentry_params, mCommandProperties[mLastCmdIndex].HistoryParams);
+		_populateComboBox(comboboxentry_port, mPorts);
+
+		_populateComboBox(comboboxentry_params, mCommandProperties[mLastCmdIndex].HistoryParams);
 		comboboxentry_params.Sensitive = mCommandProperties[mLastCmdIndex].Params != 0;
-		_populateComboBoxEntry(comboboxentry_port, mPorts);
 
 		mCard.OnConnected += (sender, e) =>
 		{
@@ -947,7 +948,8 @@ public partial class MainWindow : Window
 			return;
 		mLastCmdIndex = cb.Active;
 
-		_populateComboBoxEntry(comboboxentry_params, mCommandProperties[mLastCmdIndex].HistoryParams);
+		List<string> history = mCommandProperties[mLastCmdIndex].HistoryParams;
+		_populateComboBox(comboboxentry_params, history);
 		comboboxentry_params.Sensitive = mCommandProperties[mLastCmdIndex].Params != 0;
 		label_cmd_desc.Text = mCommandProperties[mLastCmdIndex].CommandDescription;
 		label_params_desc.Text = mCommandProperties[mLastCmdIndex].ParamsDescription;
@@ -961,7 +963,7 @@ public partial class MainWindow : Window
 			string selected = cbe.ActiveText;
 			mPorts.Remove(selected);
 			mPorts.Insert(0, selected);
-			_populateComboBoxEntry(comboboxentry_port, mPorts);
+			_populateComboBox(comboboxentry_port, mPorts);
 		}
 	}
 
@@ -971,9 +973,10 @@ public partial class MainWindow : Window
 		if (cbe.Active > 0)
 		{
 			var parameters = cbe.ActiveText;
-			mCommandProperties[mLastCmdIndex].HistoryParams.Remove(parameters);
-			mCommandProperties[mLastCmdIndex].HistoryParams.Insert(0, parameters);
-			_populateComboBoxEntry(comboboxentry_params, mCommandProperties[mLastCmdIndex].HistoryParams);
+			List<string> history = mCommandProperties[mLastCmdIndex].HistoryParams;
+			history.Remove(parameters);
+			history.Insert(0, parameters);
+			_populateComboBox(comboboxentry_params, history);
 		}
 	}
 
@@ -992,7 +995,7 @@ public partial class MainWindow : Window
 				{
 					mPorts.Remove(port);
 					mPorts.Insert(0, port);
-					_populateComboBoxEntry(comboboxentry_port, mPorts);
+					_populateComboBox(comboboxentry_port, mPorts);
 				}
 
 				Connect(port, 250000);
@@ -1017,9 +1020,10 @@ public partial class MainWindow : Window
 		var parameters_raw = comboboxentry_params.ActiveText;
 		if (comboboxentry_params.Active != 0)
 		{
-			mCommandProperties[mLastCmdIndex].HistoryParams.Remove(parameters_raw);
-			mCommandProperties[mLastCmdIndex].HistoryParams.Insert(0, parameters_raw);
-			_populateComboBoxEntry(comboboxentry_params, mCommandProperties[mLastCmdIndex].HistoryParams);
+			List<string> history = mCommandProperties[mLastCmdIndex].HistoryParams;
+			history.Remove(parameters_raw);
+			history.Insert(0, parameters_raw);
+			_populateComboBox(comboboxentry_params, history);
 		}
 
 		parameters_raw = parameters_raw.Trim();
@@ -1036,13 +1040,8 @@ public partial class MainWindow : Window
 		foreach (var content in contents)
 			store.AppendValues(content);
 		cb.Active = contents.Count == 0 ? -1 : 0;
-	}
-
-	void _populateComboBoxEntry(ComboBoxEntry cbe, List<string> contents)
-	{
-		_populateComboBox(cbe, contents);
-		if (contents.Count == 0)
-			cbe.Entry.Text = "";
+		if (cb is ComboBoxEntry && contents.Count == 0)
+			((ComboBoxEntry)cb).Entry.Text = "";
 	}
 
 	static T _getTfromString<T>(string mystring)
