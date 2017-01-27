@@ -20,6 +20,7 @@
 #include <CmdMessenger.h>
 
 #include <avr/power.h>
+#include <avr/wdt.h>
 
 #include "util.h"
 
@@ -183,6 +184,8 @@ void setup() {
 	power_spi_disable(); // we're not using the hardware SPI
 	power_timer1_disable(); // we're not using Timer1
 	power_timer2_disable(); // we're not using Timer2
+
+	wdt_enable(WDTO_15MS);
 
 	// do the rest of the thing after we switch off the motor
     Serial.begin(UART_BAUDRATE);
@@ -378,6 +381,8 @@ void loop() {
 	uint32_t t1, t2;
 	t1 = micros();
 	#endif
+
+	wdt_reset(); // feed the dog
 
 	// read key states
     fastDigitalWrite(PIN_LATCH_IN, HIGH);
