@@ -257,8 +257,12 @@ void setup() {
 					if (unlikely(length != 0)) {
 						for (int i = 0;i < length && i < 3;++i)
 							out.bytes[i] =
-								(out.bytes[i] & ~OUTPUT_MASK[i]) |
-								(messenger.readBinArg<uint8_t>() & OUTPUT_MASK[i]);
+							#if defined(DEBUG_SERIAL)
+								messenger.readBinArg<uint8_t>();
+							#else
+							 	(out.bytes[i] & ~OUTPUT_MASK[i]) |
+							 	(messenger.readBinArg<uint8_t>() & OUTPUT_MASK[i]);
+							#endif
 						do_send = true;
 					}
 				}
