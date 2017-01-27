@@ -11,8 +11,8 @@
 
 #include "Communication.h"
 
-#define NUM_EJECT_TRACKS				(1)
-#define NUM_INSERT_TRACKS				(4)
+#define NUM_EJECT_TRACKS				(2)
+#define NUM_INSERT_TRACKS				(3)
 #define NUM_TRACKS						(NUM_EJECT_TRACKS + NUM_INSERT_TRACKS)
 
 // change this when CONF_SIZE_ALL remains the same but layout changes.
@@ -35,17 +35,29 @@
 #define CONF_ADDR_BANK_0				(CONF_ADDR_BEGIN)
 #define CONF_ADDR_BANK_1				(CONF_ADDR_BEGIN + 0x0100)
 
-#define TRACK_EJECT			(0)
-#define TRACK_INSERT_1		(1)
-#define TRACK_INSERT_2		(2)
-#define TRACK_INSERT_3		(3)
-#define TRACK_BANKNOTE		(4)
-#define TRACK_NOT_A_TRACK	(0xFF)
+#define TRACK_EJECT				(0)
+#define TRACK_INSERT_1			(2)
+#define TRACK_INSERT_2			(3)
+#define TRACK_BANKNOTE			(4)
+#define TRACK_NOT_A_TRACK		(0xFF)
 
+#define COUNTER_SCORE			(0)
+#define COUNTER_WASH			(1)
+#define COUNTER_INSERT			(2)
+#define COUNTER_EJECT			(3)
+#define COUNTER_NOT_A_COUNTER	(0xFF)
+
+//                             Eject -----+
+//                            Unused ----+|
+//                          Insert 1 ---+||
+//                          Insert 2 --+|||
+//                          Banknote -+||||
+//                                    |||||
 #define TRACK_LEVELS_DEFAULT	(0b11111110)
+
 #define EJECT_TIMEOUT_DEFAULT	(10000000L) // us
 
-#define MAX_BYTES_LENGTH	(64)
+#define MAX_BYTES_LENGTH		(64)
 
 class Configuration {
 public:

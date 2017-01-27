@@ -54,13 +54,17 @@ static const uint8_t OUTPUT_MASK[3] = { OUT_MASK_0, OUT_MASK_1, OUT_MASK_2 };
 
 bool do_send = false;
 
+TimeoutTracker trackers[] = {
 #if defined(DEBUG_SERIAL)
-TimeoutTracker tracker_nack("NACK tracker");
-TimeoutTracker tracker_eject("eject tracker");
+	TimeoutTracker("eject tracker"),
+	TimeoutTracker("NACK tracker"),
 #else
-TimeoutTracker tracker_nack;
-TimeoutTracker tracker_eject;
+	TimeoutTracker(),
+	TimeoutTracker(),
 #endif
+};
+#define TRACKER_EJECT (trackers[0])
+#define TRACKER_NACK (trackers[2])
 
 Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counters[4];
 #define PULSE_COUNTER_SCORE (pulse_counters[0])
@@ -94,17 +98,17 @@ public:
 		PULSE_COUNTER_EJECT.pulse(1);
 		uint8_t to_eject = conf.getCoinsToEject(TRACK_EJECT);
 		if (to_eject < 2) {
-			tracker_eject.stop();
-			tracker_nack.stop();
+			TRACKER_EJECT.stop();
+			TRACKER_NACK.stop();
 			out.port.ssr1 = false; // pull LOW to stop the motor
 			do_send = true;
 		}
 		if (to_eject > 0) {
-			tracker_eject.start();
+			TRACKER_EJECT.start();
 			conf.setCoinsToEject(TRACK_EJECT, to_eject - 1);
 		}
 		communicator.dispatchCoinCounterResult(TRACK_EJECT, coins);
-		tracker_nack.start();
+		TRACKER_NACK.start();
 	}
 };
 Debounce<LOW, DEBOUNCE_TIMEOUT, EmptyFunctorT, DebounceEjectFallFunctorT> debounce_eject;
@@ -169,8 +173,8 @@ void setup() {
 	conf.begin();
 
 	// initialize timeout trackers
-	tracker_eject.begin(conf.getEjectTimeout(TRACK_EJECT));
-	tracker_nack.begin(TIMEOUT_NACK);
+	TRACKER_EJECT.begin(conf.getEjectTimeout(TRACK_EJECT));
+	TRACKER_NACK.begin(TIMEOUT_NACK);
 
 	// populate the debouncers
 	debounce_banknote.begin(in.port.sw20, now);
@@ -186,7 +190,7 @@ void setup() {
 		#endif
 		switch (messenger.commandID()) {
 			case CMD_ACK:
-				tracker_nack.stop();
+				TRACKER_NACK.stop();
 				break;
 			case CMD_GET_INFO:
 				communicator.dispatchGetInfoResult();
@@ -194,20 +198,22 @@ void setup() {
 			case CMD_EJECT_COIN:
 				{
 					uint8_t const track = messenger.readBinArg<uint8_t>();
-					uint8_t const count = messenger.readBinArg<uint8_t>();
-					uint8_t const coins = conf.getCoinsToEject(TRACK_EJECT);
-
-					// block newer command if there are still coins left to be ejected
-					if (count != 0 && coins != 0) {
-						communicator.dispatchErrorEjectInterrupted(track, coins);
-					} else if (unlikely(track >= NUM_EJECT_TRACKS)) {
+					if (unlikely(track >= NUM_EJECT_TRACKS)) {
 						communicator.dispatchErrorNotATrack(track);
 					} else {
-						conf.setCoinsToEject(track, count);
-						if (count != 0) {
-							tracker_eject.start();
-							out.port.ssr1 = true;
-							do_send = true;
+						uint8_t const count = messenger.readBinArg<uint8_t>();
+						uint8_t const remained = conf.getCoinsToEject(track);
+
+						// block newer command if there are still something left to be ejected
+						if (count != 0 && remained != 0) {
+							communicator.dispatchErrorEjectInterrupted(track, remained);
+						} else {
+							conf.setCoinsToEject(track, count);
+							if (count != 0) {
+								trackers[track].start();
+								bitSet(out.bytes[0], 7 - track); // FIXME: hacky, doesn't work for SSR4 and 5
+								do_send = true;
+							}
 						}
 					}
 				}
@@ -360,13 +366,13 @@ void loop() {
 	//
 	// run the NACK tracker earlier, since eject tracker might write the UART
 	// which takes a lot of time.
-	if (tracker_nack.trigger(now))
+	if (TRACKER_NACK.trigger(now))
 	{
-		tracker_eject.stop();
+		TRACKER_EJECT.stop();
 		out.port.ssr1 = false;
 		do_send = true;
 	}
-	if (tracker_eject.trigger(now))
+	if (TRACKER_EJECT.trigger(now))
 	{
 		uint8_t const coins = conf.getCoinsToEject(TRACK_EJECT);
 		if (coins) {
@@ -378,10 +384,10 @@ void loop() {
 
 	// debounce the inputs
 	const Configuration::TrackLevelsT &track_levels = conf.getTrackLevels();
-	debounce_insert_1.feed(in.port.sw12, track_levels.bits.track_level_0, now);
-	debounce_insert_2.feed(in.port.sw13, track_levels.bits.track_level_1, now);
-	debounce_banknote.feed(in.port.sw20, track_levels.bits.track_level_3, now);
-	debounce_eject.feed(in.port.sw11, track_levels.bits.track_level_4, now);
+	debounce_insert_1.feed(in.port.sw12, track_levels.bits.track_level_2, now);
+	debounce_insert_2.feed(in.port.sw13, track_levels.bits.track_level_3, now);
+	debounce_banknote.feed(in.port.sw20, track_levels.bits.track_level_4, now);
+	debounce_eject.feed(in.port.sw11, track_levels.bits.track_level_0, now);
 
 	// pulse the counters
 	if (PULSE_COUNTER_SCORE.update(now))
