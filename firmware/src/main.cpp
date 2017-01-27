@@ -133,18 +133,6 @@ public:
 };
 Debounce<LOW, DEBOUNCE_TIMEOUT, EmptyFunctorT, DebounceInsert2FallFunctorT> debounce_insert_2;
 
-class DebounceInsert3FallFunctorT {
-public:
-	__attribute__((always_inline)) inline
-	void operator () () {
-		uint32_t coins = conf.getCoinCount(TRACK_INSERT_3) + 1;
-		conf.setCoinCount(TRACK_INSERT_3, coins);
-		communicator.dispatchCoinCounterResult(TRACK_INSERT_3, coins);
-		PULSE_COUNTER_INSERT.pulse(1);
-	}
-};
-Debounce<LOW, DEBOUNCE_TIMEOUT, EmptyFunctorT, DebounceInsert3FallFunctorT> debounce_insert_3;
-
 static uint8_t const PIN_LATCH_OUT = 4; // for 74HC595
 static uint8_t const PIN_LATCH_IN = 9;  // for 74HC165
 
@@ -189,7 +177,6 @@ void setup() {
 	debounce_eject.begin(in.port.sw11, now);
 	debounce_insert_1.begin(in.port.sw12, now);
 	debounce_insert_2.begin(in.port.sw13, now);
-	debounce_insert_3.begin(in.port.sw14, now);
 
 	// attach command handler
 	messenger.attach([]() {
@@ -393,7 +380,6 @@ void loop() {
 	Configuration::TrackLevelsT &track_levels = conf.getTrackLevels();
 	debounce_insert_1.feed(in.port.sw12, track_levels.bits.track_level_0, now);
 	debounce_insert_2.feed(in.port.sw13, track_levels.bits.track_level_1, now);
-	debounce_insert_3.feed(in.port.sw14, track_levels.bits.track_level_2, now);
 	debounce_banknote.feed(in.port.sw20, track_levels.bits.track_level_3, now);
 	debounce_eject.feed(in.port.sw11, track_levels.bits.track_level_4, now);
 
