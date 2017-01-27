@@ -394,9 +394,6 @@ void loop() {
 
 	// check the timeout tracker before we feed the debouncers, since debouncers
 	// might trigger tracker.start() when a coin is confirmed.
-	//
-	// run the NACK tracker earlier, since eject tracker might write the UART
-	// which takes a lot of time.
 	if (TRACKER_NACK.trigger(now))
 	{
 		TRACKER_EJECT.stop();
