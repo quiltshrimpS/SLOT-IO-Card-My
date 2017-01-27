@@ -84,7 +84,8 @@ public:
 	__attribute__((always_inline)) inline
 	void operator () () {
 		if (COUNTER != COUNTER_NOT_A_COUNTER)
-			pulse_counters[COUNTER].pulse(1);
+			// FIXME: dunno why, had to +2 for it to work...
+			pulse_counters[COUNTER].pulse(2);
 		if (TRACK != TRACK_NOT_A_TRACK) {
 			uint32_t coins = conf.getCoinCount(TRACK) + 1;
 			conf.setCoinCount(TRACK, coins);
@@ -132,7 +133,8 @@ public:
 			communicator.dispatchCoinCounterResult(TRACK, coins);
 		}
 		if (COUNTER != COUNTER_NOT_A_COUNTER)
-			pulse_counters[COUNTER].pulse(1);
+			// FIXME: dunno why, had to +2 for it to work...
+			pulse_counters[COUNTER].pulse(2);
 	}
 };
 
