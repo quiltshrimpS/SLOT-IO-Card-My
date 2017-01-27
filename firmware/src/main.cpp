@@ -70,10 +70,6 @@ TimeoutTracker trackers[] = {
 #define TRACKER_NACK (trackers[2])
 
 Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counters[4];
-#define PULSE_COUNTER_SCORE (pulse_counters[0])
-#define PULSE_COUNTER_WASH (pulse_counters[1])
-#define PULSE_COUNTER_INSERT (pulse_counters[2])
-#define PULSE_COUNTER_EJECT (pulse_counters[3])
 
 class EmptyFunctorT {
 public:
