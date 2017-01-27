@@ -201,7 +201,7 @@ void setup() {
 
 	// debuggin with FRAM takes a lot of time, enable wdt after that.
 	#if defined(DEBUG_SERIAL)
-	wdt_enable(WDTO_15MS);
+	wdt_enable(WDTO_60MS);
 	#endif
 
 	// initialize timeout trackers
