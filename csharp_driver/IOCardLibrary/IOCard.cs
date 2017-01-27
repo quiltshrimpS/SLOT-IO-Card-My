@@ -19,7 +19,8 @@ namespace Spark.Slot.IO
 			CMD_SET_TRACK_LEVEL = 0x41,
 			CMD_SET_EJECT_TIMEOUT = 0x42,
 			CMD_READ_STORAGE = 0x50,
-			CMD_WRITE_STORAGE = 0x58
+			CMD_WRITE_STORAGE = 0x58,
+			CMD_REBOOT = 0xFF
 		}
 
 		public enum Events
@@ -320,6 +321,16 @@ namespace Spark.Slot.IO
 				var cmd = new SendCommand((int)Commands.CMD_RESET_COIN_COINTER);
 				cmd.AddBinArgument(track);
 				mMessenger.SendCommand(cmd, queuePosition);
+				return true;
+			}
+			return false;
+		}
+
+		public bool QueueReboot(SendQueue queuePosition = SendQueue.InFrontQueue)
+		{
+			if (IsConnected)
+			{
+				mMessenger.SendCommand(new SendCommand((int)Commands.CMD_REBOOT), queuePosition);
 				return true;
 			}
 			return false;
