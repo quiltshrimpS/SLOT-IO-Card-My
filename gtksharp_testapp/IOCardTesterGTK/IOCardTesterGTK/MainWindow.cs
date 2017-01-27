@@ -236,6 +236,7 @@ public partial class MainWindow : Window
 	CommandProperty mCommandProperty_SetTrackLevel;
 	CommandProperty mCommandProperty_WriteStorage;
 	CommandProperty mCommandProperty_ReadStorage;
+	CommandProperty mCommandProperty_Reboot;
 	CommandProperty[] mCommandProperties;
 
 	public MainWindow() : base(WindowType.Toplevel)
@@ -609,6 +610,26 @@ public partial class MainWindow : Window
 				mCard.QueryReadStorage(address, length);
 			}
 		);
+		mCommandProperty_Reboot = new CommandProperty(
+			on_error_callback,
+			IOCard.Commands.CMD_REBOOT, 0,
+			"Reboot the device",
+			"Params: N/A",
+			(command, parameters) =>
+			{
+				var iter = textview_received.Buffer.StartIter;
+				textview_received.Buffer.Insert(
+					ref iter,
+					string.Format(
+						" => {0}: cmd = {1}\r\n",
+						DateTime.Now,
+						command
+					)
+				);
+
+				mCard.QueueReboot();
+			}
+		);
 
 		mCommandProperties = new CommandProperty[] {
 			mCommandProperty_GetInfo,
@@ -622,7 +643,8 @@ public partial class MainWindow : Window
 			mCommandProperty_SetOutputs,
 			mCommandProperty_SetEjectTimeout,
 			mCommandProperty_WriteStorage,
-			mCommandProperty_ReadStorage
+			mCommandProperty_ReadStorage,
+			mCommandProperty_Reboot
 		};
 
 		var cmds = new List<string>(mCommandProperties.Length);
