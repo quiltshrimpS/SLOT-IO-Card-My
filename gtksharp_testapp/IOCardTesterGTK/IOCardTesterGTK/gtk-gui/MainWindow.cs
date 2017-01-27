@@ -9,6 +9,8 @@ public partial class MainWindow
 
 	private global::Gtk.Button button_send;
 
+	private global::Gtk.Button button_send_1;
+
 	private global::Gtk.CheckButton checkbutton_update;
 
 	private global::Gtk.ComboBox combobox_cmd;
@@ -29,6 +31,8 @@ public partial class MainWindow
 
 	private global::Gtk.Label label_params_desc;
 
+	private global::Gtk.Label label_params_history_1;
+
 	private global::Gtk.Label label_port;
 
 	protected virtual void Build()
@@ -39,7 +43,7 @@ public partial class MainWindow
 		this.Title = global::Mono.Unix.Catalog.GetString("SLOT-IO-Card Demo App");
 		this.WindowPosition = ((global::Gtk.WindowPosition)(4));
 		// Container child MainWindow.Gtk.Container+ContainerChild
-		this.table1 = new global::Gtk.Table(((uint)(4)), ((uint)(5)), false);
+		this.table1 = new global::Gtk.Table(((uint)(5)), ((uint)(5)), false);
 		this.table1.Name = "table1";
 		this.table1.RowSpacing = ((uint)(6));
 		this.table1.ColumnSpacing = ((uint)(6));
@@ -72,14 +76,14 @@ public partial class MainWindow
 		w2.XOptions = ((global::Gtk.AttachOptions)(4));
 		w2.YOptions = ((global::Gtk.AttachOptions)(4));
 		// Container child table1.Gtk.Table+TableChild
-		this.checkbutton_update = new global::Gtk.CheckButton();
-		this.checkbutton_update.CanFocus = true;
-		this.checkbutton_update.Name = "checkbutton_update";
-		this.checkbutton_update.Label = global::Mono.Unix.Catalog.GetString("Update()");
-		this.checkbutton_update.DrawIndicator = true;
-		this.checkbutton_update.UseUnderline = true;
-		this.table1.Add(this.checkbutton_update);
-		global::Gtk.Table.TableChild w3 = ((global::Gtk.Table.TableChild)(this.table1[this.checkbutton_update]));
+		this.button_send_1 = new global::Gtk.Button();
+		this.button_send_1.Sensitive = false;
+		this.button_send_1.CanFocus = true;
+		this.button_send_1.Name = "button_send_1";
+		this.button_send_1.UseUnderline = true;
+		this.button_send_1.Label = global::Mono.Unix.Catalog.GetString("Send _1");
+		this.table1.Add(this.button_send_1);
+		global::Gtk.Table.TableChild w3 = ((global::Gtk.Table.TableChild)(this.table1[this.button_send_1]));
 		w3.TopAttach = ((uint)(2));
 		w3.BottomAttach = ((uint)(3));
 		w3.LeftAttach = ((uint)(4));
@@ -87,36 +91,51 @@ public partial class MainWindow
 		w3.XOptions = ((global::Gtk.AttachOptions)(4));
 		w3.YOptions = ((global::Gtk.AttachOptions)(4));
 		// Container child table1.Gtk.Table+TableChild
+		this.checkbutton_update = new global::Gtk.CheckButton();
+		this.checkbutton_update.CanFocus = true;
+		this.checkbutton_update.Name = "checkbutton_update";
+		this.checkbutton_update.Label = global::Mono.Unix.Catalog.GetString("Update()");
+		this.checkbutton_update.DrawIndicator = true;
+		this.checkbutton_update.UseUnderline = true;
+		this.table1.Add(this.checkbutton_update);
+		global::Gtk.Table.TableChild w4 = ((global::Gtk.Table.TableChild)(this.table1[this.checkbutton_update]));
+		w4.TopAttach = ((uint)(3));
+		w4.BottomAttach = ((uint)(4));
+		w4.LeftAttach = ((uint)(4));
+		w4.RightAttach = ((uint)(5));
+		w4.XOptions = ((global::Gtk.AttachOptions)(4));
+		w4.YOptions = ((global::Gtk.AttachOptions)(4));
+		// Container child table1.Gtk.Table+TableChild
 		this.combobox_cmd = global::Gtk.ComboBox.NewText();
 		this.combobox_cmd.CanDefault = true;
 		this.combobox_cmd.Events = ((global::Gdk.EventMask)(65536));
 		this.combobox_cmd.Name = "combobox_cmd";
 		this.table1.Add(this.combobox_cmd);
-		global::Gtk.Table.TableChild w4 = ((global::Gtk.Table.TableChild)(this.table1[this.combobox_cmd]));
-		w4.TopAttach = ((uint)(1));
-		w4.BottomAttach = ((uint)(2));
-		w4.LeftAttach = ((uint)(1));
-		w4.RightAttach = ((uint)(2));
-		w4.XOptions = ((global::Gtk.AttachOptions)(0));
-		w4.YOptions = ((global::Gtk.AttachOptions)(4));
+		global::Gtk.Table.TableChild w5 = ((global::Gtk.Table.TableChild)(this.table1[this.combobox_cmd]));
+		w5.TopAttach = ((uint)(1));
+		w5.BottomAttach = ((uint)(2));
+		w5.LeftAttach = ((uint)(1));
+		w5.RightAttach = ((uint)(2));
+		w5.XOptions = ((global::Gtk.AttachOptions)(0));
+		w5.YOptions = ((global::Gtk.AttachOptions)(4));
 		// Container child table1.Gtk.Table+TableChild
 		this.comboboxentry_params = global::Gtk.ComboBoxEntry.NewText();
 		this.comboboxentry_params.Name = "comboboxentry_params";
 		this.table1.Add(this.comboboxentry_params);
-		global::Gtk.Table.TableChild w5 = ((global::Gtk.Table.TableChild)(this.table1[this.comboboxentry_params]));
-		w5.TopAttach = ((uint)(1));
-		w5.BottomAttach = ((uint)(2));
-		w5.LeftAttach = ((uint)(3));
-		w5.RightAttach = ((uint)(4));
-		w5.YOptions = ((global::Gtk.AttachOptions)(4));
+		global::Gtk.Table.TableChild w6 = ((global::Gtk.Table.TableChild)(this.table1[this.comboboxentry_params]));
+		w6.TopAttach = ((uint)(1));
+		w6.BottomAttach = ((uint)(2));
+		w6.LeftAttach = ((uint)(3));
+		w6.RightAttach = ((uint)(4));
+		w6.YOptions = ((global::Gtk.AttachOptions)(4));
 		// Container child table1.Gtk.Table+TableChild
 		this.comboboxentry_port = global::Gtk.ComboBoxEntry.NewText();
 		this.comboboxentry_port.Name = "comboboxentry_port";
 		this.table1.Add(this.comboboxentry_port);
-		global::Gtk.Table.TableChild w6 = ((global::Gtk.Table.TableChild)(this.table1[this.comboboxentry_port]));
-		w6.LeftAttach = ((uint)(1));
-		w6.RightAttach = ((uint)(4));
-		w6.YOptions = ((global::Gtk.AttachOptions)(4));
+		global::Gtk.Table.TableChild w7 = ((global::Gtk.Table.TableChild)(this.table1[this.comboboxentry_port]));
+		w7.LeftAttach = ((uint)(1));
+		w7.RightAttach = ((uint)(4));
+		w7.YOptions = ((global::Gtk.AttachOptions)(4));
 		// Container child table1.Gtk.Table+TableChild
 		this.GtkScrolledWindow = new global::Gtk.ScrolledWindow();
 		this.GtkScrolledWindow.Name = "GtkScrolledWindow";
@@ -129,67 +148,79 @@ public partial class MainWindow
 		this.textview_received.AcceptsTab = false;
 		this.GtkScrolledWindow.Add(this.textview_received);
 		this.table1.Add(this.GtkScrolledWindow);
-		global::Gtk.Table.TableChild w8 = ((global::Gtk.Table.TableChild)(this.table1[this.GtkScrolledWindow]));
-		w8.TopAttach = ((uint)(3));
-		w8.BottomAttach = ((uint)(4));
-		w8.RightAttach = ((uint)(5));
-		w8.XOptions = ((global::Gtk.AttachOptions)(4));
+		global::Gtk.Table.TableChild w9 = ((global::Gtk.Table.TableChild)(this.table1[this.GtkScrolledWindow]));
+		w9.TopAttach = ((uint)(4));
+		w9.BottomAttach = ((uint)(5));
+		w9.RightAttach = ((uint)(5));
+		w9.XOptions = ((global::Gtk.AttachOptions)(4));
 		// Container child table1.Gtk.Table+TableChild
 		this.label_cmd = new global::Gtk.Label();
 		this.label_cmd.Name = "label_cmd";
 		this.label_cmd.Xalign = 0F;
 		this.label_cmd.LabelProp = global::Mono.Unix.Catalog.GetString("Cmd:");
 		this.table1.Add(this.label_cmd);
-		global::Gtk.Table.TableChild w9 = ((global::Gtk.Table.TableChild)(this.table1[this.label_cmd]));
-		w9.TopAttach = ((uint)(1));
-		w9.BottomAttach = ((uint)(2));
-		w9.XOptions = ((global::Gtk.AttachOptions)(0));
-		w9.YOptions = ((global::Gtk.AttachOptions)(4));
+		global::Gtk.Table.TableChild w10 = ((global::Gtk.Table.TableChild)(this.table1[this.label_cmd]));
+		w10.TopAttach = ((uint)(1));
+		w10.BottomAttach = ((uint)(2));
+		w10.XOptions = ((global::Gtk.AttachOptions)(0));
+		w10.YOptions = ((global::Gtk.AttachOptions)(4));
 		// Container child table1.Gtk.Table+TableChild
 		this.label_cmd_desc = new global::Gtk.Label();
 		this.label_cmd_desc.Name = "label_cmd_desc";
 		this.label_cmd_desc.Xalign = 0F;
 		this.table1.Add(this.label_cmd_desc);
-		global::Gtk.Table.TableChild w10 = ((global::Gtk.Table.TableChild)(this.table1[this.label_cmd_desc]));
-		w10.TopAttach = ((uint)(2));
-		w10.BottomAttach = ((uint)(3));
-		w10.RightAttach = ((uint)(2));
-		w10.XOptions = ((global::Gtk.AttachOptions)(6));
-		w10.YOptions = ((global::Gtk.AttachOptions)(4));
+		global::Gtk.Table.TableChild w11 = ((global::Gtk.Table.TableChild)(this.table1[this.label_cmd_desc]));
+		w11.TopAttach = ((uint)(3));
+		w11.BottomAttach = ((uint)(4));
+		w11.RightAttach = ((uint)(2));
+		w11.XOptions = ((global::Gtk.AttachOptions)(6));
+		w11.YOptions = ((global::Gtk.AttachOptions)(4));
 		// Container child table1.Gtk.Table+TableChild
 		this.label_params = new global::Gtk.Label();
 		this.label_params.Name = "label_params";
 		this.label_params.Xalign = 0F;
 		this.label_params.LabelProp = global::Mono.Unix.Catalog.GetString("Params:");
 		this.table1.Add(this.label_params);
-		global::Gtk.Table.TableChild w11 = ((global::Gtk.Table.TableChild)(this.table1[this.label_params]));
-		w11.TopAttach = ((uint)(1));
-		w11.BottomAttach = ((uint)(2));
-		w11.LeftAttach = ((uint)(2));
-		w11.RightAttach = ((uint)(3));
-		w11.XOptions = ((global::Gtk.AttachOptions)(2));
-		w11.YOptions = ((global::Gtk.AttachOptions)(4));
+		global::Gtk.Table.TableChild w12 = ((global::Gtk.Table.TableChild)(this.table1[this.label_params]));
+		w12.TopAttach = ((uint)(1));
+		w12.BottomAttach = ((uint)(2));
+		w12.LeftAttach = ((uint)(2));
+		w12.RightAttach = ((uint)(3));
+		w12.XOptions = ((global::Gtk.AttachOptions)(2));
+		w12.YOptions = ((global::Gtk.AttachOptions)(4));
 		// Container child table1.Gtk.Table+TableChild
 		this.label_params_desc = new global::Gtk.Label();
 		this.label_params_desc.Name = "label_params_desc";
 		this.label_params_desc.Xalign = 0F;
 		this.table1.Add(this.label_params_desc);
-		global::Gtk.Table.TableChild w12 = ((global::Gtk.Table.TableChild)(this.table1[this.label_params_desc]));
-		w12.TopAttach = ((uint)(2));
-		w12.BottomAttach = ((uint)(3));
-		w12.LeftAttach = ((uint)(2));
-		w12.RightAttach = ((uint)(4));
-		w12.XOptions = ((global::Gtk.AttachOptions)(4));
-		w12.YOptions = ((global::Gtk.AttachOptions)(4));
+		global::Gtk.Table.TableChild w13 = ((global::Gtk.Table.TableChild)(this.table1[this.label_params_desc]));
+		w13.TopAttach = ((uint)(3));
+		w13.BottomAttach = ((uint)(4));
+		w13.LeftAttach = ((uint)(2));
+		w13.RightAttach = ((uint)(4));
+		w13.XOptions = ((global::Gtk.AttachOptions)(4));
+		w13.YOptions = ((global::Gtk.AttachOptions)(4));
+		// Container child table1.Gtk.Table+TableChild
+		this.label_params_history_1 = new global::Gtk.Label();
+		this.label_params_history_1.Name = "label_params_history_1";
+		this.label_params_history_1.Xalign = 0F;
+		this.table1.Add(this.label_params_history_1);
+		global::Gtk.Table.TableChild w14 = ((global::Gtk.Table.TableChild)(this.table1[this.label_params_history_1]));
+		w14.TopAttach = ((uint)(2));
+		w14.BottomAttach = ((uint)(3));
+		w14.LeftAttach = ((uint)(3));
+		w14.RightAttach = ((uint)(4));
+		w14.XOptions = ((global::Gtk.AttachOptions)(4));
+		w14.YOptions = ((global::Gtk.AttachOptions)(4));
 		// Container child table1.Gtk.Table+TableChild
 		this.label_port = new global::Gtk.Label();
 		this.label_port.Name = "label_port";
 		this.label_port.Xalign = 0F;
 		this.label_port.LabelProp = global::Mono.Unix.Catalog.GetString("Port:");
 		this.table1.Add(this.label_port);
-		global::Gtk.Table.TableChild w13 = ((global::Gtk.Table.TableChild)(this.table1[this.label_port]));
-		w13.XOptions = ((global::Gtk.AttachOptions)(0));
-		w13.YOptions = ((global::Gtk.AttachOptions)(4));
+		global::Gtk.Table.TableChild w15 = ((global::Gtk.Table.TableChild)(this.table1[this.label_port]));
+		w15.XOptions = ((global::Gtk.AttachOptions)(0));
+		w15.YOptions = ((global::Gtk.AttachOptions)(4));
 		this.Add(this.table1);
 		if ((this.Child != null))
 		{
@@ -203,6 +234,7 @@ public partial class MainWindow
 		this.comboboxentry_port.Changed += new global::System.EventHandler(this.OnComboBoxEntryPort_Changed);
 		this.comboboxentry_params.Changed += new global::System.EventHandler(this.OnComboBoxEntryParams_Changed);
 		this.combobox_cmd.Changed += new global::System.EventHandler(this.OnComboBoxCmd_Changed);
+		this.button_send_1.Clicked += new global::System.EventHandler(this.OnButtonSend1_Clicked);
 		this.button_send.Clicked += new global::System.EventHandler(this.OnButtonSend_Clicked);
 		this.button_connect.Clicked += new global::System.EventHandler(this.OnButtonConnect_Clicked);
 	}

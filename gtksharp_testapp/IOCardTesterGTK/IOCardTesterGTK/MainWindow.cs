@@ -637,6 +637,15 @@ public partial class MainWindow : Window
 
 		_populateComboBox(comboboxentry_params, mCommandProperties[mLastCmdIndex].HistoryParams);
 		comboboxentry_params.Sensitive = mCommandProperties[mLastCmdIndex].Params != 0;
+		if (mCommandProperties[mLastCmdIndex].HistoryParams.Count > 2)
+		{
+			label_params_history_1.Text = mCommandProperties[mLastCmdIndex].HistoryParams[1];
+			button_send_1.Sensitive = true;
+		}
+		else {
+			label_params_history_1.Text = "";
+			button_send_1.Sensitive = false;
+		}
 
 		mCard.OnConnected += (sender, e) =>
 		{
@@ -953,6 +962,15 @@ public partial class MainWindow : Window
 		comboboxentry_params.Sensitive = mCommandProperties[mLastCmdIndex].Params != 0;
 		label_cmd_desc.Text = mCommandProperties[mLastCmdIndex].CommandDescription;
 		label_params_desc.Text = mCommandProperties[mLastCmdIndex].ParamsDescription;
+		if (history.Count >= 2)
+		{
+			label_params_history_1.Text = history[1];
+			button_send_1.Sensitive = mCard.IsConnected;
+		}
+		else {
+			label_params_history_1.Text = "";
+			button_send_1.Sensitive = false;
+		}
 	}
 
 	protected void OnComboBoxEntryPort_Changed(object sender, EventArgs e)
@@ -977,6 +995,15 @@ public partial class MainWindow : Window
 			history.Remove(parameters);
 			history.Insert(0, parameters);
 			_populateComboBox(comboboxentry_params, history);
+			if (history.Count > 2)
+			{
+				label_params_history_1.Text = history[1];
+				button_send_1.Sensitive = true;
+			}
+			else {
+				label_params_history_1.Text = "";
+				button_send_1.Sensitive = false;
+			}
 		}
 	}
 
@@ -1025,6 +1052,21 @@ public partial class MainWindow : Window
 			history.Insert(0, parameters_raw);
 			_populateComboBox(comboboxentry_params, history);
 		}
+
+		parameters_raw = parameters_raw.Trim();
+		var comment_idx = parameters_raw.IndexOf("//", StringComparison.Ordinal);
+		parameters_raw = parameters_raw.Substring(0, comment_idx == -1 ? parameters_raw.Length : comment_idx).Trim();
+
+		mCommandProperties[mLastCmdIndex].SendCommand(parameters_raw.Split(','));
+	}
+
+	protected void OnButtonSend1_Clicked(object sender, EventArgs e)
+	{
+		var parameters_raw = label_params_history_1.Text;
+		List<string> history = mCommandProperties[mLastCmdIndex].HistoryParams;
+		history.Remove(parameters_raw);
+		history.Insert(0, parameters_raw);
+		_populateComboBox(comboboxentry_params, history);
 
 		parameters_raw = parameters_raw.Trim();
 		var comment_idx = parameters_raw.IndexOf("//", StringComparison.Ordinal);
