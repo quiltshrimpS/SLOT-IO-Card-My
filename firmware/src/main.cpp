@@ -93,8 +93,11 @@ public:
 		if (to_eject < 2) {
 			trackers[TRACK].stop();
 			TRACKER_NACK.stop();
-			// FIXME: hacky, doesn't work for SSR4 and 5
+			#if (NUM_EJECT_TRACKS < 4)
 			bitClear(out.bytes[0], 7 - TRACK); // pull LOW to stop the SSR
+			#else
+			#error find another way to clear the bits!
+			#endif
 			do_send = true;
 		}
 		if (to_eject > 0) {
@@ -227,7 +230,11 @@ void setup() {
 							conf.setCoinsToEject(track, count);
 							if (count != 0) {
 								trackers[track].start();
-								bitSet(out.bytes[0], 7 - track); // FIXME: hacky, doesn't work for SSR4 and 5
+								#if (NUM_EJECT_TRACKS < 4)
+								bitSet(out.bytes[0], 7 - track); // pull HIGH to enable the SSR
+								#else
+								#error find another way to set the bits!
+								#endif
 								do_send = true;
 							}
 						}
