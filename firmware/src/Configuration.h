@@ -13,9 +13,10 @@
 #define NUM_EJECT_TRACKS				(2)
 #define NUM_INSERT_TRACKS				(3)
 #define NUM_TRACKS						(NUM_EJECT_TRACKS + NUM_INSERT_TRACKS)
+#define NUM_COUNTERS					(4)
 
 // change this when configuration layout changes.
-#define CONF_VERSION					(0x01)
+#define CONF_VERSION					(0x02)
 
 #define CONF_ADDR_BEGIN					(0x0000)
 #define CONF_ADDR_BANK_0				(CONF_ADDR_BEGIN)
@@ -230,6 +231,22 @@ public:
 	}
 
 	__attribute__((always_inline)) inline
+	uint32_t getCounterTicks(uint8_t const counter) {
+		return _data.configs.counter_ticks[counter];
+	}
+
+	__attribute__((always_inline)) inline
+	void setCounterTicks(uint8_t const counter, uint32_t const ticks) {
+		_data.configs.counter_ticks[counter] = ticks;
+		_data.configs.crc = _getChecksum();
+		_fram.writeTo(CONF_ADDR_BANK_0 + (reinterpret_cast<uint8_t const * const>(&(_data.configs.counter_ticks[counter])) - reinterpret_cast<uint8_t const * const>(&_data.configs)), ticks);
+		_fram.writeTo(CONF_ADDR_BANK_0 + (reinterpret_cast<uint8_t const * const>(&_data.configs.crc) - reinterpret_cast<uint8_t const * const>(&_data.configs)), _data.configs.crc);
+		_fram.writeTo(CONF_ADDR_BANK_1 + (reinterpret_cast<uint8_t const * const>(&(_data.configs.counter_ticks[counter])) - reinterpret_cast<uint8_t const * const>(&_data.configs)), ticks);
+		_fram.writeTo(CONF_ADDR_BANK_1 + (reinterpret_cast<uint8_t const * const>(&_data.configs.crc) - reinterpret_cast<uint8_t const * const>(&_data.configs)), _data.configs.crc);
+		dumpBuffer("_data", _data.bytes, sizeof(ConfigDataT));
+	}
+
+	__attribute__((always_inline)) inline
 	void dumpBuffer(char const * const tag, uint8_t const * const buffer, size_t const size) {
 		#if defined(DEBUG_SERIAL)
 		DEBUG_SERIAL.print((int)EVT_DEBUG);
@@ -287,6 +304,7 @@ private:
 		uint8_t coins_to_eject[NUM_EJECT_TRACKS];
 		uint32_t coin_count[NUM_TRACKS];
 		uint32_t eject_timeout[NUM_EJECT_TRACKS];
+		uint32_t counter_ticks[NUM_COUNTERS];
 
 		uint8_t crc;
 	};
