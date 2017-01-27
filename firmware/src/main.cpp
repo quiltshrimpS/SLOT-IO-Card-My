@@ -40,12 +40,12 @@ CmdMessenger messenger(Serial);
 Communicator communicator(messenger);
 
 union {
-    uint8_t bytes[3];
+    uint8_t bytes[sizeof(struct OutPort)];
     struct OutPort port;
 } out;
 
 union {
-    uint8_t bytes[3];
+    uint8_t bytes[sizeof(struct InPort)];
     struct InPort port;
 } in, previous_in;
 
