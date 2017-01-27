@@ -28,11 +28,11 @@
 
 #ifndef WreckedSPI_h
 #define WreckedSPI_h
-#include "DigitalPin.h"
-//------------------------------------------------------------------------------
-/** Nop for timing. */
-#define nop asm volatile ("nop\n\t")
-//------------------------------------------------------------------------------
+
+#include <Arduino.h>
+
+#include <DigitalPin.h>
+
 /** Pin Mode for MISO is input.*/
 #define MISO_MODE INPUT
 /** Pullups disabled for MISO are disabled. */
@@ -41,9 +41,9 @@
 #define MOSI_MODE  OUTPUT
 /** Pin Mode for SCK is output. */
 #define SCK_MODE  OUTPUT
-//------------------------------------------------------------------------------
+
 /**
- * @class SoftSPI
+ * @class WreckedSPI
  * @brief Fast software SPI with 2 Sck pins.
  */
 template<uint8_t MisoPin, uint8_t MosiPin, uint8_t SckPinMiso, uint8_t SckPinMosi, uint8_t ModeMiso = 2, uint8_t ModeMosi = 0>
