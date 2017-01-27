@@ -86,26 +86,29 @@ class DebounceEjectFallFunctorT {
 public:
 	__attribute__((always_inline)) inline
 	void operator () () {
-		uint32_t coins = conf.getCoinCount(TRACK) + 1;
-		conf.setCoinCount(TRACK, coins);
-		pulse_counters[COUNTER].pulse(1);
-		uint8_t to_eject = conf.getCoinsToEject(TRACK);
-		if (to_eject < 2) {
-			trackers[TRACK].stop();
-			TRACKER_NACK.stop();
-			#if (NUM_EJECT_TRACKS < 4)
-			bitClear(out.bytes[0], 7 - TRACK); // pull LOW to stop the SSR
-			#else
-			#error find another way to clear the bits!
-			#endif
-			do_send = true;
+		if (COUNTER != COUNTER_NOT_A_COUNTER)
+			pulse_counters[COUNTER].pulse(1);
+		if (TRACK != TRACK_NOT_A_TRACK) {
+			uint32_t coins = conf.getCoinCount(TRACK) + 1;
+			conf.setCoinCount(TRACK, coins);
+			uint8_t to_eject = conf.getCoinsToEject(TRACK);
+			if (to_eject < 2) {
+				trackers[TRACK].stop();
+				TRACKER_NACK.stop();
+				#if (NUM_EJECT_TRACKS < 4)
+				bitClear(out.bytes[0], 7 - TRACK); // pull LOW to stop the SSR
+				#else
+				#error find another way to clear the bits!
+				#endif
+				do_send = true;
+			}
+			if (to_eject > 0) {
+				trackers[TRACK].stop();
+				conf.setCoinsToEject(TRACK, to_eject - 1);
+			}
+			communicator.dispatchCoinCounterResult(TRACK, coins);
+			TRACKER_NACK.start();
 		}
-		if (to_eject > 0) {
-			trackers[TRACK].stop();
-			conf.setCoinsToEject(TRACK, to_eject - 1);
-		}
-		communicator.dispatchCoinCounterResult(TRACK, coins);
-		TRACKER_NACK.start();
 	}
 };
 
