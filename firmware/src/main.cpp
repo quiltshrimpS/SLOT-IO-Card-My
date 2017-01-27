@@ -185,11 +185,19 @@ void setup() {
 	power_timer1_disable(); // we're not using Timer1
 	power_timer2_disable(); // we're not using Timer2
 
+	// debuggin with FRAM takes a lot of time, enable wdt after that.
+	#if !defined(DEBUG_SERIAL)
 	wdt_enable(WDTO_15MS);
+	#endif
 
 	// do the rest of the thing after we switch off the motor
     Serial.begin(UART_BAUDRATE);
 	conf.begin();
+
+	// debuggin with FRAM takes a lot of time, enable wdt after that.
+	#if defined(DEBUG_SERIAL)
+	wdt_enable(WDTO_15MS);
+	#endif
 
 	// initialize timeout trackers
 	TRACKER_EJECT.begin(conf.getEjectTimeout(TRACK_EJECT));
