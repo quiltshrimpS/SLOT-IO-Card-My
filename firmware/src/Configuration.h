@@ -36,6 +36,7 @@
 #define CONF_ADDR_BANK_1				(CONF_ADDR_BEGIN + 0x0100)
 
 #define TRACK_EJECT				(0)
+#define TRACK_TICKET			(1)
 #define TRACK_INSERT_1			(2)
 #define TRACK_INSERT_2			(3)
 #define TRACK_BANKNOTE			(4)

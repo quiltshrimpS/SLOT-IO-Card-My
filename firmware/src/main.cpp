@@ -57,13 +57,16 @@ bool do_send = false;
 TimeoutTracker trackers[] = {
 #if defined(DEBUG_SERIAL)
 	TimeoutTracker("eject tracker"),
+	TimeoutTracker("ticket tracker"),
 	TimeoutTracker("NACK tracker"),
 #else
+	TimeoutTracker(),
 	TimeoutTracker(),
 	TimeoutTracker(),
 #endif
 };
 #define TRACKER_EJECT (trackers[0])
+#define TRACKER_TICKET (trackers[1])
 #define TRACKER_NACK (trackers[2])
 
 Pulse<COUNTER_PULSE_DUTY_HIGH, COUNTER_PULSE_DUTY_LOW> pulse_counters[4];
@@ -112,6 +115,30 @@ public:
 	}
 };
 Debounce<LOW, DEBOUNCE_TIMEOUT, EmptyFunctorT, DebounceEjectFallFunctorT> debounce_eject;
+
+class DebounceTicketFallFunctorT {
+public:
+	__attribute__((always_inline)) inline
+	void operator () () {
+		uint32_t coins = conf.getCoinCount(TRACK_TICKET) + 1;
+		conf.setCoinCount(TRACK_TICKET, coins);
+		// PULSE_COUNTER_EJECT.pulse(1);
+		uint8_t to_eject = conf.getCoinsToEject(TRACK_TICKET);
+		if (to_eject < 2) {
+			TRACKER_TICKET.stop();
+			TRACKER_NACK.stop();
+			out.port.ssr2 = false; // pull LOW to stop the motor
+			do_send = true;
+		}
+		if (to_eject > 0) {
+			TRACKER_TICKET.start();
+			conf.setCoinsToEject(TRACK_TICKET, to_eject - 1);
+		}
+		communicator.dispatchCoinCounterResult(TRACK_TICKET, coins);
+		TRACKER_NACK.start();
+	}
+};
+Debounce<LOW, DEBOUNCE_TIMEOUT, EmptyFunctorT, DebounceTicketFallFunctorT> debounce_ticket;
 
 class DebounceInsert1FallFunctorT {
 public:
@@ -174,11 +201,13 @@ void setup() {
 
 	// initialize timeout trackers
 	TRACKER_EJECT.begin(conf.getEjectTimeout(TRACK_EJECT));
+	TRACKER_TICKET.begin(conf.getEjectTimeout(TRACK_TICKET));
 	TRACKER_NACK.begin(TIMEOUT_NACK);
 
 	// populate the debouncers
 	debounce_banknote.begin(in.port.sw20, now);
 	debounce_eject.begin(in.port.sw11, now);
+	debounce_ticket.begin(in.port.sw14, now);
 	debounce_insert_1.begin(in.port.sw12, now);
 	debounce_insert_2.begin(in.port.sw13, now);
 
@@ -369,7 +398,9 @@ void loop() {
 	if (TRACKER_NACK.trigger(now))
 	{
 		TRACKER_EJECT.stop();
+		TRACKER_TICKET.stop();
 		out.port.ssr1 = false;
+		out.port.ssr2 = false;
 		do_send = true;
 	}
 	if (TRACKER_EJECT.trigger(now))
@@ -381,6 +412,15 @@ void loop() {
 			do_send = true;
 		}
 	}
+	if (TRACKER_TICKET.trigger(now))
+	{
+		uint8_t const coins = conf.getCoinsToEject(TRACK_TICKET);
+		if (coins) {
+			communicator.dispatchErrorEjectTimeout(TRACK_TICKET, coins);
+			out.port.ssr2 = false;
+			do_send = true;
+		}
+	}
 
 	// debounce the inputs
 	const Configuration::TrackLevelsT &track_levels = conf.getTrackLevels();
@@ -388,6 +428,7 @@ void loop() {
 	debounce_insert_2.feed(in.port.sw13, track_levels.bits.track_level_3, now);
 	debounce_banknote.feed(in.port.sw20, track_levels.bits.track_level_4, now);
 	debounce_eject.feed(in.port.sw11, track_levels.bits.track_level_0, now);
+	debounce_ticket.feed(in.port.sw14, track_levels.bits.track_level_1, now);
 
 	// pulse the counters
 	if (PULSE_COUNTER_SCORE.update(now))
