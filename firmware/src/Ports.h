@@ -53,10 +53,10 @@ struct InPort {
     uint8_t sw08:1;     // 0b00000001: max bet
     uint8_t sw09:1;     // 0b00000010: help
     uint8_t sw10:1;     // 0b00000100: extract coin
-    uint8_t sw11:1;     // 0b00001000: coin eject counter
+    uint8_t sw11:1;     // 0b00001000: coin eject signal
     uint8_t sw12:1;     // 0b00010000: coin track 1
     uint8_t sw13:1;     // 0b00100000: coin track 2
-    uint8_t sw14:1;     // 0b01000000: coin track 3
+    uint8_t sw14:1;     // 0b01000000: ticket eject signal
     uint8_t sw20:1;     // 0b10000000: banknote
 
     uint8_t sw15:1;     // 0b00000001: open score (??)
