@@ -81,17 +81,6 @@ public:
 	void operator () () { }
 };
 
-class DebounceBanknoteFallFunctorT {
-public:
-	__attribute__((always_inline)) inline
-	void operator () () {
-		uint32_t coins = conf.getCoinCount(TRACK_BANKNOTE) + 1;
-		conf.setCoinCount(TRACK_BANKNOTE, coins);
-		communicator.dispatchCoinCounterResult(TRACK_BANKNOTE, coins);
-	}
-};
-Debounce<LOW, DEBOUNCE_TIMEOUT, EmptyFunctorT, DebounceBanknoteFallFunctorT> debounce_banknote;
-
 class DebounceEjectFallFunctorT {
 public:
 	__attribute__((always_inline)) inline
@@ -140,29 +129,38 @@ public:
 };
 Debounce<LOW, DEBOUNCE_TIMEOUT, EmptyFunctorT, DebounceTicketFallFunctorT> debounce_ticket;
 
-class DebounceInsert1FallFunctorT {
+template < uint8_t TRACK, uint8_t COUNTER >
+class DebounceInsertFallFunctorT {
 public:
 	__attribute__((always_inline)) inline
 	void operator () () {
-		uint32_t coins = conf.getCoinCount(TRACK_INSERT_1) + 1;
-		conf.setCoinCount(TRACK_INSERT_1, coins);
-		communicator.dispatchCoinCounterResult(TRACK_INSERT_1, coins);
-		PULSE_COUNTER_INSERT.pulse(1);
+		if (TRACK != TRACK_NOT_A_TRACK) {
+			uint32_t coins = conf.getCoinCount(TRACK) + 1;
+			conf.setCoinCount(TRACK, coins);
+			communicator.dispatchCoinCounterResult(TRACK, coins);
+		}
+		if (COUNTER != COUNTER_NOT_A_COUNTER)
+			pulse_counters[COUNTER].pulse(1);
 	}
 };
-Debounce<LOW, DEBOUNCE_TIMEOUT, EmptyFunctorT, DebounceInsert1FallFunctorT> debounce_insert_1;
 
-class DebounceInsert2FallFunctorT {
-public:
-	__attribute__((always_inline)) inline
-	void operator () () {
-		uint32_t coins = conf.getCoinCount(TRACK_INSERT_2) + 1;
-		conf.setCoinCount(TRACK_INSERT_2, coins);
-		communicator.dispatchCoinCounterResult(TRACK_INSERT_2, coins);
-		PULSE_COUNTER_INSERT.pulse(1);
-	}
-};
-Debounce<LOW, DEBOUNCE_TIMEOUT, EmptyFunctorT, DebounceInsert2FallFunctorT> debounce_insert_2;
+Debounce<
+	LOW, DEBOUNCE_TIMEOUT,
+	EmptyFunctorT,
+	DebounceInsertFallFunctorT<TRACK_INSERT_1, COUNTER_INSERT>
+> debounce_insert_1;
+
+Debounce<
+	LOW, DEBOUNCE_TIMEOUT,
+	EmptyFunctorT,
+	DebounceInsertFallFunctorT<TRACK_INSERT_2, COUNTER_INSERT>
+> debounce_insert_2;
+
+Debounce<
+	LOW, DEBOUNCE_TIMEOUT,
+	EmptyFunctorT,
+	DebounceInsertFallFunctorT<TRACK_BANKNOTE, COUNTER_NOT_A_COUNTER>
+> debounce_banknote;
 
 static uint8_t const PIN_LATCH_OUT = 4; // for 74HC595
 static uint8_t const PIN_LATCH_IN = 9;  // for 74HC165
