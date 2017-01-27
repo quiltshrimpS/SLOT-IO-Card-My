@@ -284,9 +284,9 @@ void setup() {
 					uint8_t const counter = messenger.readBinArg<uint8_t>();
 					uint8_t const ticks = messenger.readBinArg<uint8_t>();
 				#if defined(DEBUG_SERIAL)
-					if (unlikely(counter < 4)) {
+					if (likely(counter < 4)) {
 				#else
-					if (unlikely(counter < 2)) {
+					if (likely(counter < 2)) {
 				#endif
 						pulse_counters[counter].pulse(ticks);
 					} else {
