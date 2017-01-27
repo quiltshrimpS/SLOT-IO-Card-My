@@ -231,12 +231,21 @@ void setup() {
 							communicator.dispatchErrorEjectInterrupted(track, remained);
 						} else {
 							conf.setCoinsToEject(track, count);
-							if (count != 0) {
+							if (likely(count != 0)) {
 								trackers[track].start();
 								#if (NUM_EJECT_TRACKS < 4)
 								bitSet(out.bytes[0], 7 - track); // pull HIGH to enable the SSR
 								#else
 								#error find another way to set the bits!
+								#endif
+								do_send = true;
+							} else {
+								trackers[track].stop();
+								TRACKER_NACK.stop();
+								#if (NUM_EJECT_TRACKS < 4)
+								bitClear(out.bytes[0], 7 - track); // pull LOW to stop the SSR
+								#else
+								#error find another way to clear the bits!
 								#endif
 								do_send = true;
 							}
