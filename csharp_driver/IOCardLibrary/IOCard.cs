@@ -240,7 +240,7 @@ namespace Spark.Slot.IO
 		/// the queue, or <c>SendQueue.AtEndQueue</c> to place the command at the end of the queue. Defaults to
 		/// <c>SendQueue.InFrontQueue</c>.
 		/// </param>
-		public bool QueryTickAuditCounter(byte counter, byte ticks, SendQueue queuePosition = SendQueue.InFrontQueue)
+		public bool QueryTickAuditCounter(byte counter, uint ticks, SendQueue queuePosition = SendQueue.InFrontQueue)
 		{
 			if (IsConnected)
 			{
