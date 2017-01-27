@@ -14,6 +14,7 @@
 #define CMD_SET_EJECT_TIMEOUT		(0x42)
 #define CMD_READ_STORAGE			(0x50)
 #define CMD_WRITE_STORAGE			(0x58)
+#define CMD_REBOOT					(0xFF)
 
 #define EVT_GET_INFO_RESULT			(0x01)
 #define EVT_KEY_MASKS_RESULT		(0x02)

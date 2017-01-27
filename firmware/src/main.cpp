@@ -375,6 +375,8 @@ void setup() {
 					}
 				}
 				break;
+			case CMD_REBOOT:
+				for (;;); // block the thread and let WDT triggers an reset
 			default:
 				communicator.dispatchErrorUnknownCommand(messenger.commandID());
 		}
