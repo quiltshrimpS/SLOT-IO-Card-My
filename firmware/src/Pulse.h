@@ -15,7 +15,7 @@ public:
 	}
 
 	__attribute__((always_inline)) inline
-	void pulse(uint16_t pulses) {
+	void pulse(uint32_t pulses) {
 		_pulses += pulses;
 	}
 
@@ -54,7 +54,7 @@ public:
 
 private:
 	uint32_t _start_us;
-	uint16_t _pulses;
+	uint32_t _pulses;
 	uint8_t _state;
 };
 
