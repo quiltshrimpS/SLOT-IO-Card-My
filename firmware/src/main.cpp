@@ -81,53 +81,42 @@ public:
 	void operator () () { }
 };
 
+template < uint8_t TRACK, uint8_t COUNTER >
 class DebounceEjectFallFunctorT {
 public:
 	__attribute__((always_inline)) inline
 	void operator () () {
-		uint32_t coins = conf.getCoinCount(TRACK_EJECT) + 1;
-		conf.setCoinCount(TRACK_EJECT, coins);
-		PULSE_COUNTER_EJECT.pulse(1);
-		uint8_t to_eject = conf.getCoinsToEject(TRACK_EJECT);
+		uint32_t coins = conf.getCoinCount(TRACK) + 1;
+		conf.setCoinCount(TRACK, coins);
+		pulse_counters[COUNTER].pulse(1);
+		uint8_t to_eject = conf.getCoinsToEject(TRACK);
 		if (to_eject < 2) {
-			TRACKER_EJECT.stop();
+			trackers[TRACK].stop();
 			TRACKER_NACK.stop();
-			out.port.ssr1 = false; // pull LOW to stop the motor
+			// FIXME: hacky, doesn't work for SSR4 and 5
+			bitClear(out.bytes[0], 7 - TRACK); // pull LOW to stop the SSR
 			do_send = true;
 		}
 		if (to_eject > 0) {
-			TRACKER_EJECT.start();
-			conf.setCoinsToEject(TRACK_EJECT, to_eject - 1);
+			trackers[TRACK].stop();
+			conf.setCoinsToEject(TRACK, to_eject - 1);
 		}
-		communicator.dispatchCoinCounterResult(TRACK_EJECT, coins);
+		communicator.dispatchCoinCounterResult(TRACK, coins);
 		TRACKER_NACK.start();
 	}
 };
-Debounce<LOW, DEBOUNCE_TIMEOUT, EmptyFunctorT, DebounceEjectFallFunctorT> debounce_eject;
 
-class DebounceTicketFallFunctorT {
-public:
-	__attribute__((always_inline)) inline
-	void operator () () {
-		uint32_t coins = conf.getCoinCount(TRACK_TICKET) + 1;
-		conf.setCoinCount(TRACK_TICKET, coins);
-		// PULSE_COUNTER_EJECT.pulse(1);
-		uint8_t to_eject = conf.getCoinsToEject(TRACK_TICKET);
-		if (to_eject < 2) {
-			TRACKER_TICKET.stop();
-			TRACKER_NACK.stop();
-			out.port.ssr2 = false; // pull LOW to stop the motor
-			do_send = true;
-		}
-		if (to_eject > 0) {
-			TRACKER_TICKET.start();
-			conf.setCoinsToEject(TRACK_TICKET, to_eject - 1);
-		}
-		communicator.dispatchCoinCounterResult(TRACK_TICKET, coins);
-		TRACKER_NACK.start();
-	}
-};
-Debounce<LOW, DEBOUNCE_TIMEOUT, EmptyFunctorT, DebounceTicketFallFunctorT> debounce_ticket;
+Debounce<
+	LOW, DEBOUNCE_TIMEOUT,
+	EmptyFunctorT,
+	DebounceEjectFallFunctorT<TRACK_EJECT, COUNTER_EJECT>
+> debounce_eject;
+
+Debounce<
+	LOW, DEBOUNCE_TIMEOUT,
+	EmptyFunctorT,
+	DebounceEjectFallFunctorT<TRACK_TICKET, COUNTER_NOT_A_COUNTER>
+> debounce_ticket;
 
 template < uint8_t TRACK, uint8_t COUNTER >
 class DebounceInsertFallFunctorT {
