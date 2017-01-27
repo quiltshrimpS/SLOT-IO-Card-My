@@ -170,9 +170,9 @@ void setup() {
 	// send and receive the initial states
     fastDigitalWrite(PIN_LATCH_OUT, LOW);
     fastDigitalWrite(PIN_LATCH_IN, HIGH);
-    previous_in.bytes[0] = spi::transfer(out.bytes[0]) | IN_MASK_0;
-    previous_in.bytes[1] = spi::transfer(out.bytes[1]) | IN_MASK_1;
-    previous_in.bytes[2] = spi::transfer(out.bytes[2]) | IN_MASK_2;
+    previous_in.bytes[0] = spi::transfer(out.bytes[0]) & IN_MASK_0;
+    previous_in.bytes[1] = spi::transfer(out.bytes[1]) & IN_MASK_1;
+    previous_in.bytes[2] = spi::transfer(out.bytes[2]) & IN_MASK_2;
     fastDigitalWrite(PIN_LATCH_OUT, HIGH);
     fastDigitalWrite(PIN_LATCH_IN, LOW);
 
