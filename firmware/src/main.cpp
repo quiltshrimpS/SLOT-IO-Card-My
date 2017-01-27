@@ -294,7 +294,7 @@ void setup() {
 			case CMD_TICK_AUDIT_COUNTER:
 				{
 					uint8_t const counter = messenger.readBinArg<uint8_t>();
-					uint8_t const ticks = messenger.readBinArg<uint8_t>();
+					uint32_t const ticks = messenger.readBinArg<uint32_t>();
 				#if defined(DEBUG_SERIAL)
 					if (likely(counter < 4)) {
 				#else
