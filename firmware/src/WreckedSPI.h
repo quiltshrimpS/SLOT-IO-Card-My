@@ -82,7 +82,7 @@ public:
 	 * @param[in] txData	Data byte to send.
 	 */
 	static inline __attribute__((always_inline))
- 	void send(uint8_t txData) {
+ 	void send(uint8_t const txData) {
 		sendBit(7, txData);
 		sendBit(6, txData);
 		sendBit(5, txData);
@@ -100,7 +100,7 @@ public:
 	 * @return				Data byte received.
 	 */
 	static inline __attribute__((always_inline))
-	uint8_t transfer(uint8_t txData) {
+	uint8_t transfer(uint8_t const txData) {
 		uint8_t rxData = 0;
 		transferBit(7, &rxData, txData);
 		transferBit(6, &rxData, txData);
@@ -115,17 +115,17 @@ public:
 
 private:
 	static inline __attribute__((always_inline))
-	bool MODE_CPHA(uint8_t mode) {
+	bool MODE_CPHA(uint8_t const mode) {
 		return (mode & 1) != 0;
 	}
 
 	static inline __attribute__((always_inline))
-	bool MODE_CPOL(uint8_t mode) {
+	bool MODE_CPOL(uint8_t const mode) {
 		return (mode & 2) != 0;
 	}
 
 	static inline __attribute__((always_inline))
-	void receiveBit(uint8_t bit, uint8_t* data) {
+	void receiveBit(uint8_t const bit, uint8_t * const data) {
 		if (MODE_CPHA(ModeMiso))
 			fastDigitalWrite(SckPinMiso, !MODE_CPOL(ModeMiso));
 		fastDigitalWrite(SckPinMiso, MODE_CPHA(ModeMiso) ? MODE_CPOL(ModeMiso) : !MODE_CPOL(ModeMiso));
@@ -136,7 +136,7 @@ private:
 	}
 
 	static inline __attribute__((always_inline))
-	void sendBit(uint8_t bit, uint8_t data) {
+	void sendBit(uint8_t const bit, uint8_t const data) {
 		if (MODE_CPHA(ModeMosi))
 			fastDigitalWrite(SckPinMosi, !MODE_CPOL(ModeMosi));
 		fastDigitalWrite(MosiPin, data & (1 << bit));
@@ -146,7 +146,7 @@ private:
 	}
 
 	static inline __attribute__((always_inline))
-	void transferBit(uint8_t bit, uint8_t* rxData, uint8_t txData) {
+	void transferBit(uint8_t const bit, uint8_t * const rxData, uint8_t const txData) {
 		if (MODE_CPHA(ModeMiso))
 			fastDigitalWrite(SckPinMiso, !MODE_CPOL(ModeMiso));
 		if (MODE_CPHA(ModeMosi))
