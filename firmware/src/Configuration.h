@@ -15,6 +15,9 @@
 #define NUM_INSERT_TRACKS				(4)
 #define NUM_TRACKS						(NUM_EJECT_TRACKS + NUM_INSERT_TRACKS)
 
+// change this when CONF_SIZE_ALL remains the same but layout changes.
+#define CONF_VERSION					(0x01)
+
 #define CONF_OFFSET_COIN_TRACK_LEVEL	(0x0000)
 #define CONF_SIZE_COIN_TRACK_LEVEL		(1)
 #define CONF_OFFSET_COINS_TO_EJECT		(CONF_OFFSET_COIN_TRACK_LEVEL + CONF_SIZE_COIN_TRACK_LEVEL)
@@ -276,7 +279,7 @@ private:
 		t1 = micros();
 		#endif
 
-		uint8_t crc = 0x87; // randomly picked seed...
+		uint8_t crc = CONF_VERSION;
 		for (uint8_t i = 0;i < CONF_SIZE_ALL - 1;++i)
 			crc = _crc8_ccitt_update(crc, _data.bytes[i]);
 
