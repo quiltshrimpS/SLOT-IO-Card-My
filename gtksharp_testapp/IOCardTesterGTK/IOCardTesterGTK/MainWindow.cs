@@ -246,7 +246,8 @@ public partial class MainWindow : Window
 
 		GLib.Timeout.Add(1000 / 60, delegate ()
 		{
-			Update();
+			if (checkbutton_update.Active)
+				Update();
 			return true;
 		});
 
