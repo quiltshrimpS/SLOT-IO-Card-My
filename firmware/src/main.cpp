@@ -377,7 +377,7 @@ void loop() {
 	}
 
 	// debounce the inputs
-	Configuration::TrackLevelsT &track_levels = conf.getTrackLevels();
+	const Configuration::TrackLevelsT &track_levels = conf.getTrackLevels();
 	debounce_insert_1.feed(in.port.sw12, track_levels.bits.track_level_0, now);
 	debounce_insert_2.feed(in.port.sw13, track_levels.bits.track_level_1, now);
 	debounce_banknote.feed(in.port.sw20, track_levels.bits.track_level_3, now);
