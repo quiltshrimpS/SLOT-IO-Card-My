@@ -158,6 +158,9 @@ static uint8_t const PIN_LATCH_OUT = 4; // for 74HC595
 static uint8_t const PIN_LATCH_IN = 9;  // for 74HC165
 
 void setup() {
+	#if defined(DEBUG_SERIAL)
+	uint32_t t1 = micros(), t2;
+	#endif
 	// FIXME: because 74HC595 defaults to HIGH on power-on, send the initial
 	// FIXME: states as soon as we enter `setup()`
     fastPinConfig(5, OUTPUT, LOW); // 595 nCLR (active LOW), clear register
@@ -381,6 +384,14 @@ void setup() {
 		DEBUG_SERIAL.print("us;");
 		#endif
 	});
+
+	#if defined(DEBUG_SERIAL)
+	t2 = micros();
+	DEBUG_SERIAL.print((int)EVT_DEBUG);
+	DEBUG_SERIAL.print(F(",setup() took "));
+	DEBUG_SERIAL.print(t2 - t1);
+	DEBUG_SERIAL.print("us;");
+	#endif
 }
 
 void loop() {
