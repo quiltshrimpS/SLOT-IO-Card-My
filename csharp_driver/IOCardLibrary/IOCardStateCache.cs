@@ -145,7 +145,7 @@ namespace Spark.Slot.IO
 		/// </summary>
 		/// <returns>The coin counter.</returns>
 		/// <param name="track">Track.</param>
-		public uint getCoinCounter(byte track)
+		public uint GetCoinCounter(byte track)
 		{
 			lock (mCoinCounters)
 			{
