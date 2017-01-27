@@ -1,6 +1,8 @@
 #ifndef __PULSE_H__
 #define __PULSE_H__
 
+#include <Arduino.h>
+
 #include "util.h"
 
 static uint8_t const STATE_PAUSED = 0;
