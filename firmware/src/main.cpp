@@ -433,24 +433,24 @@ void loop() {
 	debounce_ticket.feed(in.port.sw14, track_levels.bits.track_level_1, now);
 
 	// pulse the counters
-	if (PULSE_COUNTER_SCORE.update(now))
+	if (pulse_counters[COUNTER_SCORE].update(now))
 	{
-		out.port.counter1 = PULSE_COUNTER_SCORE.get();
+		out.port.counter1 = pulse_counters[COUNTER_SCORE].get();
 		do_send = true;
 	}
-	if (PULSE_COUNTER_WASH.update(now))
+	if (pulse_counters[COUNTER_WASH].update(now))
 	{
-		out.port.counter2 = PULSE_COUNTER_WASH.get();
+		out.port.counter2 = pulse_counters[COUNTER_WASH].get();
 		do_send = true;
 	}
-	if (PULSE_COUNTER_INSERT.update(now))
+	if (pulse_counters[COUNTER_INSERT].update(now))
 	{
-		out.port.counter3 = PULSE_COUNTER_INSERT.get();
+		out.port.counter3 = pulse_counters[COUNTER_INSERT].get();
 		do_send = true;
 	}
-	if (PULSE_COUNTER_EJECT.update(now))
+	if (pulse_counters[COUNTER_EJECT].update(now))
 	{
-		out.port.counter4 = PULSE_COUNTER_EJECT.get();
+		out.port.counter4 = pulse_counters[COUNTER_EJECT].get();
 		do_send = true;
 	}
 
