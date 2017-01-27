@@ -33,7 +33,7 @@
 #include "TimeoutTracker.h"
 #include "Communicator.h"
 
-WreckedSPI< /* MISO */ 7, /* MOSI */ 2, /* SCLK_MISO */ 8, /* SCLK_MOSI */ 3, /* MODE_MISO */ 2, /* MODE_MOSI */ 0 > spi;
+typedef WreckedSPI< /* MISO */ 7, /* MOSI */ 2, /* SCLK_MISO */ 8, /* SCLK_MOSI */ 3, /* MODE_MISO */ 2, /* MODE_MOSI */ 0 > spi;
 Configuration conf;
 
 CmdMessenger messenger(Serial);
@@ -155,15 +155,15 @@ void setup() {
     fastPinConfig(6, OUTPUT, LOW); // 595 nG (active LOW), enable
     fastPinConfig(PIN_LATCH_OUT, OUTPUT, HIGH); // 595 latch
     fastPinConfig(PIN_LATCH_IN, OUTPUT, LOW);   // 165 latch
-    spi.begin(); // for 74HC595 and 74HC165
+    spi::begin(); // for 74HC595 and 74HC165
     fastDigitalWrite(5, HIGH); // cleared 74HC595, put it back on.
 
 	// send and receive the initial states
     fastDigitalWrite(PIN_LATCH_OUT, LOW);
     fastDigitalWrite(PIN_LATCH_IN, HIGH);
-    previous_in.bytes[0] = spi.transfer(out.bytes[0]) | IN_MASK_0;
-    previous_in.bytes[1] = spi.transfer(out.bytes[1]) | IN_MASK_1;
-    previous_in.bytes[2] = spi.transfer(out.bytes[2]) | IN_MASK_2;
+    previous_in.bytes[0] = spi::transfer(out.bytes[0]) | IN_MASK_0;
+    previous_in.bytes[1] = spi::transfer(out.bytes[1]) | IN_MASK_1;
+    previous_in.bytes[2] = spi::transfer(out.bytes[2]) | IN_MASK_2;
     fastDigitalWrite(PIN_LATCH_OUT, HIGH);
     fastDigitalWrite(PIN_LATCH_IN, LOW);
 
@@ -357,9 +357,9 @@ void loop() {
 
 	// read key states
     fastDigitalWrite(PIN_LATCH_IN, HIGH);
-    in.bytes[0] = spi.receive();
-    in.bytes[1] = spi.receive();
-    in.bytes[2] = spi.receive();
+    in.bytes[0] = spi::receive();
+    in.bytes[1] = spi::receive();
+    in.bytes[2] = spi::receive();
     fastDigitalWrite(PIN_LATCH_IN, LOW);
 
 	uint32_t now = micros();
@@ -464,9 +464,9 @@ void loop() {
 		if (do_send) {
 			do_send = false;
 	        fastDigitalWrite(PIN_LATCH_OUT, LOW);
-	        spi.send(out.bytes[0]);
-	        spi.send(out.bytes[1]);
-	        spi.send(out.bytes[2]);
+	        spi::send(out.bytes[0]);
+	        spi::send(out.bytes[1]);
+	        spi::send(out.bytes[2]);
 	        fastDigitalWrite(PIN_LATCH_OUT, HIGH);
 		}
 
