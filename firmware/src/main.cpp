@@ -344,7 +344,7 @@ void setup() {
 				{
 					uint16_t const address = messenger.readBinArg<uint16_t>();
 					uint8_t const length = messenger.readBinArg<uint8_t>();
-					if (unlikely(address < 0x200)) {
+					if (unlikely(address < CONF_ADDR_USER_BEGIN)) {
 						communicator.dispatchErrorProtectedStorage(address);
 					} else if (unlikely(length > MAX_BYTES_LENGTH)) {
 						communicator.dispatchErrorTooLong(length);
@@ -362,7 +362,7 @@ void setup() {
 					uint16_t const address = messenger.readBinArg<uint16_t>();
 					uint8_t const length = messenger.readBinArg<uint8_t>();
 				#if !defined(DEBUG_SERIAL)
-					if (unlikely(address < 0x200)) {
+					if (unlikely(address < CONF_ADDR_USER_BEGIN)) {
 						communicator.dispatchErrorProtectedStorage(address);
 					} else
 				#endif
