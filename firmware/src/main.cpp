@@ -404,6 +404,18 @@ void setup() {
 	#endif
 }
 
+static inline __attribute__ ((always_inline))
+void check_counter(uint8_t const idx, uint32_t const now = micros()) {
+	if (pulse_counters[idx].update(now)) {
+		if (pulse_counters[idx].get()) {
+			bitSet(out.bytes[0], idx);
+		} else {
+			bitClear(out.bytes[0], idx);
+		}
+		do_send = true;
+	}
+}
+
 void loop() {
 	#if defined(DEBUG_SERIAL)
 	static uint32_t last_millis = millis();
@@ -460,42 +472,10 @@ void loop() {
 	debounce_ticket.feed(in.port.sw14, track_levels.bits.track_level_1, now);
 
 	// pulse the counters
-	if (pulse_counters[COUNTER_SCORE].update(now))
-	{
-		if (pulse_counters[COUNTER_SCORE].get()) {
-			bitSet(out.bytes[0], COUNTER_SCORE);
-		} else {
-			bitClear(out.bytes[0], COUNTER_SCORE);
-		}
-		do_send = true;
-	}
-	if (pulse_counters[COUNTER_WASH].update(now))
-	{
-		if (pulse_counters[COUNTER_WASH].get()) {
-			bitSet(out.bytes[0], COUNTER_WASH);
-		} else {
-			bitClear(out.bytes[0], COUNTER_WASH);
-		}
-		do_send = true;
-	}
-	if (pulse_counters[COUNTER_INSERT].update(now))
-	{
-		if (pulse_counters[COUNTER_INSERT].get()) {
-			bitSet(out.bytes[0], COUNTER_INSERT);
-		} else {
-			bitClear(out.bytes[0], COUNTER_INSERT);
-		}
-		do_send = true;
-	}
-	if (pulse_counters[COUNTER_EJECT].update(now))
-	{
-		if (pulse_counters[COUNTER_EJECT].get()) {
-			bitSet(out.bytes[0], COUNTER_EJECT);
-		} else {
-			bitClear(out.bytes[0], COUNTER_EJECT);
-		}
-		do_send = true;
-	}
+	check_counter(COUNTER_SCORE, now);
+	check_counter(COUNTER_WASH, now);
+	check_counter(COUNTER_INSERT, now);
+	check_counter(COUNTER_EJECT, now);
 
 	// rest of the keys are not debounced, we just send them to the PC if
 	// anything changed.
