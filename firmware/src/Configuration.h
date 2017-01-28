@@ -15,7 +15,7 @@
 #define NUM_INSERT_TRACKS				(3)
 #define NUM_TRACKS						(NUM_EJECT_TRACKS + NUM_INSERT_TRACKS)
 
-// change this when CONF_SIZE_ALL remains the same but layout changes.
+// change this when configuration layout changes.
 #define CONF_VERSION					(0x01)
 
 #define CONF_OFFSET_COIN_TRACK_LEVEL	(0x0000)
@@ -49,7 +49,7 @@
 #define COUNTER_NOT_A_COUNTER	(0xFF)
 
 //                             Eject -----+
-//                            Unused ----+|
+//                            Ticket ----+|
 //                          Insert 1 ---+||
 //                          Insert 2 --+|||
 //                          Banknote -+||||
@@ -92,8 +92,7 @@ public:
 		//   - CONF_ADDR_BANK_0 (256 bytes): [ CONF_SIZE_ALL ] [ RESERVED ]
 		//   - CONF_ADDR_BANK_1 (256 bytes): [ CONF_SIZE_ALL ] [ RESERVED ]
 		// the last byte of the bank is the `crc`.
-		//   - crc: crc8_ccitt of all data bytes with seed `0x87` (0x87 is
-		//          choosen because that's how `42` is choosen...)
+		//   - crc: crc8_ccitt of all data bytes with `CONF_VERSION` as the seed.
 		//
 		// this class will try to use the one with good `crc`
 
