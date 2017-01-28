@@ -671,14 +671,6 @@ public partial class MainWindow : Window
 
 		mCard.OnConnected += (sender, e) =>
 		{
-			mCommandProperty_GetInfo.SendCommand(new string[] { });
-			mCommandProperty_GetKeys.SendCommand(new string[] { });
-			mCommandProperty_GetCoinCounter.SendCommand(new string[] { "0" });
-			mCommandProperty_GetCoinCounter.SendCommand(new string[] { "1" });
-			mCommandProperty_GetCoinCounter.SendCommand(new string[] { "2" });
-			mCommandProperty_GetCoinCounter.SendCommand(new string[] { "3" });
-			mCommandProperty_GetCoinCounter.SendCommand(new string[] { "3" });
-
 			Application.Invoke(delegate
 			{
 				button_send.Sensitive = true;
