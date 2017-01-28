@@ -118,7 +118,8 @@ public:
 		_messenger.sendCmdEnd();
 	}
 
-	void dispatchErrorTooLong(uint8_t length) {
+	__attribute__((always_inline)) inline
+	void dispatchErrorTooLong(uint8_t const length) {
 		_messenger.sendCmdStart(EVT_ERROR);
 		_messenger.sendCmdBinArg<uint8_t>(ERR_TOO_LONG);
 		_messenger.sendCmdBinArg<uint8_t>(MAX_BYTES_LENGTH);
