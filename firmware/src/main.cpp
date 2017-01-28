@@ -342,7 +342,7 @@ void setup() {
 				break;
 			case CMD_WRITE_STORAGE:
 				{
-					uint16_t const address = messenger.readBinArg<uint16_t>();
+					uint32_t const address = messenger.readBinArg<uint16_t>();
 					uint8_t const length = messenger.readBinArg<uint8_t>();
 					if (unlikely(address < CONF_ADDR_USER_BEGIN)) {
 						communicator.dispatchErrorProtectedStorage(address);
@@ -361,7 +361,7 @@ void setup() {
 				break;
 			case CMD_READ_STORAGE:
 				{
-					uint16_t const address = messenger.readBinArg<uint16_t>();
+					uint32_t const address = messenger.readBinArg<uint16_t>();
 					uint8_t const length = messenger.readBinArg<uint8_t>();
 				#if !defined(DEBUG_SERIAL)
 					if (unlikely(address < CONF_ADDR_USER_BEGIN)) {
