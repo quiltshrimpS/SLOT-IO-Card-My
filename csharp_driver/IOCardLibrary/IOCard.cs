@@ -520,6 +520,10 @@ namespace Spark.Slot.IO
 
 		public bool IsConnected { get { lock (this) { return mMessenger != null; } } }
 
+		CmdMessenger mMessenger;
+
+		#region "Events and EventArgs"
+
 		public event System.EventHandler OnConnected;
 		public event System.EventHandler OnDisconnected;
 		public event System.EventHandler<GetInfoResultEventArgs> OnGetInfoResult;
@@ -532,10 +536,6 @@ namespace Spark.Slot.IO
 		public event System.EventHandler<ErrorEventArgs> OnError;
 		public event System.EventHandler<UnknownEventArgs> OnUnknown;
 		public event System.EventHandler<DebugEventArgs> OnDebug;
-
-		CmdMessenger mMessenger;
-
-		#region "EventArgs"
 
 		public class EventArgs : System.EventArgs
 		{
