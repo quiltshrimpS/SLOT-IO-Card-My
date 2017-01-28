@@ -348,6 +348,8 @@ void setup() {
 						communicator.dispatchErrorProtectedStorage(address);
 					} else if (unlikely(length > MAX_BYTES_LENGTH)) {
 						communicator.dispatchErrorTooLong(length);
+					} else if (unlikely(address + length > MAX_STORAGE_ADDRESS)) {
+						communicator.dispatchErrorOutOfRange(address, length);
 					} else {
 						uint8_t buffer[length];
 						for (uint8_t i = 0; i < length; ++i)
@@ -368,6 +370,8 @@ void setup() {
 				#endif
 					if (unlikely(length > MAX_BYTES_LENGTH)) {
 						communicator.dispatchErrorTooLong(length);
+					} else if (unlikely(address + length > MAX_STORAGE_ADDRESS)) {
+						communicator.dispatchErrorOutOfRange(address, length);
 					} else {
 						uint8_t buffer[length];
 						conf.readBytes(address, length, buffer);

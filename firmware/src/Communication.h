@@ -32,6 +32,7 @@
 #define ERR_PROTECTED_STORAGE		(0x04)
 #define ERR_TOO_LONG				(0x05)
 #define ERR_NOT_A_COUNTER			(0x06)
+#define ERR_OUT_OF_RANGE			(0x07)
 #define ERR_UNKNOWN_COMMAND			(0xFF)
 
 #endif

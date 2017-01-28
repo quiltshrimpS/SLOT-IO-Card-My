@@ -60,6 +60,7 @@
 #define EJECT_TIMEOUT_DEFAULT	(10000000L) // us
 
 #define MAX_BYTES_LENGTH		(64)
+#define MAX_STORAGE_ADDRESS		(16384u)
 
 class Configuration {
 public:

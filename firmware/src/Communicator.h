@@ -127,6 +127,15 @@ public:
 	}
 
 	__attribute__((always_inline)) inline
+	void dispatchErrorOutOfRange(uint16_t const address, uint8_t const length) {
+		_messenger.sendCmdStart(EVT_ERROR);
+		_messenger.sendCmdBinArg<uint8_t>(ERR_OUT_OF_RANGE);
+		_messenger.sendCmdBinArg<uint16_t>(address);
+		_messenger.sendCmdBinArg<uint8_t>(length);
+		_messenger.sendCmdEnd();
+	}
+
+	__attribute__((always_inline)) inline
 	void dispatchErrorUnknownCommand(uint8_t const command) {
 		_messenger.sendCmdStart(EVT_ERROR);
 		_messenger.sendCmdBinArg<uint8_t>(ERR_UNKNOWN_COMMAND);
