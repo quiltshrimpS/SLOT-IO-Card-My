@@ -31,6 +31,7 @@ namespace Spark.Slot.IO
 			EVT_COIN_COUNTER_RESULT = 0x20,
 			EVT_READ_STORAGE_RESULT = 0x50,
 			EVT_WRITE_STORAGE_RESULT = 0x58,
+			EVT_BOOT = 0x80,
 			EVT_DEBUG = 0xFE,
 			EVT_ERROR = 0xFF
 		}
@@ -400,6 +401,13 @@ namespace Spark.Slot.IO
 				if (OnGetInfoResult != null)
 					OnGetInfoResult(this, new GetInfoResultEventArgs(receivedCommand.TimeStamp, manufacturer, product, version, protocol));
 			});
+			mMessenger.Attach((int)Events.EVT_BOOT, (receivedCommand) =>
+			{
+				uint protocol = receivedCommand.ReadBinUInt32Arg();
+
+				if (OnBoot != null)
+					OnBoot(this, new BootEventArgs(receivedCommand.TimeStamp, protocol));
+			});
 			mMessenger.Attach((int)Events.EVT_COIN_COUNTER_RESULT, (receivedCommand) =>
 			{
 				// ACK this event so ejection don't get interruptted.
@@ -515,6 +523,7 @@ namespace Spark.Slot.IO
 		public event System.EventHandler OnConnected;
 		public event System.EventHandler OnDisconnected;
 		public event System.EventHandler<GetInfoResultEventArgs> OnGetInfoResult;
+		public event System.EventHandler<BootEventArgs> OnBoot;
 		public event System.EventHandler<CoinCounterResultEventArgs> OnCoinCounterResult;
 		public event System.EventHandler<KeysEventArgs> OnKeys;
 		public event System.EventHandler<KeyMasksEventArgs> OnKeyMasks;
@@ -549,6 +558,17 @@ namespace Spark.Slot.IO
 			public EventArgs(long timestamp)
 			{
 				TimeStamp = timestamp;
+			}
+		}
+
+		public class BootEventArgs : EventArgs
+		{
+			public uint ProtocolVersion { get; private set; }
+
+			public BootEventArgs(long timestamp, uint protoVersion) :
+				base(timestamp)
+			{
+				ProtocolVersion = protoVersion;
 			}
 		}
 
