@@ -106,6 +106,7 @@ public:
 		}
 		badCounterCheck(COUNTER);
 		if (COUNTER != COUNTER_NOT_A_COUNTER) {
+			conf.setCounterTicks(COUNTER, conf.getCounterTicks(COUNTER) + 1);
 			pulse_counters[COUNTER].pulse(1);
 		}
 	}
@@ -135,6 +136,7 @@ public:
 		}
 		badCounterCheck(COUNTER);
 		if (COUNTER != COUNTER_NOT_A_COUNTER) {
+			conf.setCounterTicks(COUNTER, conf.getCounterTicks(COUNTER) + 1);
 			pulse_counters[COUNTER].pulse(1);
 		}
 	}
@@ -217,6 +219,10 @@ void setup() {
 	debounce_ticket.begin(in.port.sw14, now);
 	debounce_insert_1.begin(in.port.sw12, now);
 	debounce_insert_2.begin(in.port.sw13, now);
+
+	// resume remaining ticks
+	for (uint8_t i = 0;i < NUM_COUNTERS;++i)
+		pulse_counters[i].pulse(conf.getCounterTicks(i));
 
 	// attach command handler
 	messenger.attach([]() {
@@ -314,6 +320,7 @@ void setup() {
 				#else
 					if (likely(counter < 2)) {
 				#endif
+						conf.setCounterTicks(counter, ticks + conf.getCounterTicks(counter));
 						pulse_counters[counter].pulse(ticks);
 					} else {
 						communicator.dispatchErrorNotACounter(counter);
@@ -414,6 +421,9 @@ void check_counter(uint32_t const now = micros()) {
 	if (pulse_counters[COUNTER].update(now)) {
 		if (pulse_counters[COUNTER].get()) {
 			bitSet(out.bytes[0], COUNTER);
+			uint32_t const ticks = conf.getCounterTicks(COUNTER);
+			if (ticks != 0)
+				conf.setCounterTicks(COUNTER, ticks - 1);
 		} else {
 			bitClear(out.bytes[0], COUNTER);
 		}
