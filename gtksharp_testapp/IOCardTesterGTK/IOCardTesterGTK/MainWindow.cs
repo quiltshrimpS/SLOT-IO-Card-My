@@ -825,6 +825,22 @@ public partial class MainWindow : Window
 				}
 			});
 		};
+		mCard.OnBoot += (sender, e) =>
+		{
+			Application.Invoke(delegate
+			{
+				var iter = textview_received.Buffer.StartIter;
+				textview_received.Buffer.Insert(
+					ref iter,
+					string.Format(
+						"<=  {0}: Evt = {1}, Protocol = {2}\r\n",
+						e.DateTime,
+						e.GetType(),
+						e.ProtocolVersion
+					)
+				);
+			});
+		};
 		mCard.OnGetInfoResult += (sender, e) =>
 		{
 			Application.Invoke(delegate
