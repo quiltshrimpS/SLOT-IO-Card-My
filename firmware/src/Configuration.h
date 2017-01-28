@@ -99,7 +99,7 @@ public:
 		// this class will try to use the one with good `crc`
 
 		// read the data from bank 0
-		readBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
+		_fram.readFrom(CONF_ADDR_BANK_0, _data);
 		uint8_t crc0 = _getChecksum();
 		bool bank0_checksum_good = crc0 == _data.configs.crc;
 
@@ -114,7 +114,7 @@ public:
 		#endif
 
 		// read the data from bank 1
-		readBytes(CONF_ADDR_BANK_1, CONF_SIZE_ALL, _data.bytes);
+		_fram.readFrom(CONF_ADDR_BANK_1, _data);
 		uint8_t crc1 = _getChecksum();
 		bool bank1_checksum_good = crc1 == _data.configs.crc;
 
@@ -152,8 +152,8 @@ public:
 			_data.configs.track_levels.bytes = TRACK_LEVELS_DEFAULT;
 			_data.configs.crc = _getChecksum();
 
-			writeBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
-			writeBytes(CONF_ADDR_BANK_1, CONF_SIZE_ALL, _data.bytes);
+			_fram.writeTo(CONF_ADDR_BANK_0, _data);
+			_fram.writeTo(CONF_ADDR_BANK_1, _data);
 		} else {
 			if (bank0_checksum_good) {
 				#if defined(DEBUG_SERIAL)
@@ -183,10 +183,10 @@ public:
 	void setTrackLevel(uint8_t const track, bool const level) {
 		bitSet(_data.configs.track_levels.bytes, track);
 		_data.configs.crc = _getChecksum();
-		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_COIN_TRACK_LEVEL, _data.bytes[CONF_OFFSET_COIN_TRACK_LEVEL]);
-		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
-		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_COIN_TRACK_LEVEL, _data.bytes[CONF_OFFSET_COIN_TRACK_LEVEL]);
-		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
+		_fram.writeTo(CONF_ADDR_BANK_0 + CONF_OFFSET_COIN_TRACK_LEVEL, _data.bytes[CONF_OFFSET_COIN_TRACK_LEVEL]);
+		_fram.writeTo(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
+		_fram.writeTo(CONF_ADDR_BANK_1 + CONF_OFFSET_COIN_TRACK_LEVEL, _data.bytes[CONF_OFFSET_COIN_TRACK_LEVEL]);
+		_fram.writeTo(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
 		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
 	}
 
@@ -204,10 +204,10 @@ public:
 	void setCoinsToEject(uint8_t const track, uint8_t const coins) {
 		_data.configs.coins_to_eject[track] = coins;
 		_data.configs.crc = _getChecksum();
-		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_COINS_TO_EJECT + track, coins);
-		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
-		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_COINS_TO_EJECT + track, coins);
-		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
+		_fram.writeTo(CONF_ADDR_BANK_0 + CONF_OFFSET_COINS_TO_EJECT + track, coins);
+		_fram.writeTo(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
+		_fram.writeTo(CONF_ADDR_BANK_1 + CONF_OFFSET_COINS_TO_EJECT + track, coins);
+		_fram.writeTo(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
 		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
 	}
 
@@ -220,10 +220,10 @@ public:
 	void setCoinCount(uint8_t const track, uint32_t const count) {
 		_data.configs.coin_count[track] = count;
 		_data.configs.crc = _getChecksum();
-		_fram.writeLong(CONF_ADDR_BANK_0 + CONF_OFFSET_COIN_COUNT + track * sizeof(uint32_t), count);
-		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
-		_fram.writeLong(CONF_ADDR_BANK_1 + CONF_OFFSET_COIN_COUNT + track * sizeof(uint32_t), count);
-		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
+		_fram.writeTo(CONF_ADDR_BANK_0 + CONF_OFFSET_COIN_COUNT + track * sizeof(uint32_t), count);
+		_fram.writeTo(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
+		_fram.writeTo(CONF_ADDR_BANK_1 + CONF_OFFSET_COIN_COUNT + track * sizeof(uint32_t), count);
+		_fram.writeTo(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
 		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
 	}
 
@@ -236,10 +236,10 @@ public:
 	void setEjectTimeout(uint8_t const track, uint32_t const timeout) {
 		_data.configs.eject_timeout[track] = timeout;
 		_data.configs.crc = _getChecksum();
-		_fram.writeLong(CONF_ADDR_BANK_0 + CONF_OFFSET_EJECT_TIMEOUT + track * sizeof(uint32_t), timeout);
-		_fram.writeByte(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
-		_fram.writeLong(CONF_ADDR_BANK_1 + CONF_OFFSET_EJECT_TIMEOUT + track * sizeof(uint32_t), timeout);
-		_fram.writeByte(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
+		_fram.writeTo(CONF_ADDR_BANK_0 + CONF_OFFSET_EJECT_TIMEOUT + track * sizeof(uint32_t), timeout);
+		_fram.writeTo(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
+		_fram.writeTo(CONF_ADDR_BANK_1 + CONF_OFFSET_EJECT_TIMEOUT + track * sizeof(uint32_t), timeout);
+		_fram.writeTo(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
 		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
 	}
 
@@ -265,24 +265,12 @@ public:
 
 	__attribute__((always_inline)) inline
 	void readBytes(uint16_t addr, uint8_t length, uint8_t * buffer) {
-		while (length != 0) {
-			uint8_t bytes = min(length, TWI_BUFFER_LENGTH);
-			_fram.readArray(addr, bytes, buffer);
-			addr += bytes;
-			buffer += bytes;
-			length -= bytes;
-		}
+		_fram.readArray(addr, length, buffer);
 	}
 
 	__attribute__((always_inline)) inline
 	void writeBytes(uint16_t addr, uint8_t length, uint8_t * buffer) {
-		while (length != 0) {
-			uint8_t bytes = min(length, TWI_BUFFER_LENGTH);
-			_fram.writeArray(addr, bytes, buffer);
-			addr += bytes;
-			buffer += bytes;
-			length -= bytes;
-		}
+		_fram.writeArray(addr, length, buffer);
 	}
 
 private:
