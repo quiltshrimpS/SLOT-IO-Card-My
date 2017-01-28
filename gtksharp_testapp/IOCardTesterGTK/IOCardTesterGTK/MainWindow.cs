@@ -144,6 +144,12 @@ public partial class MainWindow : Window
 								Debug.WriteLine("Got: error = {0}, desired = {1}, requested = {2}, time = {3}", e.DesiredLength, e.RequestedLength, e.DateTime);
 							}
 							break;
+						case IOCard.Errors.ERR_OUT_OF_RANGE:
+							{
+								var e = (IOCard.ErrorOutOfRangeEventArgs)error;
+								Debug.WriteLine("Got: error = {0}, address = 0x{1:X4}, length = {2}, time = {3}", e.ErrorCode, e.Address, e.Length);
+							}
+							break;
 						case IOCard.Errors.ERR_NOT_A_COUNTER:
 							{
 								var e = (IOCard.ErrorNotACounterEventArgs)error;
@@ -780,6 +786,22 @@ public partial class MainWindow : Window
 									ev.ErrorCode,
 									ev.RequestedLength,
 									ev.DesiredLength
+								)
+							);
+						}
+						break;
+					case IOCard.Errors.ERR_OUT_OF_RANGE:
+						{
+							var ev = (IOCard.ErrorOutOfRangeEventArgs)e;
+							var iter = textview_received.Buffer.StartIter;
+							textview_received.Buffer.Insert(
+								ref iter,
+								string.Format(
+									"<=  {0}: error = {1}, address = 0x{2:X4}, length = {3}\r\n",
+									ev.DateTime,
+									ev.ErrorCode,
+									ev.Address,
+									ev.Length
 								)
 							);
 						}
