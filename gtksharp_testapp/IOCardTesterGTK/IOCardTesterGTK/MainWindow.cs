@@ -141,7 +141,7 @@ public partial class MainWindow : Window
 						case IOCard.Errors.ERR_TOO_LONG:
 							{
 								var e = (IOCard.ErrorTooLongEventArgs)error;
-								Debug.WriteLine("Got: error = {0}, desired = {1}, requested = {2}, time = {3}", e.DesiredLength, e.RequestedLength, e.DateTime);
+								Debug.WriteLine("Got: error = {0}, desired = {1}, requested = {2}, time = {3}", e.ErrorCode, e.DesiredLength, e.RequestedLength, e.DateTime);
 							}
 							break;
 						case IOCard.Errors.ERR_OUT_OF_RANGE:
