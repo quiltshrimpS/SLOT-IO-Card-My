@@ -22,6 +22,7 @@
 #define EVT_COIN_COUNTER_RESULT		(0x20)
 #define EVT_READ_STORAGE_RESULT		(0x50)
 #define EVT_WRITE_STORAGE_RESULT	(0x58)
+#define EVT_BOOT					(0x80)
 #define EVT_DEBUG					(0xFE)
 #define EVT_ERROR					(0xFF)
 

@@ -389,6 +389,8 @@ void setup() {
 		#endif
 	});
 
+	communicator.dispatchBoot();
+
 	#if defined(DEBUG_SERIAL)
 	t2 = micros();
 	DEBUG_SERIAL.print((int)EVT_DEBUG);
