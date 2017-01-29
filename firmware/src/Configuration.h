@@ -216,7 +216,7 @@ public:
 	}
 
 	__attribute__((always_inline)) inline
-	void setCoinCount(uint8_t const track, uint32_t const count) {
+	void setCoinCount(uint8_t const track, uint32_t const & count) {
 		_data.configs.coin_count[track] = count;
 		_data.configs.crc = _getChecksum();
 		_fram.writeTo(CONF_ADDR_BANK_0 + CONF_OFFSET_COIN_COUNT + track * sizeof(uint32_t), count);
@@ -232,7 +232,7 @@ public:
 	}
 
 	__attribute__((always_inline)) inline
-	void setEjectTimeout(uint8_t const track, uint32_t const timeout) {
+	void setEjectTimeout(uint8_t const track, uint32_t const & timeout) {
 		_data.configs.eject_timeout[track] = timeout;
 		_data.configs.crc = _getChecksum();
 		_fram.writeTo(CONF_ADDR_BANK_0 + CONF_OFFSET_EJECT_TIMEOUT + track * sizeof(uint32_t), timeout);
@@ -263,12 +263,12 @@ public:
 	}
 
 	__attribute__((always_inline)) inline
-	void readBytes(uint16_t addr, uint8_t length, uint8_t * buffer) {
+	void readBytes(uint16_t const & addr, uint8_t const length, uint8_t * const buffer) {
 		_fram.readArray(addr, length, buffer);
 	}
 
 	__attribute__((always_inline)) inline
-	void writeBytes(uint16_t addr, uint8_t length, uint8_t * buffer) {
+	void writeBytes(uint16_t const & addr, uint8_t const length, uint8_t const * const buffer) {
 		_fram.writeArray(addr, length, buffer);
 	}
 
