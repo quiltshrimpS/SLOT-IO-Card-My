@@ -4,10 +4,9 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <utility/twi.h>
+#include <util/crc16.h>
 
 #include <FRAM_MB85RC_I2C.h>
-
-#include <util/crc16.h>
 
 #include "Communication.h"
 
@@ -308,7 +307,9 @@ private:
 		} configs;
 	} _data;
 
-	FRAM_MB85RC_I2C _fram;
+	// FIXME: hardware layout connects WP to A7, but A7 can only be used as ADC
+	//        input and not digital output, so we have to leave WP unmanaged.
+	FRAM_MB85RC_I2C_T<WriteProtect_Unmanaged> _fram;
 };
 
 #endif

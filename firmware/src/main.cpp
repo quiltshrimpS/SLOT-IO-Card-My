@@ -10,7 +10,7 @@
  *
  * A4 - FRAM - SDA
  * A5 - FRAM - SCL
- * A7 - FRAM - WP
+ * A7 - FRAM - WP	// FIXME: hw issue, pin doesn't support digitalWrite()
  */
 
 #include <Arduino.h>
