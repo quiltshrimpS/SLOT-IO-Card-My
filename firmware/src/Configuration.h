@@ -268,7 +268,7 @@ private:
 		#endif
 
 		uint8_t crc = CONF_VERSION;
-		for (uint8_t i = 0;i < sizeof(ConfigDataT) - 1;++i)
+		for (uint8_t i = 0;i < sizeof(ConfigDataT) - sizeof(_data.configs.crc);++i)
 			crc = _crc8_ccitt_update(crc, _data.bytes[i]);
 
 		#if defined(DEBUG_SERIAL)
