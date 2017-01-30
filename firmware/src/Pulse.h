@@ -19,12 +19,12 @@ public:
 	}
 
 	__attribute__((always_inline)) inline
-	void pulse(uint32_t pulses) {
+	void pulse(uint32_t const & pulses) {
 		_pulses += pulses;
 	}
 
 	__attribute__((always_inline)) inline
-	bool update(uint32_t now = micros())
+	bool update(uint32_t const & now = micros())
 	{
 		// super easy state machine :-D
 		if (likely(_state == STATE_PAUSED)) {

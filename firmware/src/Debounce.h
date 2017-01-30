@@ -14,19 +14,19 @@ public:
 	}
 
 	__attribute__((always_inline)) inline
-	void begin(bool const initial_state, uint32_t const now = micros())
+	void begin(bool const initial_state, uint32_t const & now = micros())
 	{
 		_old_output = initial_state;
 		_feed_micros = now;
 	}
 
 	__attribute__((always_inline)) inline
-	void feed(bool const state, uint32_t const now = micros()) {
+	void feed(bool const state, uint32_t const & now = micros()) {
 		feed(state, ACTIVE_LEVEL, now);
 	}
 
 	__attribute__((always_inline)) inline
-	void feed(bool const state, bool const active_level, uint32_t const now = micros()) {
+	void feed(bool const state, bool const active_level, uint32_t const & now = micros()) {
 		if (state == active_level) {
 			_energy += _feed_micros - now;
 		} else {
