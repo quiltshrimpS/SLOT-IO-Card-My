@@ -236,7 +236,7 @@ public:
 	}
 
 	__attribute__((always_inline)) inline
-	void setCounterTicks(uint8_t const counter, uint32_t const ticks) {
+	void setCounterTicks(uint8_t const counter, uint32_t const & ticks) {
 		_data.configs.counter_ticks[counter] = ticks;
 		_data.configs.crc = _getChecksum();
 		_fram.writeTo(CONF_ADDR_BANK_0 + (reinterpret_cast<uint8_t const * const>(&(_data.configs.counter_ticks[counter])) - reinterpret_cast<uint8_t const * const>(&_data.configs)), ticks);
