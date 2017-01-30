@@ -32,7 +32,7 @@ public:
 	}
 
 	__attribute__((always_inline)) inline
-	void dispatchCoinCounterResult(uint8_t const track, uint32_t const coins) {
+	void dispatchCoinCounterResult(uint8_t const track, uint32_t const & coins) {
 		_messenger.sendCmdStart(EVT_COIN_COUNTER_RESULT);
 		_messenger.sendCmdBinArg<uint8_t>(track);
 		_messenger.sendCmdBinArg<uint32_t>(coins);
@@ -59,7 +59,7 @@ public:
 	}
 
 	__attribute__((always_inline)) inline
-	void dispatchWriteStorageResult(uint16_t const address, uint8_t const length) {
+	void dispatchWriteStorageResult(uint16_t const & address, uint8_t const length) {
 		_messenger.sendCmdStart(EVT_WRITE_STORAGE_RESULT);
 		_messenger.sendCmdBinArg<uint16_t>(address);
 		_messenger.sendCmdBinArg<uint8_t>(length);
@@ -67,7 +67,7 @@ public:
 	}
 
 	__attribute__((always_inline)) inline
-	void dispatchReadStorageResult(uint16_t const address, uint8_t const length, uint8_t const * const buffer) {
+	void dispatchReadStorageResult(uint16_t const & address, uint8_t const length, uint8_t const * const buffer) {
 		_messenger.sendCmdStart(EVT_READ_STORAGE_RESULT);
 		_messenger.sendCmdBinArg<uint16_t>(address);
 		_messenger.sendCmdBinArg<uint8_t>(length);
@@ -111,7 +111,7 @@ public:
 	}
 
 	__attribute__((always_inline)) inline
-	void dispatchErrorProtectedStorage(uint16_t const address) {
+	void dispatchErrorProtectedStorage(uint16_t const & address) {
 		_messenger.sendCmdStart(EVT_ERROR);
 		_messenger.sendCmdBinArg<uint8_t>(ERR_PROTECTED_STORAGE);
 		_messenger.sendCmdBinArg<uint16_t>(address);
@@ -128,7 +128,7 @@ public:
 	}
 
 	__attribute__((always_inline)) inline
-	void dispatchErrorOutOfRange(uint16_t const address, uint8_t const length) {
+	void dispatchErrorOutOfRange(uint16_t const & address, uint8_t const length) {
 		_messenger.sendCmdStart(EVT_ERROR);
 		_messenger.sendCmdBinArg<uint8_t>(ERR_OUT_OF_RANGE);
 		_messenger.sendCmdBinArg<uint16_t>(address);
