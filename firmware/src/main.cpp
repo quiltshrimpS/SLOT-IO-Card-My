@@ -104,6 +104,7 @@ public:
 			communicator.dispatchCoinCounterResult(TRACK, coins);
 			TRACKER_NACK.start();
 		}
+		badCounterCheck(COUNTER);
 		if (COUNTER != COUNTER_NOT_A_COUNTER) {
 			pulse_counters[COUNTER].pulse(1);
 		}
@@ -132,6 +133,7 @@ public:
 			conf.setCoinCount(TRACK, coins);
 			communicator.dispatchCoinCounterResult(TRACK, coins);
 		}
+		badCounterCheck(COUNTER);
 		if (COUNTER != COUNTER_NOT_A_COUNTER) {
 			pulse_counters[COUNTER].pulse(1);
 		}
@@ -404,13 +406,16 @@ void setup() {
 	#endif
 }
 
+template < uint8_t COUNTER >
 static inline __attribute__ ((always_inline))
-void check_counter(uint8_t const idx, uint32_t const now = micros()) {
-	if (pulse_counters[idx].update(now)) {
-		if (pulse_counters[idx].get()) {
-			bitSet(out.bytes[0], idx);
+void check_counter(uint32_t const now = micros()) {
+	badCounterCheck(COUNTER);
+
+	if (pulse_counters[COUNTER].update(now)) {
+		if (pulse_counters[COUNTER].get()) {
+			bitSet(out.bytes[0], COUNTER);
 		} else {
-			bitClear(out.bytes[0], idx);
+			bitClear(out.bytes[0], COUNTER);
 		}
 		do_send = true;
 	}
@@ -472,10 +477,10 @@ void loop() {
 	debounce_ticket.feed(in.port.sw14, track_levels.bits.track_level_1, now);
 
 	// pulse the counters
-	check_counter(COUNTER_SCORE, now);
-	check_counter(COUNTER_WASH, now);
-	check_counter(COUNTER_INSERT, now);
-	check_counter(COUNTER_EJECT, now);
+	check_counter<COUNTER_SCORE>(now);
+	check_counter<COUNTER_WASH>(now);
+	check_counter<COUNTER_INSERT>(now);
+	check_counter<COUNTER_EJECT>(now);
 
 	// rest of the keys are not debounced, we just send them to the PC if
 	// anything changed.
