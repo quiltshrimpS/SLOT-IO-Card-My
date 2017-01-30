@@ -17,19 +17,6 @@
 // change this when configuration layout changes.
 #define CONF_VERSION					(0x01)
 
-#define CONF_OFFSET_COIN_TRACK_LEVEL	(0x0000)
-#define CONF_SIZE_COIN_TRACK_LEVEL		(1)
-#define CONF_OFFSET_COINS_TO_EJECT		(CONF_OFFSET_COIN_TRACK_LEVEL + CONF_SIZE_COIN_TRACK_LEVEL)
-#define CONF_SIZE_COINS_TO_EJECT		(NUM_EJECT_TRACKS * sizeof(uint8_t))
-#define CONF_OFFSET_COIN_COUNT			(CONF_OFFSET_COINS_TO_EJECT + CONF_SIZE_COINS_TO_EJECT)
-#define CONF_SIZE_COIN_COUNT			(NUM_TRACKS * sizeof(uint32_t))
-#define CONF_OFFSET_EJECT_TIMEOUT		(CONF_OFFSET_COIN_COUNT + CONF_SIZE_COIN_COUNT)
-#define CONF_SIZE_EJECT_TIMEOUT			(NUM_EJECT_TRACKS * sizeof(uint32_t))
-#define CONF_OFFSET_CHECKSUM			(CONF_OFFSET_EJECT_TIMEOUT + CONF_SIZE_EJECT_TIMEOUT)
-#define CONF_SIZE_CHECKSUM				(1)
-#define CONF_OFFSET_END					(CONF_OFFSET_CHECKSUM + CONF_SIZE_CHECKSUM)
-#define CONF_SIZE_ALL					(CONF_OFFSET_END)
-
 #define CONF_ADDR_BEGIN					(0x0000)
 #define CONF_ADDR_BANK_0				(CONF_ADDR_BEGIN)
 #define CONF_ADDR_BANK_1				(CONF_ADDR_BANK_0 + 0x0100)
@@ -160,7 +147,7 @@ public:
 				DEBUG_SERIAL.print(F(",bank1 bad/, use bank0;"));
 				#endif
 				// bank1 is bad, read back bank0
-				readBytes(CONF_ADDR_BANK_0, CONF_SIZE_ALL, _data.bytes);
+				readBytes(CONF_ADDR_BANK_0, sizeof(ConfigDataT), _data.bytes);
 			} else /* if (bank1_checksum_good) */ {
 				#if defined(DEBUG_SERIAL)
 				DEBUG_SERIAL.print((int)EVT_DEBUG);
@@ -170,7 +157,7 @@ public:
 			}
 		}
 
-		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
+		dumpBuffer("_data", _data.bytes, sizeof(ConfigDataT));
 	}
 
 	__attribute__((always_inline)) inline
@@ -182,11 +169,11 @@ public:
 	void setTrackLevel(uint8_t const track, bool const level) {
 		bitSet(_data.configs.track_levels.bytes, track);
 		_data.configs.crc = _getChecksum();
-		_fram.writeTo(CONF_ADDR_BANK_0 + CONF_OFFSET_COIN_TRACK_LEVEL, _data.bytes[CONF_OFFSET_COIN_TRACK_LEVEL]);
-		_fram.writeTo(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
-		_fram.writeTo(CONF_ADDR_BANK_1 + CONF_OFFSET_COIN_TRACK_LEVEL, _data.bytes[CONF_OFFSET_COIN_TRACK_LEVEL]);
-		_fram.writeTo(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
-		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
+		_fram.writeTo(CONF_ADDR_BANK_0 + (reinterpret_cast<uint8_t const * const>(&_data.configs.track_levels) - reinterpret_cast<uint8_t const * const>(&_data.configs)), _data.configs.track_levels);
+		_fram.writeTo(CONF_ADDR_BANK_0 + (reinterpret_cast<uint8_t const * const>(&_data.configs.crc) - reinterpret_cast<uint8_t const * const>(&_data.configs)), _data.configs.crc);
+		_fram.writeTo(CONF_ADDR_BANK_1 + (reinterpret_cast<uint8_t const * const>(&_data.configs.track_levels) - reinterpret_cast<uint8_t const * const>(&_data.configs)), _data.configs.track_levels);
+		_fram.writeTo(CONF_ADDR_BANK_1 + (reinterpret_cast<uint8_t const * const>(&_data.configs.crc) - reinterpret_cast<uint8_t const * const>(&_data.configs)), _data.configs.crc);
+		dumpBuffer("_data", _data.bytes, sizeof(ConfigDataT));
 	}
 
 	__attribute__((always_inline)) inline
@@ -203,11 +190,11 @@ public:
 	void setCoinsToEject(uint8_t const track, uint8_t const coins) {
 		_data.configs.coins_to_eject[track] = coins;
 		_data.configs.crc = _getChecksum();
-		_fram.writeTo(CONF_ADDR_BANK_0 + CONF_OFFSET_COINS_TO_EJECT + track, coins);
-		_fram.writeTo(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
-		_fram.writeTo(CONF_ADDR_BANK_1 + CONF_OFFSET_COINS_TO_EJECT + track, coins);
-		_fram.writeTo(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
-		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
+		_fram.writeTo(CONF_ADDR_BANK_0 + (reinterpret_cast<uint8_t const * const>(&(_data.configs.coins_to_eject[track])) - reinterpret_cast<uint8_t const * const>(&_data.configs)), coins);
+		_fram.writeTo(CONF_ADDR_BANK_0 + (reinterpret_cast<uint8_t const * const>(&_data.configs.crc) - reinterpret_cast<uint8_t const * const>(&_data.configs)), _data.configs.crc);
+		_fram.writeTo(CONF_ADDR_BANK_1 + (reinterpret_cast<uint8_t const * const>(&(_data.configs.coins_to_eject[track])) - reinterpret_cast<uint8_t const * const>(&_data.configs)), coins);
+		_fram.writeTo(CONF_ADDR_BANK_1 + (reinterpret_cast<uint8_t const * const>(&_data.configs.crc) - reinterpret_cast<uint8_t const * const>(&_data.configs)), _data.configs.crc);
+		dumpBuffer("_data", _data.bytes, sizeof(ConfigDataT));
 	}
 
 	__attribute__((always_inline)) inline
@@ -219,11 +206,11 @@ public:
 	void setCoinCount(uint8_t const track, uint32_t const & count) {
 		_data.configs.coin_count[track] = count;
 		_data.configs.crc = _getChecksum();
-		_fram.writeTo(CONF_ADDR_BANK_0 + CONF_OFFSET_COIN_COUNT + track * sizeof(uint32_t), count);
-		_fram.writeTo(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
-		_fram.writeTo(CONF_ADDR_BANK_1 + CONF_OFFSET_COIN_COUNT + track * sizeof(uint32_t), count);
-		_fram.writeTo(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
-		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
+		_fram.writeTo(CONF_ADDR_BANK_0 + (reinterpret_cast<uint8_t const * const>(&(_data.configs.coin_count[track])) - reinterpret_cast<uint8_t const * const>(&_data.configs)), count);
+		_fram.writeTo(CONF_ADDR_BANK_0 + (reinterpret_cast<uint8_t const * const>(&_data.configs.crc) - reinterpret_cast<uint8_t const * const>(&_data.configs)), _data.configs.crc);
+		_fram.writeTo(CONF_ADDR_BANK_1 + (reinterpret_cast<uint8_t const * const>(&(_data.configs.coin_count[track])) - reinterpret_cast<uint8_t const * const>(&_data.configs)), count);
+		_fram.writeTo(CONF_ADDR_BANK_1 + (reinterpret_cast<uint8_t const * const>(&_data.configs.crc) - reinterpret_cast<uint8_t const * const>(&_data.configs)), _data.configs.crc);
+		dumpBuffer("_data", _data.bytes, sizeof(ConfigDataT));
 	}
 
 	__attribute__((always_inline)) inline
@@ -235,11 +222,11 @@ public:
 	void setEjectTimeout(uint8_t const track, uint32_t const & timeout) {
 		_data.configs.eject_timeout[track] = timeout;
 		_data.configs.crc = _getChecksum();
-		_fram.writeTo(CONF_ADDR_BANK_0 + CONF_OFFSET_EJECT_TIMEOUT + track * sizeof(uint32_t), timeout);
-		_fram.writeTo(CONF_ADDR_BANK_0 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
-		_fram.writeTo(CONF_ADDR_BANK_1 + CONF_OFFSET_EJECT_TIMEOUT + track * sizeof(uint32_t), timeout);
-		_fram.writeTo(CONF_ADDR_BANK_1 + CONF_OFFSET_CHECKSUM, _data.configs.crc);
-		dumpBuffer("_data", _data.bytes, CONF_SIZE_ALL);
+		_fram.writeTo(CONF_ADDR_BANK_0 + (reinterpret_cast<uint8_t const * const>(&(_data.configs.eject_timeout[track])) - reinterpret_cast<uint8_t const * const>(&_data.configs)), timeout);
+		_fram.writeTo(CONF_ADDR_BANK_0 + (reinterpret_cast<uint8_t const * const>(&_data.configs.crc) - reinterpret_cast<uint8_t const * const>(&_data.configs)), _data.configs.crc);
+		_fram.writeTo(CONF_ADDR_BANK_1 + (reinterpret_cast<uint8_t const * const>(&(_data.configs.eject_timeout[track])) - reinterpret_cast<uint8_t const * const>(&_data.configs)), timeout);
+		_fram.writeTo(CONF_ADDR_BANK_1 + (reinterpret_cast<uint8_t const * const>(&_data.configs.crc) - reinterpret_cast<uint8_t const * const>(&_data.configs)), _data.configs.crc);
+		dumpBuffer("_data", _data.bytes, sizeof(ConfigDataT));
 	}
 
 	__attribute__((always_inline)) inline
@@ -281,7 +268,7 @@ private:
 		#endif
 
 		uint8_t crc = CONF_VERSION;
-		for (uint8_t i = 0;i < CONF_SIZE_ALL - 1;++i)
+		for (uint8_t i = 0;i < sizeof(ConfigDataT) - 1;++i)
 			crc = _crc8_ccitt_update(crc, _data.bytes[i]);
 
 		#if defined(DEBUG_SERIAL)
@@ -294,17 +281,19 @@ private:
 		return crc;
 	}
 
+	struct ConfigDataT {
+		union TrackLevelsT track_levels;
+
+		uint8_t coins_to_eject[NUM_EJECT_TRACKS];
+		uint32_t coin_count[NUM_TRACKS];
+		uint32_t eject_timeout[NUM_EJECT_TRACKS];
+
+		uint8_t crc;
+	};
+
 	union {
-		uint8_t bytes[CONF_SIZE_ALL];
-		struct {
-			union TrackLevelsT track_levels;
-
-			uint8_t coins_to_eject[NUM_EJECT_TRACKS];
-			uint32_t coin_count[NUM_TRACKS];
-			uint32_t eject_timeout[NUM_EJECT_TRACKS];
-
-			uint8_t crc;
-		} configs;
+		uint8_t bytes[sizeof(ConfigDataT)];
+		struct ConfigDataT configs;
 	} _data;
 
 	// FIXME: hardware layout connects WP to A7, but A7 can only be used as ADC
