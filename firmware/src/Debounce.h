@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 
+#include "util.h"
+
 template <bool ACTIVE_LEVEL, int32_t DEBOUNCE_TIMEOUT_US, typename OnRaiseHandlerT, typename OnFallHandlerT>
 class Debounce {
 public:
@@ -27,7 +29,7 @@ public:
 
 	__attribute__((always_inline)) inline
 	void feed(bool const state, bool const active_level, uint32_t const & now = micros()) {
-		if (state == active_level) {
+		if (unlikely(state == active_level)) {
 			_energy += _feed_micros - now;
 		} else {
 			_energy -= _feed_micros - now;
